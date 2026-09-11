@@ -340,6 +340,7 @@ pub(crate) fn log_delivery_configuration_type_correct_errors(
 #[cfg(any(
     feature = "op_create_terms",
     feature = "op_describe_terms",
+    feature = "op_describe_terms_by_client",
     feature = "op_update_terms"
 ))]
 pub(crate) fn terms_type_correct_errors(

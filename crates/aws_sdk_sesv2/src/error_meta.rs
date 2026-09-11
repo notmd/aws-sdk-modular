@@ -11,6 +11,7 @@ pub enum Error {
     /// <p>The message can't be sent because the account's ability to send email has been permanently restricted.</p>
     AccountSuspendedException(crate::types::error::AccountSuspendedException),
     #[cfg(any(
+        feature = "op_associate_email_identity_certificate",
         feature = "op_create_configuration_set",
         feature = "op_create_configuration_set_event_destination",
         feature = "op_create_contact",
@@ -28,6 +29,7 @@ pub enum Error {
     /// <p>The resource specified in your request already exists.</p>
     AlreadyExistsException(crate::types::error::AlreadyExistsException),
     #[cfg(any(
+        feature = "op_associate_email_identity_certificate",
         feature = "op_batch_get_metric_data",
         feature = "op_cancel_export_job",
         feature = "op_create_configuration_set",
@@ -58,6 +60,7 @@ pub enum Error {
         feature = "op_delete_suppressed_destination",
         feature = "op_delete_tenant",
         feature = "op_delete_tenant_resource_association",
+        feature = "op_disassociate_email_identity_certificate",
         feature = "op_get_account",
         feature = "op_get_blacklist_reports",
         feature = "op_get_configuration_set",
@@ -91,6 +94,7 @@ pub enum Error {
         feature = "op_list_deliverability_test_reports",
         feature = "op_list_domain_deliverability_campaigns",
         feature = "op_list_email_identities",
+        feature = "op_list_email_identity_certificates",
         feature = "op_list_email_templates",
         feature = "op_list_export_jobs",
         feature = "op_list_import_jobs",
@@ -132,6 +136,7 @@ pub enum Error {
         feature = "op_tag_resource",
         feature = "op_test_render_email_template",
         feature = "op_untag_resource",
+        feature = "op_update_configuration_set",
         feature = "op_update_configuration_set_event_destination",
         feature = "op_update_contact",
         feature = "op_update_contact_list",
@@ -214,6 +219,7 @@ pub enum Error {
     /// <p>The message can't be sent because it contains invalid content.</p>
     MessageRejected(crate::types::error::MessageRejected),
     #[cfg(any(
+        feature = "op_associate_email_identity_certificate",
         feature = "op_batch_get_metric_data",
         feature = "op_cancel_export_job",
         feature = "op_create_configuration_set",
@@ -238,6 +244,7 @@ pub enum Error {
         feature = "op_delete_suppressed_destination",
         feature = "op_delete_tenant",
         feature = "op_delete_tenant_resource_association",
+        feature = "op_disassociate_email_identity_certificate",
         feature = "op_get_blacklist_reports",
         feature = "op_get_configuration_set",
         feature = "op_get_configuration_set_event_destinations",
@@ -263,6 +270,7 @@ pub enum Error {
         feature = "op_list_contacts",
         feature = "op_list_deliverability_test_reports",
         feature = "op_list_domain_deliverability_campaigns",
+        feature = "op_list_email_identity_certificates",
         feature = "op_list_recommendations",
         feature = "op_list_resource_tenants",
         feature = "op_list_suppressed_destinations",
@@ -292,6 +300,7 @@ pub enum Error {
         feature = "op_tag_resource",
         feature = "op_test_render_email_template",
         feature = "op_untag_resource",
+        feature = "op_update_configuration_set",
         feature = "op_update_configuration_set_event_destination",
         feature = "op_update_contact",
         feature = "op_update_contact_list",
@@ -310,6 +319,7 @@ pub enum Error {
     /// <p>The message can't be sent because the account's ability to send email is currently paused.</p>
     SendingPausedException(crate::types::error::SendingPausedException),
     #[cfg(any(
+        feature = "op_associate_email_identity_certificate",
         feature = "op_batch_get_metric_data",
         feature = "op_cancel_export_job",
         feature = "op_create_configuration_set",
@@ -340,6 +350,7 @@ pub enum Error {
         feature = "op_delete_suppressed_destination",
         feature = "op_delete_tenant",
         feature = "op_delete_tenant_resource_association",
+        feature = "op_disassociate_email_identity_certificate",
         feature = "op_get_account",
         feature = "op_get_blacklist_reports",
         feature = "op_get_configuration_set",
@@ -373,6 +384,7 @@ pub enum Error {
         feature = "op_list_deliverability_test_reports",
         feature = "op_list_domain_deliverability_campaigns",
         feature = "op_list_email_identities",
+        feature = "op_list_email_identity_certificates",
         feature = "op_list_email_templates",
         feature = "op_list_export_jobs",
         feature = "op_list_import_jobs",
@@ -414,6 +426,7 @@ pub enum Error {
         feature = "op_tag_resource",
         feature = "op_test_render_email_template",
         feature = "op_untag_resource",
+        feature = "op_update_configuration_set",
         feature = "op_update_configuration_set_event_destination",
         feature = "op_update_contact",
         feature = "op_update_contact_list",
@@ -446,6 +459,7 @@ impl ::std::fmt::Display for Error {
             ))]
             Error::AccountSuspendedException(inner) => inner.fmt(f),
             #[cfg(any(
+                feature = "op_associate_email_identity_certificate",
                 feature = "op_create_configuration_set",
                 feature = "op_create_configuration_set_event_destination",
                 feature = "op_create_contact",
@@ -462,6 +476,7 @@ impl ::std::fmt::Display for Error {
             ))]
             Error::AlreadyExistsException(inner) => inner.fmt(f),
             #[cfg(any(
+                feature = "op_associate_email_identity_certificate",
                 feature = "op_batch_get_metric_data",
                 feature = "op_cancel_export_job",
                 feature = "op_create_configuration_set",
@@ -492,6 +507,7 @@ impl ::std::fmt::Display for Error {
                 feature = "op_delete_suppressed_destination",
                 feature = "op_delete_tenant",
                 feature = "op_delete_tenant_resource_association",
+                feature = "op_disassociate_email_identity_certificate",
                 feature = "op_get_account",
                 feature = "op_get_blacklist_reports",
                 feature = "op_get_configuration_set",
@@ -525,6 +541,7 @@ impl ::std::fmt::Display for Error {
                 feature = "op_list_deliverability_test_reports",
                 feature = "op_list_domain_deliverability_campaigns",
                 feature = "op_list_email_identities",
+                feature = "op_list_email_identity_certificates",
                 feature = "op_list_email_templates",
                 feature = "op_list_export_jobs",
                 feature = "op_list_import_jobs",
@@ -566,6 +583,7 @@ impl ::std::fmt::Display for Error {
                 feature = "op_tag_resource",
                 feature = "op_test_render_email_template",
                 feature = "op_untag_resource",
+                feature = "op_update_configuration_set",
                 feature = "op_update_configuration_set_event_destination",
                 feature = "op_update_contact",
                 feature = "op_update_contact_list",
@@ -640,6 +658,7 @@ impl ::std::fmt::Display for Error {
             ))]
             Error::MessageRejected(inner) => inner.fmt(f),
             #[cfg(any(
+                feature = "op_associate_email_identity_certificate",
                 feature = "op_batch_get_metric_data",
                 feature = "op_cancel_export_job",
                 feature = "op_create_configuration_set",
@@ -664,6 +683,7 @@ impl ::std::fmt::Display for Error {
                 feature = "op_delete_suppressed_destination",
                 feature = "op_delete_tenant",
                 feature = "op_delete_tenant_resource_association",
+                feature = "op_disassociate_email_identity_certificate",
                 feature = "op_get_blacklist_reports",
                 feature = "op_get_configuration_set",
                 feature = "op_get_configuration_set_event_destinations",
@@ -689,6 +709,7 @@ impl ::std::fmt::Display for Error {
                 feature = "op_list_contacts",
                 feature = "op_list_deliverability_test_reports",
                 feature = "op_list_domain_deliverability_campaigns",
+                feature = "op_list_email_identity_certificates",
                 feature = "op_list_recommendations",
                 feature = "op_list_resource_tenants",
                 feature = "op_list_suppressed_destinations",
@@ -718,6 +739,7 @@ impl ::std::fmt::Display for Error {
                 feature = "op_tag_resource",
                 feature = "op_test_render_email_template",
                 feature = "op_untag_resource",
+                feature = "op_update_configuration_set",
                 feature = "op_update_configuration_set_event_destination",
                 feature = "op_update_contact",
                 feature = "op_update_contact_list",
@@ -734,6 +756,7 @@ impl ::std::fmt::Display for Error {
             ))]
             Error::SendingPausedException(inner) => inner.fmt(f),
             #[cfg(any(
+                feature = "op_associate_email_identity_certificate",
                 feature = "op_batch_get_metric_data",
                 feature = "op_cancel_export_job",
                 feature = "op_create_configuration_set",
@@ -764,6 +787,7 @@ impl ::std::fmt::Display for Error {
                 feature = "op_delete_suppressed_destination",
                 feature = "op_delete_tenant",
                 feature = "op_delete_tenant_resource_association",
+                feature = "op_disassociate_email_identity_certificate",
                 feature = "op_get_account",
                 feature = "op_get_blacklist_reports",
                 feature = "op_get_configuration_set",
@@ -797,6 +821,7 @@ impl ::std::fmt::Display for Error {
                 feature = "op_list_deliverability_test_reports",
                 feature = "op_list_domain_deliverability_campaigns",
                 feature = "op_list_email_identities",
+                feature = "op_list_email_identity_certificates",
                 feature = "op_list_email_templates",
                 feature = "op_list_export_jobs",
                 feature = "op_list_import_jobs",
@@ -838,6 +863,7 @@ impl ::std::fmt::Display for Error {
                 feature = "op_tag_resource",
                 feature = "op_test_render_email_template",
                 feature = "op_untag_resource",
+                feature = "op_update_configuration_set",
                 feature = "op_update_configuration_set_event_destination",
                 feature = "op_update_contact",
                 feature = "op_update_contact_list",
@@ -878,6 +904,7 @@ impl ::aws_smithy_types::error::metadata::ProvideErrorMetadata for Error {
             ))]
             Self::AccountSuspendedException(inner) => inner.meta(),
             #[cfg(any(
+                feature = "op_associate_email_identity_certificate",
                 feature = "op_create_configuration_set",
                 feature = "op_create_configuration_set_event_destination",
                 feature = "op_create_contact",
@@ -894,6 +921,7 @@ impl ::aws_smithy_types::error::metadata::ProvideErrorMetadata for Error {
             ))]
             Self::AlreadyExistsException(inner) => inner.meta(),
             #[cfg(any(
+                feature = "op_associate_email_identity_certificate",
                 feature = "op_batch_get_metric_data",
                 feature = "op_cancel_export_job",
                 feature = "op_create_configuration_set",
@@ -924,6 +952,7 @@ impl ::aws_smithy_types::error::metadata::ProvideErrorMetadata for Error {
                 feature = "op_delete_suppressed_destination",
                 feature = "op_delete_tenant",
                 feature = "op_delete_tenant_resource_association",
+                feature = "op_disassociate_email_identity_certificate",
                 feature = "op_get_account",
                 feature = "op_get_blacklist_reports",
                 feature = "op_get_configuration_set",
@@ -957,6 +986,7 @@ impl ::aws_smithy_types::error::metadata::ProvideErrorMetadata for Error {
                 feature = "op_list_deliverability_test_reports",
                 feature = "op_list_domain_deliverability_campaigns",
                 feature = "op_list_email_identities",
+                feature = "op_list_email_identity_certificates",
                 feature = "op_list_email_templates",
                 feature = "op_list_export_jobs",
                 feature = "op_list_import_jobs",
@@ -998,6 +1028,7 @@ impl ::aws_smithy_types::error::metadata::ProvideErrorMetadata for Error {
                 feature = "op_tag_resource",
                 feature = "op_test_render_email_template",
                 feature = "op_untag_resource",
+                feature = "op_update_configuration_set",
                 feature = "op_update_configuration_set_event_destination",
                 feature = "op_update_contact",
                 feature = "op_update_contact_list",
@@ -1072,6 +1103,7 @@ impl ::aws_smithy_types::error::metadata::ProvideErrorMetadata for Error {
             ))]
             Self::MessageRejected(inner) => inner.meta(),
             #[cfg(any(
+                feature = "op_associate_email_identity_certificate",
                 feature = "op_batch_get_metric_data",
                 feature = "op_cancel_export_job",
                 feature = "op_create_configuration_set",
@@ -1096,6 +1128,7 @@ impl ::aws_smithy_types::error::metadata::ProvideErrorMetadata for Error {
                 feature = "op_delete_suppressed_destination",
                 feature = "op_delete_tenant",
                 feature = "op_delete_tenant_resource_association",
+                feature = "op_disassociate_email_identity_certificate",
                 feature = "op_get_blacklist_reports",
                 feature = "op_get_configuration_set",
                 feature = "op_get_configuration_set_event_destinations",
@@ -1121,6 +1154,7 @@ impl ::aws_smithy_types::error::metadata::ProvideErrorMetadata for Error {
                 feature = "op_list_contacts",
                 feature = "op_list_deliverability_test_reports",
                 feature = "op_list_domain_deliverability_campaigns",
+                feature = "op_list_email_identity_certificates",
                 feature = "op_list_recommendations",
                 feature = "op_list_resource_tenants",
                 feature = "op_list_suppressed_destinations",
@@ -1150,6 +1184,7 @@ impl ::aws_smithy_types::error::metadata::ProvideErrorMetadata for Error {
                 feature = "op_tag_resource",
                 feature = "op_test_render_email_template",
                 feature = "op_untag_resource",
+                feature = "op_update_configuration_set",
                 feature = "op_update_configuration_set_event_destination",
                 feature = "op_update_contact",
                 feature = "op_update_contact_list",
@@ -1166,6 +1201,7 @@ impl ::aws_smithy_types::error::metadata::ProvideErrorMetadata for Error {
             ))]
             Self::SendingPausedException(inner) => inner.meta(),
             #[cfg(any(
+                feature = "op_associate_email_identity_certificate",
                 feature = "op_batch_get_metric_data",
                 feature = "op_cancel_export_job",
                 feature = "op_create_configuration_set",
@@ -1196,6 +1232,7 @@ impl ::aws_smithy_types::error::metadata::ProvideErrorMetadata for Error {
                 feature = "op_delete_suppressed_destination",
                 feature = "op_delete_tenant",
                 feature = "op_delete_tenant_resource_association",
+                feature = "op_disassociate_email_identity_certificate",
                 feature = "op_get_account",
                 feature = "op_get_blacklist_reports",
                 feature = "op_get_configuration_set",
@@ -1229,6 +1266,7 @@ impl ::aws_smithy_types::error::metadata::ProvideErrorMetadata for Error {
                 feature = "op_list_deliverability_test_reports",
                 feature = "op_list_domain_deliverability_campaigns",
                 feature = "op_list_email_identities",
+                feature = "op_list_email_identity_certificates",
                 feature = "op_list_email_templates",
                 feature = "op_list_export_jobs",
                 feature = "op_list_import_jobs",
@@ -1270,6 +1308,7 @@ impl ::aws_smithy_types::error::metadata::ProvideErrorMetadata for Error {
                 feature = "op_tag_resource",
                 feature = "op_test_render_email_template",
                 feature = "op_untag_resource",
+                feature = "op_update_configuration_set",
                 feature = "op_update_configuration_set_event_destination",
                 feature = "op_update_contact",
                 feature = "op_update_contact_list",
@@ -1281,6 +1320,56 @@ impl ::aws_smithy_types::error::metadata::ProvideErrorMetadata for Error {
             ))]
             Self::TooManyRequestsException(inner) => inner.meta(),
             Self::Unhandled(inner) => &inner.meta,
+        }
+    }
+}
+#[cfg(feature = "op_associate_email_identity_certificate")]
+impl<R>
+    From<
+        ::aws_smithy_runtime_api::client::result::SdkError<
+            crate::operation::associate_email_identity_certificate::AssociateEmailIdentityCertificateError,
+            R,
+        >,
+    > for Error
+where
+    R: Send + Sync + std::fmt::Debug + 'static,
+{
+    fn from(
+        err: ::aws_smithy_runtime_api::client::result::SdkError<
+            crate::operation::associate_email_identity_certificate::AssociateEmailIdentityCertificateError,
+            R,
+        >,
+    ) -> Self {
+        match err {
+            ::aws_smithy_runtime_api::client::result::SdkError::ServiceError(context) => Self::from(context.into_err()),
+            _ => Error::Unhandled(crate::error::sealed_unhandled::Unhandled {
+                meta: ::aws_smithy_types::error::metadata::ProvideErrorMetadata::meta(&err).clone(),
+                source: err.into(),
+            }),
+        }
+    }
+}
+#[cfg(feature = "op_associate_email_identity_certificate")]
+impl From<crate::operation::associate_email_identity_certificate::AssociateEmailIdentityCertificateError> for Error {
+    fn from(
+        err: crate::operation::associate_email_identity_certificate::AssociateEmailIdentityCertificateError,
+    ) -> Self {
+        match err {
+            crate::operation::associate_email_identity_certificate::AssociateEmailIdentityCertificateError::AlreadyExistsException(inner) => {
+                Error::AlreadyExistsException(inner)
+            }
+            crate::operation::associate_email_identity_certificate::AssociateEmailIdentityCertificateError::BadRequestException(inner) => {
+                Error::BadRequestException(inner)
+            }
+            crate::operation::associate_email_identity_certificate::AssociateEmailIdentityCertificateError::NotFoundException(inner) => {
+                Error::NotFoundException(inner)
+            }
+            crate::operation::associate_email_identity_certificate::AssociateEmailIdentityCertificateError::TooManyRequestsException(inner) => {
+                Error::TooManyRequestsException(inner)
+            }
+            crate::operation::associate_email_identity_certificate::AssociateEmailIdentityCertificateError::Unhandled(inner) => {
+                Error::Unhandled(inner)
+            }
         }
     }
 }
@@ -2679,6 +2768,55 @@ impl From<crate::operation::delete_tenant_resource_association::DeleteTenantReso
         }
     }
 }
+#[cfg(feature = "op_disassociate_email_identity_certificate")]
+impl<R>
+    From<
+        ::aws_smithy_runtime_api::client::result::SdkError<
+            crate::operation::disassociate_email_identity_certificate::DisassociateEmailIdentityCertificateError,
+            R,
+        >,
+    > for Error
+where
+    R: Send + Sync + std::fmt::Debug + 'static,
+{
+    fn from(
+        err: ::aws_smithy_runtime_api::client::result::SdkError<
+            crate::operation::disassociate_email_identity_certificate::DisassociateEmailIdentityCertificateError,
+            R,
+        >,
+    ) -> Self {
+        match err {
+            ::aws_smithy_runtime_api::client::result::SdkError::ServiceError(context) => Self::from(context.into_err()),
+            _ => Error::Unhandled(crate::error::sealed_unhandled::Unhandled {
+                meta: ::aws_smithy_types::error::metadata::ProvideErrorMetadata::meta(&err).clone(),
+                source: err.into(),
+            }),
+        }
+    }
+}
+#[cfg(feature = "op_disassociate_email_identity_certificate")]
+impl From<crate::operation::disassociate_email_identity_certificate::DisassociateEmailIdentityCertificateError>
+    for Error
+{
+    fn from(
+        err: crate::operation::disassociate_email_identity_certificate::DisassociateEmailIdentityCertificateError,
+    ) -> Self {
+        match err {
+            crate::operation::disassociate_email_identity_certificate::DisassociateEmailIdentityCertificateError::BadRequestException(inner) => {
+                Error::BadRequestException(inner)
+            }
+            crate::operation::disassociate_email_identity_certificate::DisassociateEmailIdentityCertificateError::NotFoundException(inner) => {
+                Error::NotFoundException(inner)
+            }
+            crate::operation::disassociate_email_identity_certificate::DisassociateEmailIdentityCertificateError::TooManyRequestsException(inner) => {
+                Error::TooManyRequestsException(inner)
+            }
+            crate::operation::disassociate_email_identity_certificate::DisassociateEmailIdentityCertificateError::Unhandled(inner) => {
+                Error::Unhandled(inner)
+            }
+        }
+    }
+}
 #[cfg(feature = "op_get_account")]
 impl<R> From<::aws_smithy_runtime_api::client::result::SdkError<crate::operation::get_account::GetAccountError, R>>
     for Error
@@ -4062,6 +4200,49 @@ impl From<crate::operation::list_email_identities::ListEmailIdentitiesError> for
             crate::operation::list_email_identities::ListEmailIdentitiesError::Unhandled(inner) => {
                 Error::Unhandled(inner)
             }
+        }
+    }
+}
+#[cfg(feature = "op_list_email_identity_certificates")]
+impl<R>
+    From<
+        ::aws_smithy_runtime_api::client::result::SdkError<
+            crate::operation::list_email_identity_certificates::ListEmailIdentityCertificatesError,
+            R,
+        >,
+    > for Error
+where
+    R: Send + Sync + std::fmt::Debug + 'static,
+{
+    fn from(
+        err: ::aws_smithy_runtime_api::client::result::SdkError<
+            crate::operation::list_email_identity_certificates::ListEmailIdentityCertificatesError,
+            R,
+        >,
+    ) -> Self {
+        match err {
+            ::aws_smithy_runtime_api::client::result::SdkError::ServiceError(context) => Self::from(context.into_err()),
+            _ => Error::Unhandled(crate::error::sealed_unhandled::Unhandled {
+                meta: ::aws_smithy_types::error::metadata::ProvideErrorMetadata::meta(&err).clone(),
+                source: err.into(),
+            }),
+        }
+    }
+}
+#[cfg(feature = "op_list_email_identity_certificates")]
+impl From<crate::operation::list_email_identity_certificates::ListEmailIdentityCertificatesError> for Error {
+    fn from(err: crate::operation::list_email_identity_certificates::ListEmailIdentityCertificatesError) -> Self {
+        match err {
+            crate::operation::list_email_identity_certificates::ListEmailIdentityCertificatesError::BadRequestException(inner) => {
+                Error::BadRequestException(inner)
+            }
+            crate::operation::list_email_identity_certificates::ListEmailIdentityCertificatesError::NotFoundException(inner) => {
+                Error::NotFoundException(inner)
+            }
+            crate::operation::list_email_identity_certificates::ListEmailIdentityCertificatesError::TooManyRequestsException(inner) => {
+                Error::TooManyRequestsException(inner)
+            }
+            crate::operation::list_email_identity_certificates::ListEmailIdentityCertificatesError::Unhandled(inner) => Error::Unhandled(inner),
         }
     }
 }
@@ -5888,6 +6069,51 @@ impl From<crate::operation::untag_resource::UntagResourceError> for Error {
         }
     }
 }
+#[cfg(feature = "op_update_configuration_set")]
+impl<R>
+    From<
+        ::aws_smithy_runtime_api::client::result::SdkError<
+            crate::operation::update_configuration_set::UpdateConfigurationSetError,
+            R,
+        >,
+    > for Error
+where
+    R: Send + Sync + std::fmt::Debug + 'static,
+{
+    fn from(
+        err: ::aws_smithy_runtime_api::client::result::SdkError<
+            crate::operation::update_configuration_set::UpdateConfigurationSetError,
+            R,
+        >,
+    ) -> Self {
+        match err {
+            ::aws_smithy_runtime_api::client::result::SdkError::ServiceError(context) => Self::from(context.into_err()),
+            _ => Error::Unhandled(crate::error::sealed_unhandled::Unhandled {
+                meta: ::aws_smithy_types::error::metadata::ProvideErrorMetadata::meta(&err).clone(),
+                source: err.into(),
+            }),
+        }
+    }
+}
+#[cfg(feature = "op_update_configuration_set")]
+impl From<crate::operation::update_configuration_set::UpdateConfigurationSetError> for Error {
+    fn from(err: crate::operation::update_configuration_set::UpdateConfigurationSetError) -> Self {
+        match err {
+            crate::operation::update_configuration_set::UpdateConfigurationSetError::BadRequestException(inner) => {
+                Error::BadRequestException(inner)
+            }
+            crate::operation::update_configuration_set::UpdateConfigurationSetError::NotFoundException(inner) => {
+                Error::NotFoundException(inner)
+            }
+            crate::operation::update_configuration_set::UpdateConfigurationSetError::TooManyRequestsException(
+                inner,
+            ) => Error::TooManyRequestsException(inner),
+            crate::operation::update_configuration_set::UpdateConfigurationSetError::Unhandled(inner) => {
+                Error::Unhandled(inner)
+            }
+        }
+    }
+}
 #[cfg(feature = "op_update_configuration_set_event_destination")]
 impl<R>
     From<
@@ -6252,6 +6478,7 @@ impl ::std::error::Error for Error {
             ))]
             Error::AccountSuspendedException(inner) => inner.source(),
             #[cfg(any(
+                feature = "op_associate_email_identity_certificate",
                 feature = "op_create_configuration_set",
                 feature = "op_create_configuration_set_event_destination",
                 feature = "op_create_contact",
@@ -6268,6 +6495,7 @@ impl ::std::error::Error for Error {
             ))]
             Error::AlreadyExistsException(inner) => inner.source(),
             #[cfg(any(
+                feature = "op_associate_email_identity_certificate",
                 feature = "op_batch_get_metric_data",
                 feature = "op_cancel_export_job",
                 feature = "op_create_configuration_set",
@@ -6298,6 +6526,7 @@ impl ::std::error::Error for Error {
                 feature = "op_delete_suppressed_destination",
                 feature = "op_delete_tenant",
                 feature = "op_delete_tenant_resource_association",
+                feature = "op_disassociate_email_identity_certificate",
                 feature = "op_get_account",
                 feature = "op_get_blacklist_reports",
                 feature = "op_get_configuration_set",
@@ -6331,6 +6560,7 @@ impl ::std::error::Error for Error {
                 feature = "op_list_deliverability_test_reports",
                 feature = "op_list_domain_deliverability_campaigns",
                 feature = "op_list_email_identities",
+                feature = "op_list_email_identity_certificates",
                 feature = "op_list_email_templates",
                 feature = "op_list_export_jobs",
                 feature = "op_list_import_jobs",
@@ -6372,6 +6602,7 @@ impl ::std::error::Error for Error {
                 feature = "op_tag_resource",
                 feature = "op_test_render_email_template",
                 feature = "op_untag_resource",
+                feature = "op_update_configuration_set",
                 feature = "op_update_configuration_set_event_destination",
                 feature = "op_update_contact",
                 feature = "op_update_contact_list",
@@ -6446,6 +6677,7 @@ impl ::std::error::Error for Error {
             ))]
             Error::MessageRejected(inner) => inner.source(),
             #[cfg(any(
+                feature = "op_associate_email_identity_certificate",
                 feature = "op_batch_get_metric_data",
                 feature = "op_cancel_export_job",
                 feature = "op_create_configuration_set",
@@ -6470,6 +6702,7 @@ impl ::std::error::Error for Error {
                 feature = "op_delete_suppressed_destination",
                 feature = "op_delete_tenant",
                 feature = "op_delete_tenant_resource_association",
+                feature = "op_disassociate_email_identity_certificate",
                 feature = "op_get_blacklist_reports",
                 feature = "op_get_configuration_set",
                 feature = "op_get_configuration_set_event_destinations",
@@ -6495,6 +6728,7 @@ impl ::std::error::Error for Error {
                 feature = "op_list_contacts",
                 feature = "op_list_deliverability_test_reports",
                 feature = "op_list_domain_deliverability_campaigns",
+                feature = "op_list_email_identity_certificates",
                 feature = "op_list_recommendations",
                 feature = "op_list_resource_tenants",
                 feature = "op_list_suppressed_destinations",
@@ -6524,6 +6758,7 @@ impl ::std::error::Error for Error {
                 feature = "op_tag_resource",
                 feature = "op_test_render_email_template",
                 feature = "op_untag_resource",
+                feature = "op_update_configuration_set",
                 feature = "op_update_configuration_set_event_destination",
                 feature = "op_update_contact",
                 feature = "op_update_contact_list",
@@ -6540,6 +6775,7 @@ impl ::std::error::Error for Error {
             ))]
             Error::SendingPausedException(inner) => inner.source(),
             #[cfg(any(
+                feature = "op_associate_email_identity_certificate",
                 feature = "op_batch_get_metric_data",
                 feature = "op_cancel_export_job",
                 feature = "op_create_configuration_set",
@@ -6570,6 +6806,7 @@ impl ::std::error::Error for Error {
                 feature = "op_delete_suppressed_destination",
                 feature = "op_delete_tenant",
                 feature = "op_delete_tenant_resource_association",
+                feature = "op_disassociate_email_identity_certificate",
                 feature = "op_get_account",
                 feature = "op_get_blacklist_reports",
                 feature = "op_get_configuration_set",
@@ -6603,6 +6840,7 @@ impl ::std::error::Error for Error {
                 feature = "op_list_deliverability_test_reports",
                 feature = "op_list_domain_deliverability_campaigns",
                 feature = "op_list_email_identities",
+                feature = "op_list_email_identity_certificates",
                 feature = "op_list_email_templates",
                 feature = "op_list_export_jobs",
                 feature = "op_list_import_jobs",
@@ -6644,6 +6882,7 @@ impl ::std::error::Error for Error {
                 feature = "op_tag_resource",
                 feature = "op_test_render_email_template",
                 feature = "op_untag_resource",
+                feature = "op_update_configuration_set",
                 feature = "op_update_configuration_set_event_destination",
                 feature = "op_update_contact",
                 feature = "op_update_contact_list",
@@ -6668,6 +6907,7 @@ impl ::aws_types::request_id::RequestId for Error {
             ))]
             Self::AccountSuspendedException(e) => e.request_id(),
             #[cfg(any(
+                feature = "op_associate_email_identity_certificate",
                 feature = "op_create_configuration_set",
                 feature = "op_create_configuration_set_event_destination",
                 feature = "op_create_contact",
@@ -6684,6 +6924,7 @@ impl ::aws_types::request_id::RequestId for Error {
             ))]
             Self::AlreadyExistsException(e) => e.request_id(),
             #[cfg(any(
+                feature = "op_associate_email_identity_certificate",
                 feature = "op_batch_get_metric_data",
                 feature = "op_cancel_export_job",
                 feature = "op_create_configuration_set",
@@ -6714,6 +6955,7 @@ impl ::aws_types::request_id::RequestId for Error {
                 feature = "op_delete_suppressed_destination",
                 feature = "op_delete_tenant",
                 feature = "op_delete_tenant_resource_association",
+                feature = "op_disassociate_email_identity_certificate",
                 feature = "op_get_account",
                 feature = "op_get_blacklist_reports",
                 feature = "op_get_configuration_set",
@@ -6747,6 +6989,7 @@ impl ::aws_types::request_id::RequestId for Error {
                 feature = "op_list_deliverability_test_reports",
                 feature = "op_list_domain_deliverability_campaigns",
                 feature = "op_list_email_identities",
+                feature = "op_list_email_identity_certificates",
                 feature = "op_list_email_templates",
                 feature = "op_list_export_jobs",
                 feature = "op_list_import_jobs",
@@ -6788,6 +7031,7 @@ impl ::aws_types::request_id::RequestId for Error {
                 feature = "op_tag_resource",
                 feature = "op_test_render_email_template",
                 feature = "op_untag_resource",
+                feature = "op_update_configuration_set",
                 feature = "op_update_configuration_set_event_destination",
                 feature = "op_update_contact",
                 feature = "op_update_contact_list",
@@ -6862,6 +7106,7 @@ impl ::aws_types::request_id::RequestId for Error {
             ))]
             Self::MessageRejected(e) => e.request_id(),
             #[cfg(any(
+                feature = "op_associate_email_identity_certificate",
                 feature = "op_batch_get_metric_data",
                 feature = "op_cancel_export_job",
                 feature = "op_create_configuration_set",
@@ -6886,6 +7131,7 @@ impl ::aws_types::request_id::RequestId for Error {
                 feature = "op_delete_suppressed_destination",
                 feature = "op_delete_tenant",
                 feature = "op_delete_tenant_resource_association",
+                feature = "op_disassociate_email_identity_certificate",
                 feature = "op_get_blacklist_reports",
                 feature = "op_get_configuration_set",
                 feature = "op_get_configuration_set_event_destinations",
@@ -6911,6 +7157,7 @@ impl ::aws_types::request_id::RequestId for Error {
                 feature = "op_list_contacts",
                 feature = "op_list_deliverability_test_reports",
                 feature = "op_list_domain_deliverability_campaigns",
+                feature = "op_list_email_identity_certificates",
                 feature = "op_list_recommendations",
                 feature = "op_list_resource_tenants",
                 feature = "op_list_suppressed_destinations",
@@ -6940,6 +7187,7 @@ impl ::aws_types::request_id::RequestId for Error {
                 feature = "op_tag_resource",
                 feature = "op_test_render_email_template",
                 feature = "op_untag_resource",
+                feature = "op_update_configuration_set",
                 feature = "op_update_configuration_set_event_destination",
                 feature = "op_update_contact",
                 feature = "op_update_contact_list",
@@ -6956,6 +7204,7 @@ impl ::aws_types::request_id::RequestId for Error {
             ))]
             Self::SendingPausedException(e) => e.request_id(),
             #[cfg(any(
+                feature = "op_associate_email_identity_certificate",
                 feature = "op_batch_get_metric_data",
                 feature = "op_cancel_export_job",
                 feature = "op_create_configuration_set",
@@ -6986,6 +7235,7 @@ impl ::aws_types::request_id::RequestId for Error {
                 feature = "op_delete_suppressed_destination",
                 feature = "op_delete_tenant",
                 feature = "op_delete_tenant_resource_association",
+                feature = "op_disassociate_email_identity_certificate",
                 feature = "op_get_account",
                 feature = "op_get_blacklist_reports",
                 feature = "op_get_configuration_set",
@@ -7019,6 +7269,7 @@ impl ::aws_types::request_id::RequestId for Error {
                 feature = "op_list_deliverability_test_reports",
                 feature = "op_list_domain_deliverability_campaigns",
                 feature = "op_list_email_identities",
+                feature = "op_list_email_identity_certificates",
                 feature = "op_list_email_templates",
                 feature = "op_list_export_jobs",
                 feature = "op_list_import_jobs",
@@ -7060,6 +7311,7 @@ impl ::aws_types::request_id::RequestId for Error {
                 feature = "op_tag_resource",
                 feature = "op_test_render_email_template",
                 feature = "op_untag_resource",
+                feature = "op_update_configuration_set",
                 feature = "op_update_configuration_set_event_destination",
                 feature = "op_update_contact",
                 feature = "op_update_contact_list",

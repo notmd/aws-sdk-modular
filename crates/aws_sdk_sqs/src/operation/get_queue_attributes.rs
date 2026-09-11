@@ -169,6 +169,9 @@ impl ::aws_smithy_runtime_api::client::runtime_plugin::RuntimePlugin for GetQueu
         )
         .with_retry_classifier(::aws_runtime::retries::classifiers::AwsErrorCodeClassifier::<
             crate::operation::get_queue_attributes::GetQueueAttributesError,
+        >::new())
+        .with_retry_classifier(::aws_runtime::service_clock_skew::ServiceClockSkewClassifier::<
+            crate::operation::get_queue_attributes::GetQueueAttributesError,
         >::new());
 
         ::std::borrow::Cow::Owned(rcb)

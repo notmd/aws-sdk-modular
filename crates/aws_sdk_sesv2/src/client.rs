@@ -59,14 +59,14 @@ pub(crate) struct Handle {
 /// # Using the `Client`
 ///
 /// A client has a function for every operation that can be performed by the service.
-/// For example, the [`CancelExportJob`](crate::operation::cancel_export_job) operation has
-/// a [`Client::cancel_export_job`], function which returns a builder for that operation.
+/// For example, the [`AssociateEmailIdentityCertificate`](crate::operation::associate_email_identity_certificate) operation has
+/// a [`Client::associate_email_identity_certificate`], function which returns a builder for that operation.
 /// The fluent builder ultimately has a `send()` function that returns an async future that
 /// returns a result, as illustrated below:
 ///
 /// ```rust,ignore
-/// let result = client.cancel_export_job()
-///     .job_id("example")
+/// let result = client.associate_email_identity_certificate()
+///     .email_identity("example")
 ///     .send()
 ///     .await;
 /// ```
@@ -136,6 +136,9 @@ impl Client {
     }
 }
 
+#[cfg(feature = "op_associate_email_identity_certificate")]
+mod associate_email_identity_certificate;
+
 #[cfg(feature = "op_batch_get_metric_data")]
 mod batch_get_metric_data;
 
@@ -198,7 +201,7 @@ mod create_tenant_resource_association;
 /// # let client: aws_sdk_sesv2::Client = unimplemented!();
 /// use ::http_1x::header::{HeaderName, HeaderValue};
 ///
-/// let result = client.batch_get_metric_data()
+/// let result = client.associate_email_identity_certificate()
 ///     .customize()
 ///     .mutate_request(|req| {
 ///         // Add `x-example-header` with value
@@ -252,6 +255,9 @@ mod delete_tenant;
 
 #[cfg(feature = "op_delete_tenant_resource_association")]
 mod delete_tenant_resource_association;
+
+#[cfg(feature = "op_disassociate_email_identity_certificate")]
+mod disassociate_email_identity_certificate;
 
 #[cfg(feature = "op_get_account")]
 mod get_account;
@@ -351,6 +357,9 @@ mod list_domain_deliverability_campaigns;
 
 #[cfg(feature = "op_list_email_identities")]
 mod list_email_identities;
+
+#[cfg(feature = "op_list_email_identity_certificates")]
+mod list_email_identity_certificates;
 
 #[cfg(feature = "op_list_email_templates")]
 mod list_email_templates;
@@ -474,6 +483,9 @@ mod test_render_email_template;
 
 #[cfg(feature = "op_untag_resource")]
 mod untag_resource;
+
+#[cfg(feature = "op_update_configuration_set")]
+mod update_configuration_set;
 
 #[cfg(feature = "op_update_configuration_set_event_destination")]
 mod update_configuration_set_event_destination;

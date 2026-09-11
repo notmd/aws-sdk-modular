@@ -169,6 +169,9 @@ impl ::aws_smithy_runtime_api::client::runtime_plugin::RuntimePlugin for GetCont
         )
         .with_retry_classifier(::aws_runtime::retries::classifiers::AwsErrorCodeClassifier::<
             crate::operation::get_context_keys_for_principal_policy::GetContextKeysForPrincipalPolicyError,
+        >::new())
+        .with_retry_classifier(::aws_runtime::service_clock_skew::ServiceClockSkewClassifier::<
+            crate::operation::get_context_keys_for_principal_policy::GetContextKeysForPrincipalPolicyError,
         >::new());
 
         ::std::borrow::Cow::Owned(rcb)

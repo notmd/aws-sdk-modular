@@ -104,6 +104,7 @@ pub enum Error {
         feature = "op_delete_web_authn_credential",
         feature = "op_forget_device",
         feature = "op_forgot_password",
+        feature = "op_get_client_token",
         feature = "op_get_device",
         feature = "op_get_tokens_from_refresh_token",
         feature = "op_get_user",
@@ -135,6 +136,7 @@ pub enum Error {
         feature = "op_admin_add_user_to_group",
         feature = "op_admin_confirm_sign_up",
         feature = "op_admin_create_user",
+        feature = "op_admin_delete_software_token",
         feature = "op_admin_delete_user",
         feature = "op_admin_delete_user_attributes",
         feature = "op_admin_disable_provider_for_user",
@@ -193,12 +195,14 @@ pub enum Error {
         feature = "op_describe_resource_server",
         feature = "op_describe_risk_configuration",
         feature = "op_describe_terms",
+        feature = "op_describe_terms_by_client",
         feature = "op_describe_user_import_job",
         feature = "op_describe_user_pool",
         feature = "op_describe_user_pool_client",
         feature = "op_describe_user_pool_domain",
         feature = "op_forget_device",
         feature = "op_forgot_password",
+        feature = "op_get_client_token",
         feature = "op_get_csv_header",
         feature = "op_get_device",
         feature = "op_get_group",
@@ -315,6 +319,7 @@ pub enum Error {
         feature = "op_admin_add_user_to_group",
         feature = "op_admin_confirm_sign_up",
         feature = "op_admin_create_user",
+        feature = "op_admin_delete_software_token",
         feature = "op_admin_delete_user",
         feature = "op_admin_delete_user_attributes",
         feature = "op_admin_disable_provider_for_user",
@@ -374,12 +379,14 @@ pub enum Error {
         feature = "op_describe_resource_server",
         feature = "op_describe_risk_configuration",
         feature = "op_describe_terms",
+        feature = "op_describe_terms_by_client",
         feature = "op_describe_user_import_job",
         feature = "op_describe_user_pool",
         feature = "op_describe_user_pool_client",
         feature = "op_describe_user_pool_domain",
         feature = "op_forget_device",
         feature = "op_forgot_password",
+        feature = "op_get_client_token",
         feature = "op_get_csv_header",
         feature = "op_get_device",
         feature = "op_get_group",
@@ -557,6 +564,7 @@ pub enum Error {
         feature = "op_admin_add_user_to_group",
         feature = "op_admin_confirm_sign_up",
         feature = "op_admin_create_user",
+        feature = "op_admin_delete_software_token",
         feature = "op_admin_delete_user",
         feature = "op_admin_delete_user_attributes",
         feature = "op_admin_disable_provider_for_user",
@@ -615,12 +623,14 @@ pub enum Error {
         feature = "op_describe_resource_server",
         feature = "op_describe_risk_configuration",
         feature = "op_describe_terms",
+        feature = "op_describe_terms_by_client",
         feature = "op_describe_user_import_job",
         feature = "op_describe_user_pool",
         feature = "op_describe_user_pool_client",
         feature = "op_describe_user_pool_domain",
         feature = "op_forget_device",
         feature = "op_forgot_password",
+        feature = "op_get_client_token",
         feature = "op_get_csv_header",
         feature = "op_get_device",
         feature = "op_get_group",
@@ -685,6 +695,7 @@ pub enum Error {
         feature = "op_admin_add_user_to_group",
         feature = "op_admin_confirm_sign_up",
         feature = "op_admin_create_user",
+        feature = "op_admin_delete_software_token",
         feature = "op_admin_delete_user",
         feature = "op_admin_delete_user_attributes",
         feature = "op_admin_disable_provider_for_user",
@@ -739,12 +750,14 @@ pub enum Error {
         feature = "op_describe_resource_server",
         feature = "op_describe_risk_configuration",
         feature = "op_describe_terms",
+        feature = "op_describe_terms_by_client",
         feature = "op_describe_user_import_job",
         feature = "op_describe_user_pool",
         feature = "op_describe_user_pool_client",
         feature = "op_describe_user_pool_domain",
         feature = "op_forget_device",
         feature = "op_forgot_password",
+        feature = "op_get_client_token",
         feature = "op_get_csv_header",
         feature = "op_get_device",
         feature = "op_get_group",
@@ -853,6 +866,7 @@ pub enum Error {
         feature = "op_admin_add_user_to_group",
         feature = "op_admin_confirm_sign_up",
         feature = "op_admin_create_user",
+        feature = "op_admin_delete_software_token",
         feature = "op_admin_delete_user",
         feature = "op_admin_delete_user_attributes",
         feature = "op_admin_disable_provider_for_user",
@@ -910,12 +924,14 @@ pub enum Error {
         feature = "op_describe_resource_server",
         feature = "op_describe_risk_configuration",
         feature = "op_describe_terms",
+        feature = "op_describe_terms_by_client",
         feature = "op_describe_user_import_job",
         feature = "op_describe_user_pool",
         feature = "op_describe_user_pool_client",
         feature = "op_describe_user_pool_domain",
         feature = "op_forget_device",
         feature = "op_forgot_password",
+        feature = "op_get_client_token",
         feature = "op_get_csv_header",
         feature = "op_get_device",
         feature = "op_get_group",
@@ -1007,6 +1023,7 @@ pub enum Error {
         feature = "op_admin_add_user_to_group",
         feature = "op_admin_confirm_sign_up",
         feature = "op_admin_create_user",
+        feature = "op_admin_delete_software_token",
         feature = "op_admin_delete_user",
         feature = "op_admin_delete_user_attributes",
         feature = "op_admin_disable_provider_for_user",
@@ -1061,11 +1078,13 @@ pub enum Error {
         feature = "op_describe_resource_server",
         feature = "op_describe_risk_configuration",
         feature = "op_describe_terms",
+        feature = "op_describe_terms_by_client",
         feature = "op_describe_user_import_job",
         feature = "op_describe_user_pool",
         feature = "op_describe_user_pool_client",
         feature = "op_forget_device",
         feature = "op_forgot_password",
+        feature = "op_get_client_token",
         feature = "op_get_csv_header",
         feature = "op_get_device",
         feature = "op_get_group",
@@ -1192,6 +1211,7 @@ pub enum Error {
     /// <p>This exception is thrown when the Amazon Cognito service encounters a user validation exception with the Lambda service.</p>
     UserLambdaValidationException(crate::types::error::UserLambdaValidationException),
     #[cfg(any(
+        feature = "op_admin_delete_software_token",
         feature = "op_admin_initiate_auth",
         feature = "op_admin_respond_to_auth_challenge",
         feature = "op_admin_set_user_mfa_preference",
@@ -1222,6 +1242,7 @@ pub enum Error {
         feature = "op_admin_add_user_to_group",
         feature = "op_admin_confirm_sign_up",
         feature = "op_admin_create_user",
+        feature = "op_admin_delete_software_token",
         feature = "op_admin_delete_user",
         feature = "op_admin_delete_user_attributes",
         feature = "op_admin_disable_provider_for_user",
@@ -1424,6 +1445,7 @@ impl ::std::fmt::Display for Error {
                 feature = "op_delete_web_authn_credential",
                 feature = "op_forget_device",
                 feature = "op_forgot_password",
+                feature = "op_get_client_token",
                 feature = "op_get_device",
                 feature = "op_get_tokens_from_refresh_token",
                 feature = "op_get_user",
@@ -1453,6 +1475,7 @@ impl ::std::fmt::Display for Error {
                 feature = "op_admin_add_user_to_group",
                 feature = "op_admin_confirm_sign_up",
                 feature = "op_admin_create_user",
+                feature = "op_admin_delete_software_token",
                 feature = "op_admin_delete_user",
                 feature = "op_admin_delete_user_attributes",
                 feature = "op_admin_disable_provider_for_user",
@@ -1511,12 +1534,14 @@ impl ::std::fmt::Display for Error {
                 feature = "op_describe_resource_server",
                 feature = "op_describe_risk_configuration",
                 feature = "op_describe_terms",
+                feature = "op_describe_terms_by_client",
                 feature = "op_describe_user_import_job",
                 feature = "op_describe_user_pool",
                 feature = "op_describe_user_pool_client",
                 feature = "op_describe_user_pool_domain",
                 feature = "op_forget_device",
                 feature = "op_forgot_password",
+                feature = "op_get_client_token",
                 feature = "op_get_csv_header",
                 feature = "op_get_device",
                 feature = "op_get_group",
@@ -1628,6 +1653,7 @@ impl ::std::fmt::Display for Error {
                 feature = "op_admin_add_user_to_group",
                 feature = "op_admin_confirm_sign_up",
                 feature = "op_admin_create_user",
+                feature = "op_admin_delete_software_token",
                 feature = "op_admin_delete_user",
                 feature = "op_admin_delete_user_attributes",
                 feature = "op_admin_disable_provider_for_user",
@@ -1687,12 +1713,14 @@ impl ::std::fmt::Display for Error {
                 feature = "op_describe_resource_server",
                 feature = "op_describe_risk_configuration",
                 feature = "op_describe_terms",
+                feature = "op_describe_terms_by_client",
                 feature = "op_describe_user_import_job",
                 feature = "op_describe_user_pool",
                 feature = "op_describe_user_pool_client",
                 feature = "op_describe_user_pool_domain",
                 feature = "op_forget_device",
                 feature = "op_forgot_password",
+                feature = "op_get_client_token",
                 feature = "op_get_csv_header",
                 feature = "op_get_device",
                 feature = "op_get_group",
@@ -1862,6 +1890,7 @@ impl ::std::fmt::Display for Error {
                 feature = "op_admin_add_user_to_group",
                 feature = "op_admin_confirm_sign_up",
                 feature = "op_admin_create_user",
+                feature = "op_admin_delete_software_token",
                 feature = "op_admin_delete_user",
                 feature = "op_admin_delete_user_attributes",
                 feature = "op_admin_disable_provider_for_user",
@@ -1920,12 +1949,14 @@ impl ::std::fmt::Display for Error {
                 feature = "op_describe_resource_server",
                 feature = "op_describe_risk_configuration",
                 feature = "op_describe_terms",
+                feature = "op_describe_terms_by_client",
                 feature = "op_describe_user_import_job",
                 feature = "op_describe_user_pool",
                 feature = "op_describe_user_pool_client",
                 feature = "op_describe_user_pool_domain",
                 feature = "op_forget_device",
                 feature = "op_forgot_password",
+                feature = "op_get_client_token",
                 feature = "op_get_csv_header",
                 feature = "op_get_device",
                 feature = "op_get_group",
@@ -1989,6 +2020,7 @@ impl ::std::fmt::Display for Error {
                 feature = "op_admin_add_user_to_group",
                 feature = "op_admin_confirm_sign_up",
                 feature = "op_admin_create_user",
+                feature = "op_admin_delete_software_token",
                 feature = "op_admin_delete_user",
                 feature = "op_admin_delete_user_attributes",
                 feature = "op_admin_disable_provider_for_user",
@@ -2043,12 +2075,14 @@ impl ::std::fmt::Display for Error {
                 feature = "op_describe_resource_server",
                 feature = "op_describe_risk_configuration",
                 feature = "op_describe_terms",
+                feature = "op_describe_terms_by_client",
                 feature = "op_describe_user_import_job",
                 feature = "op_describe_user_pool",
                 feature = "op_describe_user_pool_client",
                 feature = "op_describe_user_pool_domain",
                 feature = "op_forget_device",
                 feature = "op_forgot_password",
+                feature = "op_get_client_token",
                 feature = "op_get_csv_header",
                 feature = "op_get_device",
                 feature = "op_get_group",
@@ -2152,6 +2186,7 @@ impl ::std::fmt::Display for Error {
                 feature = "op_admin_add_user_to_group",
                 feature = "op_admin_confirm_sign_up",
                 feature = "op_admin_create_user",
+                feature = "op_admin_delete_software_token",
                 feature = "op_admin_delete_user",
                 feature = "op_admin_delete_user_attributes",
                 feature = "op_admin_disable_provider_for_user",
@@ -2209,12 +2244,14 @@ impl ::std::fmt::Display for Error {
                 feature = "op_describe_resource_server",
                 feature = "op_describe_risk_configuration",
                 feature = "op_describe_terms",
+                feature = "op_describe_terms_by_client",
                 feature = "op_describe_user_import_job",
                 feature = "op_describe_user_pool",
                 feature = "op_describe_user_pool_client",
                 feature = "op_describe_user_pool_domain",
                 feature = "op_forget_device",
                 feature = "op_forgot_password",
+                feature = "op_get_client_token",
                 feature = "op_get_csv_header",
                 feature = "op_get_device",
                 feature = "op_get_group",
@@ -2299,6 +2336,7 @@ impl ::std::fmt::Display for Error {
                 feature = "op_admin_add_user_to_group",
                 feature = "op_admin_confirm_sign_up",
                 feature = "op_admin_create_user",
+                feature = "op_admin_delete_software_token",
                 feature = "op_admin_delete_user",
                 feature = "op_admin_delete_user_attributes",
                 feature = "op_admin_disable_provider_for_user",
@@ -2353,11 +2391,13 @@ impl ::std::fmt::Display for Error {
                 feature = "op_describe_resource_server",
                 feature = "op_describe_risk_configuration",
                 feature = "op_describe_terms",
+                feature = "op_describe_terms_by_client",
                 feature = "op_describe_user_import_job",
                 feature = "op_describe_user_pool",
                 feature = "op_describe_user_pool_client",
                 feature = "op_forget_device",
                 feature = "op_forgot_password",
+                feature = "op_get_client_token",
                 feature = "op_get_csv_header",
                 feature = "op_get_device",
                 feature = "op_get_group",
@@ -2475,6 +2515,7 @@ impl ::std::fmt::Display for Error {
             ))]
             Error::UserLambdaValidationException(inner) => inner.fmt(f),
             #[cfg(any(
+                feature = "op_admin_delete_software_token",
                 feature = "op_admin_initiate_auth",
                 feature = "op_admin_respond_to_auth_challenge",
                 feature = "op_admin_set_user_mfa_preference",
@@ -2504,6 +2545,7 @@ impl ::std::fmt::Display for Error {
                 feature = "op_admin_add_user_to_group",
                 feature = "op_admin_confirm_sign_up",
                 feature = "op_admin_create_user",
+                feature = "op_admin_delete_software_token",
                 feature = "op_admin_delete_user",
                 feature = "op_admin_delete_user_attributes",
                 feature = "op_admin_disable_provider_for_user",
@@ -2704,6 +2746,7 @@ impl ::aws_smithy_types::error::metadata::ProvideErrorMetadata for Error {
                 feature = "op_delete_web_authn_credential",
                 feature = "op_forget_device",
                 feature = "op_forgot_password",
+                feature = "op_get_client_token",
                 feature = "op_get_device",
                 feature = "op_get_tokens_from_refresh_token",
                 feature = "op_get_user",
@@ -2733,6 +2776,7 @@ impl ::aws_smithy_types::error::metadata::ProvideErrorMetadata for Error {
                 feature = "op_admin_add_user_to_group",
                 feature = "op_admin_confirm_sign_up",
                 feature = "op_admin_create_user",
+                feature = "op_admin_delete_software_token",
                 feature = "op_admin_delete_user",
                 feature = "op_admin_delete_user_attributes",
                 feature = "op_admin_disable_provider_for_user",
@@ -2791,12 +2835,14 @@ impl ::aws_smithy_types::error::metadata::ProvideErrorMetadata for Error {
                 feature = "op_describe_resource_server",
                 feature = "op_describe_risk_configuration",
                 feature = "op_describe_terms",
+                feature = "op_describe_terms_by_client",
                 feature = "op_describe_user_import_job",
                 feature = "op_describe_user_pool",
                 feature = "op_describe_user_pool_client",
                 feature = "op_describe_user_pool_domain",
                 feature = "op_forget_device",
                 feature = "op_forgot_password",
+                feature = "op_get_client_token",
                 feature = "op_get_csv_header",
                 feature = "op_get_device",
                 feature = "op_get_group",
@@ -2908,6 +2954,7 @@ impl ::aws_smithy_types::error::metadata::ProvideErrorMetadata for Error {
                 feature = "op_admin_add_user_to_group",
                 feature = "op_admin_confirm_sign_up",
                 feature = "op_admin_create_user",
+                feature = "op_admin_delete_software_token",
                 feature = "op_admin_delete_user",
                 feature = "op_admin_delete_user_attributes",
                 feature = "op_admin_disable_provider_for_user",
@@ -2967,12 +3014,14 @@ impl ::aws_smithy_types::error::metadata::ProvideErrorMetadata for Error {
                 feature = "op_describe_resource_server",
                 feature = "op_describe_risk_configuration",
                 feature = "op_describe_terms",
+                feature = "op_describe_terms_by_client",
                 feature = "op_describe_user_import_job",
                 feature = "op_describe_user_pool",
                 feature = "op_describe_user_pool_client",
                 feature = "op_describe_user_pool_domain",
                 feature = "op_forget_device",
                 feature = "op_forgot_password",
+                feature = "op_get_client_token",
                 feature = "op_get_csv_header",
                 feature = "op_get_device",
                 feature = "op_get_group",
@@ -3142,6 +3191,7 @@ impl ::aws_smithy_types::error::metadata::ProvideErrorMetadata for Error {
                 feature = "op_admin_add_user_to_group",
                 feature = "op_admin_confirm_sign_up",
                 feature = "op_admin_create_user",
+                feature = "op_admin_delete_software_token",
                 feature = "op_admin_delete_user",
                 feature = "op_admin_delete_user_attributes",
                 feature = "op_admin_disable_provider_for_user",
@@ -3200,12 +3250,14 @@ impl ::aws_smithy_types::error::metadata::ProvideErrorMetadata for Error {
                 feature = "op_describe_resource_server",
                 feature = "op_describe_risk_configuration",
                 feature = "op_describe_terms",
+                feature = "op_describe_terms_by_client",
                 feature = "op_describe_user_import_job",
                 feature = "op_describe_user_pool",
                 feature = "op_describe_user_pool_client",
                 feature = "op_describe_user_pool_domain",
                 feature = "op_forget_device",
                 feature = "op_forgot_password",
+                feature = "op_get_client_token",
                 feature = "op_get_csv_header",
                 feature = "op_get_device",
                 feature = "op_get_group",
@@ -3269,6 +3321,7 @@ impl ::aws_smithy_types::error::metadata::ProvideErrorMetadata for Error {
                 feature = "op_admin_add_user_to_group",
                 feature = "op_admin_confirm_sign_up",
                 feature = "op_admin_create_user",
+                feature = "op_admin_delete_software_token",
                 feature = "op_admin_delete_user",
                 feature = "op_admin_delete_user_attributes",
                 feature = "op_admin_disable_provider_for_user",
@@ -3323,12 +3376,14 @@ impl ::aws_smithy_types::error::metadata::ProvideErrorMetadata for Error {
                 feature = "op_describe_resource_server",
                 feature = "op_describe_risk_configuration",
                 feature = "op_describe_terms",
+                feature = "op_describe_terms_by_client",
                 feature = "op_describe_user_import_job",
                 feature = "op_describe_user_pool",
                 feature = "op_describe_user_pool_client",
                 feature = "op_describe_user_pool_domain",
                 feature = "op_forget_device",
                 feature = "op_forgot_password",
+                feature = "op_get_client_token",
                 feature = "op_get_csv_header",
                 feature = "op_get_device",
                 feature = "op_get_group",
@@ -3432,6 +3487,7 @@ impl ::aws_smithy_types::error::metadata::ProvideErrorMetadata for Error {
                 feature = "op_admin_add_user_to_group",
                 feature = "op_admin_confirm_sign_up",
                 feature = "op_admin_create_user",
+                feature = "op_admin_delete_software_token",
                 feature = "op_admin_delete_user",
                 feature = "op_admin_delete_user_attributes",
                 feature = "op_admin_disable_provider_for_user",
@@ -3489,12 +3545,14 @@ impl ::aws_smithy_types::error::metadata::ProvideErrorMetadata for Error {
                 feature = "op_describe_resource_server",
                 feature = "op_describe_risk_configuration",
                 feature = "op_describe_terms",
+                feature = "op_describe_terms_by_client",
                 feature = "op_describe_user_import_job",
                 feature = "op_describe_user_pool",
                 feature = "op_describe_user_pool_client",
                 feature = "op_describe_user_pool_domain",
                 feature = "op_forget_device",
                 feature = "op_forgot_password",
+                feature = "op_get_client_token",
                 feature = "op_get_csv_header",
                 feature = "op_get_device",
                 feature = "op_get_group",
@@ -3579,6 +3637,7 @@ impl ::aws_smithy_types::error::metadata::ProvideErrorMetadata for Error {
                 feature = "op_admin_add_user_to_group",
                 feature = "op_admin_confirm_sign_up",
                 feature = "op_admin_create_user",
+                feature = "op_admin_delete_software_token",
                 feature = "op_admin_delete_user",
                 feature = "op_admin_delete_user_attributes",
                 feature = "op_admin_disable_provider_for_user",
@@ -3633,11 +3692,13 @@ impl ::aws_smithy_types::error::metadata::ProvideErrorMetadata for Error {
                 feature = "op_describe_resource_server",
                 feature = "op_describe_risk_configuration",
                 feature = "op_describe_terms",
+                feature = "op_describe_terms_by_client",
                 feature = "op_describe_user_import_job",
                 feature = "op_describe_user_pool",
                 feature = "op_describe_user_pool_client",
                 feature = "op_forget_device",
                 feature = "op_forgot_password",
+                feature = "op_get_client_token",
                 feature = "op_get_csv_header",
                 feature = "op_get_device",
                 feature = "op_get_group",
@@ -3755,6 +3816,7 @@ impl ::aws_smithy_types::error::metadata::ProvideErrorMetadata for Error {
             ))]
             Self::UserLambdaValidationException(inner) => inner.meta(),
             #[cfg(any(
+                feature = "op_admin_delete_software_token",
                 feature = "op_admin_initiate_auth",
                 feature = "op_admin_respond_to_auth_challenge",
                 feature = "op_admin_set_user_mfa_preference",
@@ -3784,6 +3846,7 @@ impl ::aws_smithy_types::error::metadata::ProvideErrorMetadata for Error {
                 feature = "op_admin_add_user_to_group",
                 feature = "op_admin_confirm_sign_up",
                 feature = "op_admin_create_user",
+                feature = "op_admin_delete_software_token",
                 feature = "op_admin_delete_user",
                 feature = "op_admin_delete_user_attributes",
                 feature = "op_admin_disable_provider_for_user",
@@ -4196,6 +4259,64 @@ impl From<crate::operation::admin_create_user::AdminCreateUserError> for Error {
                 Error::UserNotFoundException(inner)
             }
             crate::operation::admin_create_user::AdminCreateUserError::Unhandled(inner) => Error::Unhandled(inner),
+        }
+    }
+}
+#[cfg(feature = "op_admin_delete_software_token")]
+impl<R>
+    From<
+        ::aws_smithy_runtime_api::client::result::SdkError<
+            crate::operation::admin_delete_software_token::AdminDeleteSoftwareTokenError,
+            R,
+        >,
+    > for Error
+where
+    R: Send + Sync + std::fmt::Debug + 'static,
+{
+    fn from(
+        err: ::aws_smithy_runtime_api::client::result::SdkError<
+            crate::operation::admin_delete_software_token::AdminDeleteSoftwareTokenError,
+            R,
+        >,
+    ) -> Self {
+        match err {
+            ::aws_smithy_runtime_api::client::result::SdkError::ServiceError(context) => Self::from(context.into_err()),
+            _ => Error::Unhandled(crate::error::sealed_unhandled::Unhandled {
+                meta: ::aws_smithy_types::error::metadata::ProvideErrorMetadata::meta(&err).clone(),
+                source: err.into(),
+            }),
+        }
+    }
+}
+#[cfg(feature = "op_admin_delete_software_token")]
+impl From<crate::operation::admin_delete_software_token::AdminDeleteSoftwareTokenError> for Error {
+    fn from(err: crate::operation::admin_delete_software_token::AdminDeleteSoftwareTokenError) -> Self {
+        match err {
+            crate::operation::admin_delete_software_token::AdminDeleteSoftwareTokenError::InternalErrorException(inner) => {
+                Error::InternalErrorException(inner)
+            }
+            crate::operation::admin_delete_software_token::AdminDeleteSoftwareTokenError::InvalidParameterException(inner) => {
+                Error::InvalidParameterException(inner)
+            }
+            crate::operation::admin_delete_software_token::AdminDeleteSoftwareTokenError::NotAuthorizedException(inner) => {
+                Error::NotAuthorizedException(inner)
+            }
+            crate::operation::admin_delete_software_token::AdminDeleteSoftwareTokenError::OperationNotEnabledException(inner) => {
+                Error::OperationNotEnabledException(inner)
+            }
+            crate::operation::admin_delete_software_token::AdminDeleteSoftwareTokenError::ResourceNotFoundException(inner) => {
+                Error::ResourceNotFoundException(inner)
+            }
+            crate::operation::admin_delete_software_token::AdminDeleteSoftwareTokenError::TooManyRequestsException(inner) => {
+                Error::TooManyRequestsException(inner)
+            }
+            crate::operation::admin_delete_software_token::AdminDeleteSoftwareTokenError::UserNotConfirmedException(inner) => {
+                Error::UserNotConfirmedException(inner)
+            }
+            crate::operation::admin_delete_software_token::AdminDeleteSoftwareTokenError::UserNotFoundException(inner) => {
+                Error::UserNotFoundException(inner)
+            }
+            crate::operation::admin_delete_software_token::AdminDeleteSoftwareTokenError::Unhandled(inner) => Error::Unhandled(inner),
         }
     }
 }
@@ -7708,6 +7829,60 @@ impl From<crate::operation::describe_terms::DescribeTermsError> for Error {
         }
     }
 }
+#[cfg(feature = "op_describe_terms_by_client")]
+impl<R>
+    From<
+        ::aws_smithy_runtime_api::client::result::SdkError<
+            crate::operation::describe_terms_by_client::DescribeTermsByClientError,
+            R,
+        >,
+    > for Error
+where
+    R: Send + Sync + std::fmt::Debug + 'static,
+{
+    fn from(
+        err: ::aws_smithy_runtime_api::client::result::SdkError<
+            crate::operation::describe_terms_by_client::DescribeTermsByClientError,
+            R,
+        >,
+    ) -> Self {
+        match err {
+            ::aws_smithy_runtime_api::client::result::SdkError::ServiceError(context) => Self::from(context.into_err()),
+            _ => Error::Unhandled(crate::error::sealed_unhandled::Unhandled {
+                meta: ::aws_smithy_types::error::metadata::ProvideErrorMetadata::meta(&err).clone(),
+                source: err.into(),
+            }),
+        }
+    }
+}
+#[cfg(feature = "op_describe_terms_by_client")]
+impl From<crate::operation::describe_terms_by_client::DescribeTermsByClientError> for Error {
+    fn from(err: crate::operation::describe_terms_by_client::DescribeTermsByClientError) -> Self {
+        match err {
+            crate::operation::describe_terms_by_client::DescribeTermsByClientError::InternalErrorException(inner) => {
+                Error::InternalErrorException(inner)
+            }
+            crate::operation::describe_terms_by_client::DescribeTermsByClientError::InvalidParameterException(
+                inner,
+            ) => Error::InvalidParameterException(inner),
+            crate::operation::describe_terms_by_client::DescribeTermsByClientError::NotAuthorizedException(inner) => {
+                Error::NotAuthorizedException(inner)
+            }
+            crate::operation::describe_terms_by_client::DescribeTermsByClientError::OperationNotEnabledException(
+                inner,
+            ) => Error::OperationNotEnabledException(inner),
+            crate::operation::describe_terms_by_client::DescribeTermsByClientError::ResourceNotFoundException(
+                inner,
+            ) => Error::ResourceNotFoundException(inner),
+            crate::operation::describe_terms_by_client::DescribeTermsByClientError::TooManyRequestsException(inner) => {
+                Error::TooManyRequestsException(inner)
+            }
+            crate::operation::describe_terms_by_client::DescribeTermsByClientError::Unhandled(inner) => {
+                Error::Unhandled(inner)
+            }
+        }
+    }
+}
 #[cfg(feature = "op_describe_user_import_job")]
 impl<R>
     From<
@@ -8056,6 +8231,57 @@ impl From<crate::operation::forgot_password::ForgotPasswordError> for Error {
                 Error::UserNotFoundException(inner)
             }
             crate::operation::forgot_password::ForgotPasswordError::Unhandled(inner) => Error::Unhandled(inner),
+        }
+    }
+}
+#[cfg(feature = "op_get_client_token")]
+impl<R>
+    From<::aws_smithy_runtime_api::client::result::SdkError<crate::operation::get_client_token::GetClientTokenError, R>>
+    for Error
+where
+    R: Send + Sync + std::fmt::Debug + 'static,
+{
+    fn from(
+        err: ::aws_smithy_runtime_api::client::result::SdkError<
+            crate::operation::get_client_token::GetClientTokenError,
+            R,
+        >,
+    ) -> Self {
+        match err {
+            ::aws_smithy_runtime_api::client::result::SdkError::ServiceError(context) => Self::from(context.into_err()),
+            _ => Error::Unhandled(crate::error::sealed_unhandled::Unhandled {
+                meta: ::aws_smithy_types::error::metadata::ProvideErrorMetadata::meta(&err).clone(),
+                source: err.into(),
+            }),
+        }
+    }
+}
+#[cfg(feature = "op_get_client_token")]
+impl From<crate::operation::get_client_token::GetClientTokenError> for Error {
+    fn from(err: crate::operation::get_client_token::GetClientTokenError) -> Self {
+        match err {
+            crate::operation::get_client_token::GetClientTokenError::ForbiddenException(inner) => {
+                Error::ForbiddenException(inner)
+            }
+            crate::operation::get_client_token::GetClientTokenError::InternalErrorException(inner) => {
+                Error::InternalErrorException(inner)
+            }
+            crate::operation::get_client_token::GetClientTokenError::InvalidParameterException(inner) => {
+                Error::InvalidParameterException(inner)
+            }
+            crate::operation::get_client_token::GetClientTokenError::NotAuthorizedException(inner) => {
+                Error::NotAuthorizedException(inner)
+            }
+            crate::operation::get_client_token::GetClientTokenError::OperationNotEnabledException(inner) => {
+                Error::OperationNotEnabledException(inner)
+            }
+            crate::operation::get_client_token::GetClientTokenError::ResourceNotFoundException(inner) => {
+                Error::ResourceNotFoundException(inner)
+            }
+            crate::operation::get_client_token::GetClientTokenError::TooManyRequestsException(inner) => {
+                Error::TooManyRequestsException(inner)
+            }
+            crate::operation::get_client_token::GetClientTokenError::Unhandled(inner) => Error::Unhandled(inner),
         }
     }
 }
@@ -11541,6 +11767,7 @@ impl ::std::error::Error for Error {
                 feature = "op_delete_web_authn_credential",
                 feature = "op_forget_device",
                 feature = "op_forgot_password",
+                feature = "op_get_client_token",
                 feature = "op_get_device",
                 feature = "op_get_tokens_from_refresh_token",
                 feature = "op_get_user",
@@ -11570,6 +11797,7 @@ impl ::std::error::Error for Error {
                 feature = "op_admin_add_user_to_group",
                 feature = "op_admin_confirm_sign_up",
                 feature = "op_admin_create_user",
+                feature = "op_admin_delete_software_token",
                 feature = "op_admin_delete_user",
                 feature = "op_admin_delete_user_attributes",
                 feature = "op_admin_disable_provider_for_user",
@@ -11628,12 +11856,14 @@ impl ::std::error::Error for Error {
                 feature = "op_describe_resource_server",
                 feature = "op_describe_risk_configuration",
                 feature = "op_describe_terms",
+                feature = "op_describe_terms_by_client",
                 feature = "op_describe_user_import_job",
                 feature = "op_describe_user_pool",
                 feature = "op_describe_user_pool_client",
                 feature = "op_describe_user_pool_domain",
                 feature = "op_forget_device",
                 feature = "op_forgot_password",
+                feature = "op_get_client_token",
                 feature = "op_get_csv_header",
                 feature = "op_get_device",
                 feature = "op_get_group",
@@ -11745,6 +11975,7 @@ impl ::std::error::Error for Error {
                 feature = "op_admin_add_user_to_group",
                 feature = "op_admin_confirm_sign_up",
                 feature = "op_admin_create_user",
+                feature = "op_admin_delete_software_token",
                 feature = "op_admin_delete_user",
                 feature = "op_admin_delete_user_attributes",
                 feature = "op_admin_disable_provider_for_user",
@@ -11804,12 +12035,14 @@ impl ::std::error::Error for Error {
                 feature = "op_describe_resource_server",
                 feature = "op_describe_risk_configuration",
                 feature = "op_describe_terms",
+                feature = "op_describe_terms_by_client",
                 feature = "op_describe_user_import_job",
                 feature = "op_describe_user_pool",
                 feature = "op_describe_user_pool_client",
                 feature = "op_describe_user_pool_domain",
                 feature = "op_forget_device",
                 feature = "op_forgot_password",
+                feature = "op_get_client_token",
                 feature = "op_get_csv_header",
                 feature = "op_get_device",
                 feature = "op_get_group",
@@ -11979,6 +12212,7 @@ impl ::std::error::Error for Error {
                 feature = "op_admin_add_user_to_group",
                 feature = "op_admin_confirm_sign_up",
                 feature = "op_admin_create_user",
+                feature = "op_admin_delete_software_token",
                 feature = "op_admin_delete_user",
                 feature = "op_admin_delete_user_attributes",
                 feature = "op_admin_disable_provider_for_user",
@@ -12037,12 +12271,14 @@ impl ::std::error::Error for Error {
                 feature = "op_describe_resource_server",
                 feature = "op_describe_risk_configuration",
                 feature = "op_describe_terms",
+                feature = "op_describe_terms_by_client",
                 feature = "op_describe_user_import_job",
                 feature = "op_describe_user_pool",
                 feature = "op_describe_user_pool_client",
                 feature = "op_describe_user_pool_domain",
                 feature = "op_forget_device",
                 feature = "op_forgot_password",
+                feature = "op_get_client_token",
                 feature = "op_get_csv_header",
                 feature = "op_get_device",
                 feature = "op_get_group",
@@ -12106,6 +12342,7 @@ impl ::std::error::Error for Error {
                 feature = "op_admin_add_user_to_group",
                 feature = "op_admin_confirm_sign_up",
                 feature = "op_admin_create_user",
+                feature = "op_admin_delete_software_token",
                 feature = "op_admin_delete_user",
                 feature = "op_admin_delete_user_attributes",
                 feature = "op_admin_disable_provider_for_user",
@@ -12160,12 +12397,14 @@ impl ::std::error::Error for Error {
                 feature = "op_describe_resource_server",
                 feature = "op_describe_risk_configuration",
                 feature = "op_describe_terms",
+                feature = "op_describe_terms_by_client",
                 feature = "op_describe_user_import_job",
                 feature = "op_describe_user_pool",
                 feature = "op_describe_user_pool_client",
                 feature = "op_describe_user_pool_domain",
                 feature = "op_forget_device",
                 feature = "op_forgot_password",
+                feature = "op_get_client_token",
                 feature = "op_get_csv_header",
                 feature = "op_get_device",
                 feature = "op_get_group",
@@ -12269,6 +12508,7 @@ impl ::std::error::Error for Error {
                 feature = "op_admin_add_user_to_group",
                 feature = "op_admin_confirm_sign_up",
                 feature = "op_admin_create_user",
+                feature = "op_admin_delete_software_token",
                 feature = "op_admin_delete_user",
                 feature = "op_admin_delete_user_attributes",
                 feature = "op_admin_disable_provider_for_user",
@@ -12326,12 +12566,14 @@ impl ::std::error::Error for Error {
                 feature = "op_describe_resource_server",
                 feature = "op_describe_risk_configuration",
                 feature = "op_describe_terms",
+                feature = "op_describe_terms_by_client",
                 feature = "op_describe_user_import_job",
                 feature = "op_describe_user_pool",
                 feature = "op_describe_user_pool_client",
                 feature = "op_describe_user_pool_domain",
                 feature = "op_forget_device",
                 feature = "op_forgot_password",
+                feature = "op_get_client_token",
                 feature = "op_get_csv_header",
                 feature = "op_get_device",
                 feature = "op_get_group",
@@ -12416,6 +12658,7 @@ impl ::std::error::Error for Error {
                 feature = "op_admin_add_user_to_group",
                 feature = "op_admin_confirm_sign_up",
                 feature = "op_admin_create_user",
+                feature = "op_admin_delete_software_token",
                 feature = "op_admin_delete_user",
                 feature = "op_admin_delete_user_attributes",
                 feature = "op_admin_disable_provider_for_user",
@@ -12470,11 +12713,13 @@ impl ::std::error::Error for Error {
                 feature = "op_describe_resource_server",
                 feature = "op_describe_risk_configuration",
                 feature = "op_describe_terms",
+                feature = "op_describe_terms_by_client",
                 feature = "op_describe_user_import_job",
                 feature = "op_describe_user_pool",
                 feature = "op_describe_user_pool_client",
                 feature = "op_forget_device",
                 feature = "op_forgot_password",
+                feature = "op_get_client_token",
                 feature = "op_get_csv_header",
                 feature = "op_get_device",
                 feature = "op_get_group",
@@ -12592,6 +12837,7 @@ impl ::std::error::Error for Error {
             ))]
             Error::UserLambdaValidationException(inner) => inner.source(),
             #[cfg(any(
+                feature = "op_admin_delete_software_token",
                 feature = "op_admin_initiate_auth",
                 feature = "op_admin_respond_to_auth_challenge",
                 feature = "op_admin_set_user_mfa_preference",
@@ -12621,6 +12867,7 @@ impl ::std::error::Error for Error {
                 feature = "op_admin_add_user_to_group",
                 feature = "op_admin_confirm_sign_up",
                 feature = "op_admin_create_user",
+                feature = "op_admin_delete_software_token",
                 feature = "op_admin_delete_user",
                 feature = "op_admin_delete_user_attributes",
                 feature = "op_admin_disable_provider_for_user",
@@ -12805,6 +13052,7 @@ impl ::aws_types::request_id::RequestId for Error {
                 feature = "op_delete_web_authn_credential",
                 feature = "op_forget_device",
                 feature = "op_forgot_password",
+                feature = "op_get_client_token",
                 feature = "op_get_device",
                 feature = "op_get_tokens_from_refresh_token",
                 feature = "op_get_user",
@@ -12834,6 +13082,7 @@ impl ::aws_types::request_id::RequestId for Error {
                 feature = "op_admin_add_user_to_group",
                 feature = "op_admin_confirm_sign_up",
                 feature = "op_admin_create_user",
+                feature = "op_admin_delete_software_token",
                 feature = "op_admin_delete_user",
                 feature = "op_admin_delete_user_attributes",
                 feature = "op_admin_disable_provider_for_user",
@@ -12892,12 +13141,14 @@ impl ::aws_types::request_id::RequestId for Error {
                 feature = "op_describe_resource_server",
                 feature = "op_describe_risk_configuration",
                 feature = "op_describe_terms",
+                feature = "op_describe_terms_by_client",
                 feature = "op_describe_user_import_job",
                 feature = "op_describe_user_pool",
                 feature = "op_describe_user_pool_client",
                 feature = "op_describe_user_pool_domain",
                 feature = "op_forget_device",
                 feature = "op_forgot_password",
+                feature = "op_get_client_token",
                 feature = "op_get_csv_header",
                 feature = "op_get_device",
                 feature = "op_get_group",
@@ -13009,6 +13260,7 @@ impl ::aws_types::request_id::RequestId for Error {
                 feature = "op_admin_add_user_to_group",
                 feature = "op_admin_confirm_sign_up",
                 feature = "op_admin_create_user",
+                feature = "op_admin_delete_software_token",
                 feature = "op_admin_delete_user",
                 feature = "op_admin_delete_user_attributes",
                 feature = "op_admin_disable_provider_for_user",
@@ -13068,12 +13320,14 @@ impl ::aws_types::request_id::RequestId for Error {
                 feature = "op_describe_resource_server",
                 feature = "op_describe_risk_configuration",
                 feature = "op_describe_terms",
+                feature = "op_describe_terms_by_client",
                 feature = "op_describe_user_import_job",
                 feature = "op_describe_user_pool",
                 feature = "op_describe_user_pool_client",
                 feature = "op_describe_user_pool_domain",
                 feature = "op_forget_device",
                 feature = "op_forgot_password",
+                feature = "op_get_client_token",
                 feature = "op_get_csv_header",
                 feature = "op_get_device",
                 feature = "op_get_group",
@@ -13243,6 +13497,7 @@ impl ::aws_types::request_id::RequestId for Error {
                 feature = "op_admin_add_user_to_group",
                 feature = "op_admin_confirm_sign_up",
                 feature = "op_admin_create_user",
+                feature = "op_admin_delete_software_token",
                 feature = "op_admin_delete_user",
                 feature = "op_admin_delete_user_attributes",
                 feature = "op_admin_disable_provider_for_user",
@@ -13301,12 +13556,14 @@ impl ::aws_types::request_id::RequestId for Error {
                 feature = "op_describe_resource_server",
                 feature = "op_describe_risk_configuration",
                 feature = "op_describe_terms",
+                feature = "op_describe_terms_by_client",
                 feature = "op_describe_user_import_job",
                 feature = "op_describe_user_pool",
                 feature = "op_describe_user_pool_client",
                 feature = "op_describe_user_pool_domain",
                 feature = "op_forget_device",
                 feature = "op_forgot_password",
+                feature = "op_get_client_token",
                 feature = "op_get_csv_header",
                 feature = "op_get_device",
                 feature = "op_get_group",
@@ -13370,6 +13627,7 @@ impl ::aws_types::request_id::RequestId for Error {
                 feature = "op_admin_add_user_to_group",
                 feature = "op_admin_confirm_sign_up",
                 feature = "op_admin_create_user",
+                feature = "op_admin_delete_software_token",
                 feature = "op_admin_delete_user",
                 feature = "op_admin_delete_user_attributes",
                 feature = "op_admin_disable_provider_for_user",
@@ -13424,12 +13682,14 @@ impl ::aws_types::request_id::RequestId for Error {
                 feature = "op_describe_resource_server",
                 feature = "op_describe_risk_configuration",
                 feature = "op_describe_terms",
+                feature = "op_describe_terms_by_client",
                 feature = "op_describe_user_import_job",
                 feature = "op_describe_user_pool",
                 feature = "op_describe_user_pool_client",
                 feature = "op_describe_user_pool_domain",
                 feature = "op_forget_device",
                 feature = "op_forgot_password",
+                feature = "op_get_client_token",
                 feature = "op_get_csv_header",
                 feature = "op_get_device",
                 feature = "op_get_group",
@@ -13533,6 +13793,7 @@ impl ::aws_types::request_id::RequestId for Error {
                 feature = "op_admin_add_user_to_group",
                 feature = "op_admin_confirm_sign_up",
                 feature = "op_admin_create_user",
+                feature = "op_admin_delete_software_token",
                 feature = "op_admin_delete_user",
                 feature = "op_admin_delete_user_attributes",
                 feature = "op_admin_disable_provider_for_user",
@@ -13590,12 +13851,14 @@ impl ::aws_types::request_id::RequestId for Error {
                 feature = "op_describe_resource_server",
                 feature = "op_describe_risk_configuration",
                 feature = "op_describe_terms",
+                feature = "op_describe_terms_by_client",
                 feature = "op_describe_user_import_job",
                 feature = "op_describe_user_pool",
                 feature = "op_describe_user_pool_client",
                 feature = "op_describe_user_pool_domain",
                 feature = "op_forget_device",
                 feature = "op_forgot_password",
+                feature = "op_get_client_token",
                 feature = "op_get_csv_header",
                 feature = "op_get_device",
                 feature = "op_get_group",
@@ -13680,6 +13943,7 @@ impl ::aws_types::request_id::RequestId for Error {
                 feature = "op_admin_add_user_to_group",
                 feature = "op_admin_confirm_sign_up",
                 feature = "op_admin_create_user",
+                feature = "op_admin_delete_software_token",
                 feature = "op_admin_delete_user",
                 feature = "op_admin_delete_user_attributes",
                 feature = "op_admin_disable_provider_for_user",
@@ -13734,11 +13998,13 @@ impl ::aws_types::request_id::RequestId for Error {
                 feature = "op_describe_resource_server",
                 feature = "op_describe_risk_configuration",
                 feature = "op_describe_terms",
+                feature = "op_describe_terms_by_client",
                 feature = "op_describe_user_import_job",
                 feature = "op_describe_user_pool",
                 feature = "op_describe_user_pool_client",
                 feature = "op_forget_device",
                 feature = "op_forgot_password",
+                feature = "op_get_client_token",
                 feature = "op_get_csv_header",
                 feature = "op_get_device",
                 feature = "op_get_group",
@@ -13856,6 +14122,7 @@ impl ::aws_types::request_id::RequestId for Error {
             ))]
             Self::UserLambdaValidationException(e) => e.request_id(),
             #[cfg(any(
+                feature = "op_admin_delete_software_token",
                 feature = "op_admin_initiate_auth",
                 feature = "op_admin_respond_to_auth_challenge",
                 feature = "op_admin_set_user_mfa_preference",
@@ -13885,6 +14152,7 @@ impl ::aws_types::request_id::RequestId for Error {
                 feature = "op_admin_add_user_to_group",
                 feature = "op_admin_confirm_sign_up",
                 feature = "op_admin_create_user",
+                feature = "op_admin_delete_software_token",
                 feature = "op_admin_delete_user",
                 feature = "op_admin_delete_user_attributes",
                 feature = "op_admin_disable_provider_for_user",

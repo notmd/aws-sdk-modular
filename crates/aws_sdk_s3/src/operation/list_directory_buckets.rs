@@ -178,7 +178,10 @@ impl ::aws_smithy_runtime_api::client::runtime_plugin::RuntimePlugin for ListDir
                 ::std::borrow::Cow::Owned(transient_errors)
             })
             .build(),
-        );
+        )
+        .with_retry_classifier(::aws_runtime::service_clock_skew::ServiceClockSkewClassifier::<
+            crate::operation::list_directory_buckets::ListDirectoryBucketsError,
+        >::new());
 
         ::std::borrow::Cow::Owned(rcb)
     }

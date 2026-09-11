@@ -268,6 +268,48 @@ pub(crate) fn de_missing_meta_header(
     }
 }
 
+pub(crate) fn de_object_lock_event_hold_header(
+    header_map: &::aws_smithy_runtime_api::http::Headers,
+) -> ::std::result::Result<
+    ::std::option::Option<crate::types::ObjectLockEventHold>,
+    ::aws_smithy_http::header::ParseError,
+> {
+    let headers = header_map.get_all("x-amz-object-lock-event-hold");
+    ::aws_smithy_http::header::one_or_none(headers)
+}
+
+pub(crate) fn de_object_lock_event_hold_duration_days_header(
+    header_map: &::aws_smithy_runtime_api::http::Headers,
+) -> ::std::result::Result<::std::option::Option<i32>, ::aws_smithy_http::header::ParseError> {
+    let headers = header_map.get_all("x-amz-object-lock-event-hold-duration-days");
+    let var_7 = ::aws_smithy_http::header::read_many_primitive::<i32>(headers)?;
+    if var_7.len() > 1 {
+        Err(::aws_smithy_http::header::ParseError::new(format!(
+            "expected one item but found {}",
+            var_7.len()
+        )))
+    } else {
+        let mut var_7 = var_7;
+        Ok(var_7.pop())
+    }
+}
+
+pub(crate) fn de_object_lock_event_hold_duration_years_header(
+    header_map: &::aws_smithy_runtime_api::http::Headers,
+) -> ::std::result::Result<::std::option::Option<i32>, ::aws_smithy_http::header::ParseError> {
+    let headers = header_map.get_all("x-amz-object-lock-event-hold-duration-years");
+    let var_8 = ::aws_smithy_http::header::read_many_primitive::<i32>(headers)?;
+    if var_8.len() > 1 {
+        Err(::aws_smithy_http::header::ParseError::new(format!(
+            "expected one item but found {}",
+            var_8.len()
+        )))
+    } else {
+        let mut var_8 = var_8;
+        Ok(var_8.pop())
+    }
+}
+
 pub(crate) fn de_object_lock_legal_hold_status_header(
     header_map: &::aws_smithy_runtime_api::http::Headers,
 ) -> ::std::result::Result<
@@ -289,16 +331,16 @@ pub(crate) fn de_object_lock_retain_until_date_header(
     header_map: &::aws_smithy_runtime_api::http::Headers,
 ) -> ::std::result::Result<::std::option::Option<::aws_smithy_types::DateTime>, ::aws_smithy_http::header::ParseError> {
     let headers = header_map.get_all("x-amz-object-lock-retain-until-date");
-    let var_7: Vec<::aws_smithy_types::DateTime> =
+    let var_9: Vec<::aws_smithy_types::DateTime> =
         ::aws_smithy_http::header::many_dates(headers, ::aws_smithy_types::date_time::Format::DateTimeWithOffset)?;
-    if var_7.len() > 1 {
+    if var_9.len() > 1 {
         Err(::aws_smithy_http::header::ParseError::new(format!(
             "expected one item but found {}",
-            var_7.len()
+            var_9.len()
         )))
     } else {
-        let mut var_7 = var_7;
-        Ok(var_7.pop())
+        let mut var_9 = var_9;
+        Ok(var_9.pop())
     }
 }
 
@@ -306,15 +348,15 @@ pub(crate) fn de_parts_count_header(
     header_map: &::aws_smithy_runtime_api::http::Headers,
 ) -> ::std::result::Result<::std::option::Option<i32>, ::aws_smithy_http::header::ParseError> {
     let headers = header_map.get_all("x-amz-mp-parts-count");
-    let var_8 = ::aws_smithy_http::header::read_many_primitive::<i32>(headers)?;
-    if var_8.len() > 1 {
+    let var_10 = ::aws_smithy_http::header::read_many_primitive::<i32>(headers)?;
+    if var_10.len() > 1 {
         Err(::aws_smithy_http::header::ParseError::new(format!(
             "expected one item but found {}",
-            var_8.len()
+            var_10.len()
         )))
     } else {
-        let mut var_8 = var_8;
-        Ok(var_8.pop())
+        let mut var_10 = var_10;
+        Ok(var_10.pop())
     }
 }
 
@@ -382,15 +424,15 @@ pub(crate) fn de_tag_count_header(
     header_map: &::aws_smithy_runtime_api::http::Headers,
 ) -> ::std::result::Result<::std::option::Option<i32>, ::aws_smithy_http::header::ParseError> {
     let headers = header_map.get_all("x-amz-tagging-count");
-    let var_9 = ::aws_smithy_http::header::read_many_primitive::<i32>(headers)?;
-    if var_9.len() > 1 {
+    let var_11 = ::aws_smithy_http::header::read_many_primitive::<i32>(headers)?;
+    if var_11.len() > 1 {
         Err(::aws_smithy_http::header::ParseError::new(format!(
             "expected one item but found {}",
-            var_9.len()
+            var_11.len()
         )))
     } else {
-        let mut var_9 = var_9;
-        Ok(var_9.pop())
+        let mut var_11 = var_11;
+        Ok(var_11.pop())
     }
 }
 

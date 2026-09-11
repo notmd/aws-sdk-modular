@@ -211,6 +211,17 @@ pub use crate::types::_object_lock_mode::ObjectLockMode;
 ))]
 pub use crate::types::_object_lock_legal_hold_status::ObjectLockLegalHoldStatus;
 
+#[cfg(any(
+    feature = "op_copy_object",
+    feature = "op_create_multipart_upload",
+    feature = "op_get_object",
+    feature = "op_get_object_retention",
+    feature = "op_head_object",
+    feature = "op_put_object",
+    feature = "op_put_object_retention"
+))]
+pub use crate::types::_object_lock_event_hold::ObjectLockEventHold;
+
 #[cfg(feature = "op_copy_object")]
 pub use crate::types::_copy_object_result::CopyObjectResult;
 
@@ -677,6 +688,14 @@ pub use crate::types::_object_lock_rule::ObjectLockRule;
     feature = "op_put_object_retention"
 ))]
 pub use crate::types::_object_lock_retention_mode::ObjectLockRetentionMode;
+
+#[cfg(any(
+    feature = "op_get_object_lock_configuration",
+    feature = "op_get_object_retention",
+    feature = "op_put_object_lock_configuration",
+    feature = "op_put_object_retention"
+))]
+pub use crate::types::_event_hold_duration::EventHoldDuration;
 
 #[cfg(any(feature = "op_list_buckets", feature = "op_list_directory_buckets"))]
 pub use crate::types::_bucket::Bucket;
@@ -1534,6 +1553,14 @@ mod _event;
 ))]
 mod _event_bridge_configuration;
 
+#[cfg(any(
+    feature = "op_get_object_lock_configuration",
+    feature = "op_get_object_retention",
+    feature = "op_put_object_lock_configuration",
+    feature = "op_put_object_retention"
+))]
+mod _event_hold_duration;
+
 #[cfg(any(feature = "op_get_bucket_replication", feature = "op_put_bucket_replication"))]
 mod _existing_object_replication;
 
@@ -1905,6 +1932,17 @@ mod _object_lock_configuration;
     feature = "op_put_object_lock_configuration"
 ))]
 mod _object_lock_enabled;
+
+#[cfg(any(
+    feature = "op_copy_object",
+    feature = "op_create_multipart_upload",
+    feature = "op_get_object",
+    feature = "op_get_object_retention",
+    feature = "op_head_object",
+    feature = "op_put_object",
+    feature = "op_put_object_retention"
+))]
+mod _object_lock_event_hold;
 
 #[cfg(any(feature = "op_get_object_legal_hold", feature = "op_put_object_legal_hold"))]
 mod _object_lock_legal_hold;

@@ -1158,6 +1158,17 @@ pub use crate::types::_end_point_type::EndPointType;
 pub use crate::types::_schema_registry_event_record_format::SchemaRegistryEventRecordFormat;
 
 #[cfg(any(
+    feature = "op_create_function",
+    feature = "op_get_function",
+    feature = "op_get_function_configuration",
+    feature = "op_list_functions",
+    feature = "op_list_versions_by_function",
+    feature = "op_update_function_code",
+    feature = "op_update_function_configuration"
+))]
+pub use crate::types::_s3_files_config::S3FilesConfig;
+
+#[cfg(any(
     feature = "op_create_capacity_provider",
     feature = "op_delete_capacity_provider",
     feature = "op_get_capacity_provider",
@@ -1193,6 +1204,17 @@ pub use crate::types::_kafka_schema_registry_access_config::KafkaSchemaRegistryA
     feature = "op_update_event_source_mapping"
 ))]
 pub use crate::types::_kafka_schema_validation_config::KafkaSchemaValidationConfig;
+
+#[cfg(any(
+    feature = "op_create_function",
+    feature = "op_get_function",
+    feature = "op_get_function_configuration",
+    feature = "op_list_functions",
+    feature = "op_list_versions_by_function",
+    feature = "op_update_function_code",
+    feature = "op_update_function_configuration"
+))]
+pub use crate::types::_direct_s3_read::DirectS3Read;
 
 #[cfg(any(
     feature = "op_delete_event_source_mapping",
@@ -1486,6 +1508,17 @@ mod _dead_letter_config;
     feature = "op_update_function_event_invoke_config"
 ))]
 mod _destination_config;
+
+#[cfg(any(
+    feature = "op_create_function",
+    feature = "op_get_function",
+    feature = "op_get_function_configuration",
+    feature = "op_list_functions",
+    feature = "op_list_versions_by_function",
+    feature = "op_update_function_code",
+    feature = "op_update_function_configuration"
+))]
+mod _direct_s3_read;
 
 #[cfg(any(
     feature = "op_delete_event_source_mapping",
@@ -2088,6 +2121,17 @@ mod _runtime_version_config;
     feature = "op_update_function_configuration"
 ))]
 mod _runtime_version_error;
+
+#[cfg(any(
+    feature = "op_create_function",
+    feature = "op_get_function",
+    feature = "op_get_function_configuration",
+    feature = "op_list_functions",
+    feature = "op_list_versions_by_function",
+    feature = "op_update_function_code",
+    feature = "op_update_function_configuration"
+))]
+mod _s3_files_config;
 
 #[cfg(any(
     feature = "op_create_function",

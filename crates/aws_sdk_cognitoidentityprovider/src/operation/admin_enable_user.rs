@@ -169,6 +169,9 @@ impl ::aws_smithy_runtime_api::client::runtime_plugin::RuntimePlugin for AdminEn
         )
         .with_retry_classifier(::aws_runtime::retries::classifiers::AwsErrorCodeClassifier::<
             crate::operation::admin_enable_user::AdminEnableUserError,
+        >::new())
+        .with_retry_classifier(::aws_runtime::service_clock_skew::ServiceClockSkewClassifier::<
+            crate::operation::admin_enable_user::AdminEnableUserError,
         >::new());
 
         ::std::borrow::Cow::Owned(rcb)

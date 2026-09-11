@@ -1352,6 +1352,14 @@ pub(crate) mod shape_csv_input;
 #[cfg(any(feature = "op_restore_object", feature = "op_select_object_content"))]
 pub(crate) mod shape_csv_output;
 
+#[cfg(any(
+    feature = "op_get_object_lock_configuration",
+    feature = "op_get_object_retention",
+    feature = "op_put_object_lock_configuration",
+    feature = "op_put_object_retention"
+))]
+pub(crate) mod shape_event_hold_duration;
+
 #[cfg(feature = "op_get_bucket_metadata_configuration")]
 pub(crate) mod shape_get_bucket_metadata_configuration_result;
 

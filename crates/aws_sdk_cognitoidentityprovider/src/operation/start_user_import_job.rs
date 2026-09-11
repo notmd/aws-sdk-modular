@@ -169,6 +169,9 @@ impl ::aws_smithy_runtime_api::client::runtime_plugin::RuntimePlugin for StartUs
         )
         .with_retry_classifier(::aws_runtime::retries::classifiers::AwsErrorCodeClassifier::<
             crate::operation::start_user_import_job::StartUserImportJobError,
+        >::new())
+        .with_retry_classifier(::aws_runtime::service_clock_skew::ServiceClockSkewClassifier::<
+            crate::operation::start_user_import_job::StartUserImportJobError,
         >::new());
 
         ::std::borrow::Cow::Owned(rcb)

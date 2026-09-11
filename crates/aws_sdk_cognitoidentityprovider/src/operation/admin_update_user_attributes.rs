@@ -169,6 +169,9 @@ impl ::aws_smithy_runtime_api::client::runtime_plugin::RuntimePlugin for AdminUp
         )
         .with_retry_classifier(::aws_runtime::retries::classifiers::AwsErrorCodeClassifier::<
             crate::operation::admin_update_user_attributes::AdminUpdateUserAttributesError,
+        >::new())
+        .with_retry_classifier(::aws_runtime::service_clock_skew::ServiceClockSkewClassifier::<
+            crate::operation::admin_update_user_attributes::AdminUpdateUserAttributesError,
         >::new());
 
         ::std::borrow::Cow::Owned(rcb)

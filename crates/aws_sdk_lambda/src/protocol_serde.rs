@@ -2206,6 +2206,17 @@ pub(crate) mod shape_runtime_version_error;
     feature = "op_update_function_code",
     feature = "op_update_function_configuration"
 ))]
+pub(crate) mod shape_s3_files_config;
+
+#[cfg(any(
+    feature = "op_create_function",
+    feature = "op_get_function",
+    feature = "op_get_function_configuration",
+    feature = "op_list_functions",
+    feature = "op_list_versions_by_function",
+    feature = "op_update_function_code",
+    feature = "op_update_function_configuration"
+))]
 pub(crate) mod shape_security_group_ids;
 
 #[cfg(any(

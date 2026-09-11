@@ -25,6 +25,13 @@ pub use crate::types::_vdm_options::VdmOptions;
 pub use crate::types::_archiving_options::ArchivingOptions;
 
 #[cfg(any(
+    feature = "op_create_configuration_set",
+    feature = "op_get_configuration_set",
+    feature = "op_update_configuration_set"
+))]
+pub use crate::types::_message_security_options::MessageSecurityOptions;
+
+#[cfg(any(
     feature = "op_create_configuration_set_event_destination",
     feature = "op_update_configuration_set_event_destination"
 ))]
@@ -342,6 +349,13 @@ pub use crate::types::_dashboard_options::DashboardOptions;
 pub use crate::types::_guardian_options::GuardianOptions;
 
 #[cfg(any(
+    feature = "op_create_configuration_set",
+    feature = "op_get_configuration_set",
+    feature = "op_update_configuration_set"
+))]
+pub use crate::types::_signing_scheme::SigningScheme;
+
+#[cfg(any(
     feature = "op_create_configuration_set_event_destination",
     feature = "op_get_configuration_set_event_destinations",
     feature = "op_update_configuration_set_event_destination"
@@ -549,6 +563,9 @@ pub use crate::types::_custom_verification_email_template_metadata::CustomVerifi
 #[cfg(feature = "op_list_email_identities")]
 pub use crate::types::_identity_info::IdentityInfo;
 
+#[cfg(feature = "op_list_email_identity_certificates")]
+pub use crate::types::_identity_certificate::IdentityCertificate;
+
 #[cfg(feature = "op_list_email_templates")]
 pub use crate::types::_email_template_metadata::EmailTemplateMetadata;
 
@@ -621,6 +638,20 @@ pub use crate::types::_metric::Metric;
 pub use crate::types::_query_error_code::QueryErrorCode;
 
 #[cfg(any(
+    feature = "op_create_configuration_set",
+    feature = "op_get_configuration_set",
+    feature = "op_update_configuration_set"
+))]
+pub use crate::types::_default_signing_scheme::DefaultSigningScheme;
+
+#[cfg(any(
+    feature = "op_create_configuration_set",
+    feature = "op_get_configuration_set",
+    feature = "op_update_configuration_set"
+))]
+pub use crate::types::_smime_signing_scheme::SmimeSigningScheme;
+
+#[cfg(any(
     feature = "op_create_configuration_set_event_destination",
     feature = "op_get_configuration_set_event_destinations",
     feature = "op_get_message_insights",
@@ -672,6 +703,9 @@ pub use crate::types::_domain_isp_placement::DomainIspPlacement;
 #[cfg(feature = "op_get_email_address_insights")]
 pub use crate::types::_email_address_insights_confidence_verdict::EmailAddressInsightsConfidenceVerdict;
 
+#[cfg(feature = "op_list_email_identity_certificates")]
+pub use crate::types::_identity_certificate_status::IdentityCertificateStatus;
+
 #[cfg(feature = "op_list_recommendations")]
 pub use crate::types::_recommendation_type::RecommendationType;
 
@@ -702,6 +736,13 @@ pub use crate::types::_bulk_email_status::BulkEmailStatus;
     feature = "op_get_export_job"
 ))]
 pub use crate::types::_metric_dimension_name::MetricDimensionName;
+
+#[cfg(any(
+    feature = "op_create_configuration_set",
+    feature = "op_get_configuration_set",
+    feature = "op_update_configuration_set"
+))]
+pub use crate::types::_signature_format::SignatureFormat;
 
 #[cfg(any(
     feature = "op_create_configuration_set_event_destination",
@@ -920,6 +961,13 @@ mod _dedicated_ip;
 #[cfg(feature = "op_get_dedicated_ip_pool")]
 mod _dedicated_ip_pool;
 
+#[cfg(any(
+    feature = "op_create_configuration_set",
+    feature = "op_get_configuration_set",
+    feature = "op_update_configuration_set"
+))]
+mod _default_signing_scheme;
+
 #[cfg(feature = "op_get_deliverability_dashboard_options")]
 mod _deliverability_dashboard_account_status;
 
@@ -1109,6 +1157,12 @@ mod _guardian_options;
 ))]
 mod _https_policy;
 
+#[cfg(feature = "op_list_email_identity_certificates")]
+mod _identity_certificate;
+
+#[cfg(feature = "op_list_email_identity_certificates")]
+mod _identity_certificate_status;
+
 #[cfg(feature = "op_list_email_identities")]
 mod _identity_info;
 
@@ -1201,6 +1255,13 @@ mod _message_insights_data_source;
 
 #[cfg(any(feature = "op_create_export_job", feature = "op_get_export_job"))]
 mod _message_insights_filters;
+
+#[cfg(any(
+    feature = "op_create_configuration_set",
+    feature = "op_get_configuration_set",
+    feature = "op_update_configuration_set"
+))]
+mod _message_security_options;
 
 #[cfg(any(
     feature = "op_get_message_insights",
@@ -1348,6 +1409,27 @@ mod _sending_options;
     feature = "op_update_reputation_entity_customer_managed_status"
 ))]
 mod _sending_status;
+
+#[cfg(any(
+    feature = "op_create_configuration_set",
+    feature = "op_get_configuration_set",
+    feature = "op_update_configuration_set"
+))]
+mod _signature_format;
+
+#[cfg(any(
+    feature = "op_create_configuration_set",
+    feature = "op_get_configuration_set",
+    feature = "op_update_configuration_set"
+))]
+mod _signing_scheme;
+
+#[cfg(any(
+    feature = "op_create_configuration_set",
+    feature = "op_get_configuration_set",
+    feature = "op_update_configuration_set"
+))]
+mod _smime_signing_scheme;
 
 #[cfg(any(
     feature = "op_create_configuration_set_event_destination",

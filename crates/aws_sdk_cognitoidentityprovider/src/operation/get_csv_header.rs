@@ -167,6 +167,9 @@ impl ::aws_smithy_runtime_api::client::runtime_plugin::RuntimePlugin for GetCSVH
         )
         .with_retry_classifier(::aws_runtime::retries::classifiers::AwsErrorCodeClassifier::<
             crate::operation::get_csv_header::GetCSVHeaderError,
+        >::new())
+        .with_retry_classifier(::aws_runtime::service_clock_skew::ServiceClockSkewClassifier::<
+            crate::operation::get_csv_header::GetCSVHeaderError,
         >::new());
 
         ::std::borrow::Cow::Owned(rcb)

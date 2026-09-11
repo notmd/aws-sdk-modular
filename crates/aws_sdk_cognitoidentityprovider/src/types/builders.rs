@@ -113,6 +113,7 @@ pub use crate::types::_resource_server_type::ResourceServerTypeBuilder;
 #[cfg(any(
     feature = "op_create_terms",
     feature = "op_describe_terms",
+    feature = "op_describe_terms_by_client",
     feature = "op_update_terms"
 ))]
 pub use crate::types::_terms_type::TermsTypeBuilder;
@@ -283,6 +284,9 @@ pub use crate::types::_domain_description_type::DomainDescriptionTypeBuilder;
     feature = "op_update_user_attributes"
 ))]
 pub use crate::types::_code_delivery_details_type::CodeDeliveryDetailsTypeBuilder;
+
+#[cfg(feature = "op_get_client_token")]
+pub use crate::types::_client_authentication_result_type::ClientAuthenticationResultTypeBuilder;
 
 #[cfg(any(
     feature = "op_get_log_delivery_configuration",

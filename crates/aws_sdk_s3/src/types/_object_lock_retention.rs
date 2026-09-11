@@ -8,6 +8,10 @@ pub struct ObjectLockRetention {
     pub mode: ::std::option::Option<crate::types::ObjectLockRetentionMode>,
     /// <p>The date on which this Object Lock Retention will expire.</p>
     pub retain_until_date: ::std::option::Option<::aws_smithy_types::DateTime>,
+    /// <p>The event hold status for the object. Set to <code>ON</code> to enable an event hold or <code>OFF</code> to disable it.</p>
+    pub event_hold: ::std::option::Option<crate::types::ObjectLockEventHold>,
+    /// <p>The event hold duration for the object. Specifies how long the object remains protected after the event hold is released.</p>
+    pub event_hold_duration: ::std::option::Option<crate::types::EventHoldDuration>,
 }
 impl ObjectLockRetention {
     /// <p>Indicates the Retention mode for the specified object.</p>
@@ -17,6 +21,14 @@ impl ObjectLockRetention {
     /// <p>The date on which this Object Lock Retention will expire.</p>
     pub fn retain_until_date(&self) -> ::std::option::Option<&::aws_smithy_types::DateTime> {
         self.retain_until_date.as_ref()
+    }
+    /// <p>The event hold status for the object. Set to <code>ON</code> to enable an event hold or <code>OFF</code> to disable it.</p>
+    pub fn event_hold(&self) -> ::std::option::Option<&crate::types::ObjectLockEventHold> {
+        self.event_hold.as_ref()
+    }
+    /// <p>The event hold duration for the object. Specifies how long the object remains protected after the event hold is released.</p>
+    pub fn event_hold_duration(&self) -> ::std::option::Option<&crate::types::EventHoldDuration> {
+        self.event_hold_duration.as_ref()
     }
 }
 impl ObjectLockRetention {
@@ -32,6 +44,8 @@ impl ObjectLockRetention {
 pub struct ObjectLockRetentionBuilder {
     pub(crate) mode: ::std::option::Option<crate::types::ObjectLockRetentionMode>,
     pub(crate) retain_until_date: ::std::option::Option<::aws_smithy_types::DateTime>,
+    pub(crate) event_hold: ::std::option::Option<crate::types::ObjectLockEventHold>,
+    pub(crate) event_hold_duration: ::std::option::Option<crate::types::EventHoldDuration>,
 }
 impl ObjectLockRetentionBuilder {
     /// <p>Indicates the Retention mode for the specified object.</p>
@@ -62,11 +76,41 @@ impl ObjectLockRetentionBuilder {
     pub fn get_retain_until_date(&self) -> &::std::option::Option<::aws_smithy_types::DateTime> {
         &self.retain_until_date
     }
+    /// <p>The event hold status for the object. Set to <code>ON</code> to enable an event hold or <code>OFF</code> to disable it.</p>
+    pub fn event_hold(mut self, input: crate::types::ObjectLockEventHold) -> Self {
+        self.event_hold = ::std::option::Option::Some(input);
+        self
+    }
+    /// <p>The event hold status for the object. Set to <code>ON</code> to enable an event hold or <code>OFF</code> to disable it.</p>
+    pub fn set_event_hold(mut self, input: ::std::option::Option<crate::types::ObjectLockEventHold>) -> Self {
+        self.event_hold = input;
+        self
+    }
+    /// <p>The event hold status for the object. Set to <code>ON</code> to enable an event hold or <code>OFF</code> to disable it.</p>
+    pub fn get_event_hold(&self) -> &::std::option::Option<crate::types::ObjectLockEventHold> {
+        &self.event_hold
+    }
+    /// <p>The event hold duration for the object. Specifies how long the object remains protected after the event hold is released.</p>
+    pub fn event_hold_duration(mut self, input: crate::types::EventHoldDuration) -> Self {
+        self.event_hold_duration = ::std::option::Option::Some(input);
+        self
+    }
+    /// <p>The event hold duration for the object. Specifies how long the object remains protected after the event hold is released.</p>
+    pub fn set_event_hold_duration(mut self, input: ::std::option::Option<crate::types::EventHoldDuration>) -> Self {
+        self.event_hold_duration = input;
+        self
+    }
+    /// <p>The event hold duration for the object. Specifies how long the object remains protected after the event hold is released.</p>
+    pub fn get_event_hold_duration(&self) -> &::std::option::Option<crate::types::EventHoldDuration> {
+        &self.event_hold_duration
+    }
     /// Consumes the builder and constructs a [`ObjectLockRetention`](crate::types::ObjectLockRetention).
     pub fn build(self) -> crate::types::ObjectLockRetention {
         crate::types::ObjectLockRetention {
             mode: self.mode,
             retain_until_date: self.retain_until_date,
+            event_hold: self.event_hold,
+            event_hold_duration: self.event_hold_duration,
         }
     }
 }

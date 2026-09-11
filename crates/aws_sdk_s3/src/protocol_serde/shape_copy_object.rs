@@ -594,9 +594,44 @@ pub fn ser_copy_object_headers(
         })?;
         builder = builder.header("x-amz-object-lock-legal-hold", header_value);
     }
-    if let ::std::option::Option::Some(inner_79) = &input.expected_bucket_owner {
+    if let ::std::option::Option::Some(inner_79) = &input.object_lock_event_hold {
         let formatted_80 = inner_79.as_str();
         let header_value = formatted_80;
+        let header_value: ::http_1x::HeaderValue = header_value.parse().map_err(|err| {
+            ::aws_smithy_types::error::operation::BuildError::invalid_field(
+                "object_lock_event_hold",
+                format!("`{}` cannot be used as a header value: {}", &header_value, err),
+            )
+        })?;
+        builder = builder.header("x-amz-object-lock-event-hold", header_value);
+    }
+    if let ::std::option::Option::Some(inner_81) = &input.object_lock_event_hold_duration_days {
+        let mut encoder = ::aws_smithy_types::primitive::Encoder::from(*inner_81);
+        let formatted_82 = encoder.encode();
+        let header_value = formatted_82;
+        let header_value: ::http_1x::HeaderValue = header_value.parse().map_err(|err| {
+            ::aws_smithy_types::error::operation::BuildError::invalid_field(
+                "object_lock_event_hold_duration_days",
+                format!("`{}` cannot be used as a header value: {}", &header_value, err),
+            )
+        })?;
+        builder = builder.header("x-amz-object-lock-event-hold-duration-days", header_value);
+    }
+    if let ::std::option::Option::Some(inner_83) = &input.object_lock_event_hold_duration_years {
+        let mut encoder = ::aws_smithy_types::primitive::Encoder::from(*inner_83);
+        let formatted_84 = encoder.encode();
+        let header_value = formatted_84;
+        let header_value: ::http_1x::HeaderValue = header_value.parse().map_err(|err| {
+            ::aws_smithy_types::error::operation::BuildError::invalid_field(
+                "object_lock_event_hold_duration_years",
+                format!("`{}` cannot be used as a header value: {}", &header_value, err),
+            )
+        })?;
+        builder = builder.header("x-amz-object-lock-event-hold-duration-years", header_value);
+    }
+    if let ::std::option::Option::Some(inner_85) = &input.expected_bucket_owner {
+        let formatted_86 = inner_85.as_str();
+        let header_value = formatted_86;
         let header_value: ::http_1x::HeaderValue = header_value.parse().map_err(|err| {
             ::aws_smithy_types::error::operation::BuildError::invalid_field(
                 "expected_bucket_owner",
@@ -605,9 +640,9 @@ pub fn ser_copy_object_headers(
         })?;
         builder = builder.header("x-amz-expected-bucket-owner", header_value);
     }
-    if let ::std::option::Option::Some(inner_81) = &input.expected_source_bucket_owner {
-        let formatted_82 = inner_81.as_str();
-        let header_value = formatted_82;
+    if let ::std::option::Option::Some(inner_87) = &input.expected_source_bucket_owner {
+        let formatted_88 = inner_87.as_str();
+        let header_value = formatted_88;
         let header_value: ::http_1x::HeaderValue = header_value.parse().map_err(|err| {
             ::aws_smithy_types::error::operation::BuildError::invalid_field(
                 "expected_source_bucket_owner",
@@ -616,9 +651,9 @@ pub fn ser_copy_object_headers(
         })?;
         builder = builder.header("x-amz-source-expected-bucket-owner", header_value);
     }
-    if let ::std::option::Option::Some(inner_83) = &input.metadata {
+    if let ::std::option::Option::Some(inner_89) = &input.metadata {
         {
-            for (k, v) in inner_83 {
+            for (k, v) in inner_89 {
                 use std::str::FromStr;
                 let header_name =
                     ::http_1x::HeaderName::from_str(&format!("{}{}", "x-amz-meta-", &k)).map_err(|err| {

@@ -169,6 +169,9 @@ impl ::aws_smithy_runtime_api::client::runtime_plugin::RuntimePlugin for Describ
         )
         .with_retry_classifier(::aws_runtime::retries::classifiers::AwsErrorCodeClassifier::<
             crate::operation::describe_aggregation_authorizations::DescribeAggregationAuthorizationsError,
+        >::new())
+        .with_retry_classifier(::aws_runtime::service_clock_skew::ServiceClockSkewClassifier::<
+            crate::operation::describe_aggregation_authorizations::DescribeAggregationAuthorizationsError,
         >::new());
 
         ::std::borrow::Cow::Owned(rcb)

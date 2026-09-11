@@ -302,6 +302,28 @@ pub fn de_head_object_http_response(
                 },
             )?,
         );
+        output = output.set_object_lock_event_hold(
+            crate::protocol_serde::shape_head_object_output::de_object_lock_event_hold_header(_response_headers)
+                .map_err(|_| {
+                    crate::operation::head_object::HeadObjectError::unhandled(
+                        "Failed to parse ObjectLockEventHold from header `x-amz-object-lock-event-hold",
+                    )
+                })?,
+        );
+        output = output.set_object_lock_event_hold_duration_days(
+            crate::protocol_serde::shape_head_object_output::de_object_lock_event_hold_duration_days_header(_response_headers).map_err(|_| {
+                crate::operation::head_object::HeadObjectError::unhandled(
+                    "Failed to parse ObjectLockEventHoldDurationDays from header `x-amz-object-lock-event-hold-duration-days",
+                )
+            })?,
+        );
+        output = output.set_object_lock_event_hold_duration_years(
+            crate::protocol_serde::shape_head_object_output::de_object_lock_event_hold_duration_years_header(_response_headers).map_err(|_| {
+                crate::operation::head_object::HeadObjectError::unhandled(
+                    "Failed to parse ObjectLockEventHoldDurationYears from header `x-amz-object-lock-event-hold-duration-years",
+                )
+            })?,
+        );
         output = output.set_object_lock_legal_hold_status(
             crate::protocol_serde::shape_head_object_output::de_object_lock_legal_hold_status_header(_response_headers)
                 .map_err(|_| {

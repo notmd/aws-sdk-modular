@@ -331,6 +331,14 @@ pub use crate::types::_routing_rule::RoutingRuleBuilder;
 ))]
 pub use crate::types::_object_lock_rule::ObjectLockRuleBuilder;
 
+#[cfg(any(
+    feature = "op_get_object_lock_configuration",
+    feature = "op_get_object_retention",
+    feature = "op_put_object_lock_configuration",
+    feature = "op_put_object_retention"
+))]
+pub use crate::types::_event_hold_duration::EventHoldDurationBuilder;
+
 #[cfg(any(feature = "op_list_buckets", feature = "op_list_directory_buckets"))]
 pub use crate::types::_bucket::BucketBuilder;
 

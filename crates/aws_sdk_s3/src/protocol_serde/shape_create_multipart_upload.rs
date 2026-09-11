@@ -431,9 +431,44 @@ pub fn ser_create_multipart_upload_headers(
         })?;
         builder = builder.header("x-amz-object-lock-legal-hold", header_value);
     }
-    if let ::std::option::Option::Some(inner_51) = &input.expected_bucket_owner {
+    if let ::std::option::Option::Some(inner_51) = &input.object_lock_event_hold {
         let formatted_52 = inner_51.as_str();
         let header_value = formatted_52;
+        let header_value: ::http_1x::HeaderValue = header_value.parse().map_err(|err| {
+            ::aws_smithy_types::error::operation::BuildError::invalid_field(
+                "object_lock_event_hold",
+                format!("`{}` cannot be used as a header value: {}", &header_value, err),
+            )
+        })?;
+        builder = builder.header("x-amz-object-lock-event-hold", header_value);
+    }
+    if let ::std::option::Option::Some(inner_53) = &input.object_lock_event_hold_duration_days {
+        let mut encoder = ::aws_smithy_types::primitive::Encoder::from(*inner_53);
+        let formatted_54 = encoder.encode();
+        let header_value = formatted_54;
+        let header_value: ::http_1x::HeaderValue = header_value.parse().map_err(|err| {
+            ::aws_smithy_types::error::operation::BuildError::invalid_field(
+                "object_lock_event_hold_duration_days",
+                format!("`{}` cannot be used as a header value: {}", &header_value, err),
+            )
+        })?;
+        builder = builder.header("x-amz-object-lock-event-hold-duration-days", header_value);
+    }
+    if let ::std::option::Option::Some(inner_55) = &input.object_lock_event_hold_duration_years {
+        let mut encoder = ::aws_smithy_types::primitive::Encoder::from(*inner_55);
+        let formatted_56 = encoder.encode();
+        let header_value = formatted_56;
+        let header_value: ::http_1x::HeaderValue = header_value.parse().map_err(|err| {
+            ::aws_smithy_types::error::operation::BuildError::invalid_field(
+                "object_lock_event_hold_duration_years",
+                format!("`{}` cannot be used as a header value: {}", &header_value, err),
+            )
+        })?;
+        builder = builder.header("x-amz-object-lock-event-hold-duration-years", header_value);
+    }
+    if let ::std::option::Option::Some(inner_57) = &input.expected_bucket_owner {
+        let formatted_58 = inner_57.as_str();
+        let header_value = formatted_58;
         let header_value: ::http_1x::HeaderValue = header_value.parse().map_err(|err| {
             ::aws_smithy_types::error::operation::BuildError::invalid_field(
                 "expected_bucket_owner",
@@ -442,9 +477,9 @@ pub fn ser_create_multipart_upload_headers(
         })?;
         builder = builder.header("x-amz-expected-bucket-owner", header_value);
     }
-    if let ::std::option::Option::Some(inner_53) = &input.checksum_algorithm {
-        let formatted_54 = inner_53.as_str();
-        let header_value = formatted_54;
+    if let ::std::option::Option::Some(inner_59) = &input.checksum_algorithm {
+        let formatted_60 = inner_59.as_str();
+        let header_value = formatted_60;
         let header_value: ::http_1x::HeaderValue = header_value.parse().map_err(|err| {
             ::aws_smithy_types::error::operation::BuildError::invalid_field(
                 "checksum_algorithm",
@@ -453,9 +488,9 @@ pub fn ser_create_multipart_upload_headers(
         })?;
         builder = builder.header("x-amz-checksum-algorithm", header_value);
     }
-    if let ::std::option::Option::Some(inner_55) = &input.checksum_type {
-        let formatted_56 = inner_55.as_str();
-        let header_value = formatted_56;
+    if let ::std::option::Option::Some(inner_61) = &input.checksum_type {
+        let formatted_62 = inner_61.as_str();
+        let header_value = formatted_62;
         let header_value: ::http_1x::HeaderValue = header_value.parse().map_err(|err| {
             ::aws_smithy_types::error::operation::BuildError::invalid_field(
                 "checksum_type",
@@ -464,9 +499,9 @@ pub fn ser_create_multipart_upload_headers(
         })?;
         builder = builder.header("x-amz-checksum-type", header_value);
     }
-    if let ::std::option::Option::Some(inner_57) = &input.metadata {
+    if let ::std::option::Option::Some(inner_63) = &input.metadata {
         {
-            for (k, v) in inner_57 {
+            for (k, v) in inner_63 {
                 use std::str::FromStr;
                 let header_name =
                     ::http_1x::HeaderName::from_str(&format!("{}{}", "x-amz-meta-", &k)).map_err(|err| {
@@ -513,7 +548,7 @@ pub fn de_create_multipart_upload(
     while let Some(mut tag) = decoder.next_tag() {
         match tag.start_el() {
             s if s.matches("UploadId") /* UploadId com.amazonaws.s3.synthetic#CreateMultipartUploadOutput$UploadId */ =>  {
-                let var_58 =
+                let var_64 =
                     Some(
                         Result::<::std::string::String, ::aws_smithy_xml::decode::XmlDecodeError>::Ok(
                             ::aws_smithy_xml::decode::try_data(&mut tag)?.as_ref()
@@ -522,11 +557,11 @@ pub fn de_create_multipart_upload(
                         ?
                     )
                 ;
-                builder = builder.set_upload_id(var_58);
+                builder = builder.set_upload_id(var_64);
             }
             ,
             s if s.matches("Bucket") /* Bucket com.amazonaws.s3.synthetic#CreateMultipartUploadOutput$Bucket */ =>  {
-                let var_59 =
+                let var_65 =
                     Some(
                         Result::<::std::string::String, ::aws_smithy_xml::decode::XmlDecodeError>::Ok(
                             ::aws_smithy_xml::decode::try_data(&mut tag)?.as_ref()
@@ -535,11 +570,11 @@ pub fn de_create_multipart_upload(
                         ?
                     )
                 ;
-                builder = builder.set_bucket(var_59);
+                builder = builder.set_bucket(var_65);
             }
             ,
             s if s.matches("Key") /* Key com.amazonaws.s3.synthetic#CreateMultipartUploadOutput$Key */ =>  {
-                let var_60 =
+                let var_66 =
                     Some(
                         Result::<::std::string::String, ::aws_smithy_xml::decode::XmlDecodeError>::Ok(
                             ::aws_smithy_xml::decode::try_data(&mut tag)?.as_ref()
@@ -548,7 +583,7 @@ pub fn de_create_multipart_upload(
                         ?
                     )
                 ;
-                builder = builder.set_key(var_60);
+                builder = builder.set_key(var_66);
             }
             ,
             _ => {}

@@ -715,6 +715,17 @@ pub use crate::types::_chained_invoke_details::ChainedInvokeDetailsBuilder;
 ))]
 pub use crate::types::_filter::FilterBuilder;
 
+#[cfg(any(
+    feature = "op_create_function",
+    feature = "op_get_function",
+    feature = "op_get_function_configuration",
+    feature = "op_list_functions",
+    feature = "op_list_versions_by_function",
+    feature = "op_update_function_code",
+    feature = "op_update_function_configuration"
+))]
+pub use crate::types::_s3_files_config::S3FilesConfigBuilder;
+
 #[cfg(feature = "op_get_durable_execution_history")]
 pub use crate::types::_event_input::EventInputBuilder;
 

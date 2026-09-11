@@ -151,6 +151,9 @@ mod admin_confirm_sign_up;
 #[cfg(feature = "op_admin_create_user")]
 mod admin_create_user;
 
+#[cfg(feature = "op_admin_delete_software_token")]
+mod admin_delete_software_token;
+
 #[cfg(feature = "op_admin_delete_user")]
 mod admin_delete_user;
 
@@ -355,6 +358,9 @@ mod describe_risk_configuration;
 #[cfg(feature = "op_describe_terms")]
 mod describe_terms;
 
+#[cfg(feature = "op_describe_terms_by_client")]
+mod describe_terms_by_client;
+
 #[cfg(feature = "op_describe_user_import_job")]
 mod describe_user_import_job;
 
@@ -372,6 +378,9 @@ mod forget_device;
 
 #[cfg(feature = "op_forgot_password")]
 mod forgot_password;
+
+#[cfg(feature = "op_get_client_token")]
+mod get_client_token;
 
 #[cfg(feature = "op_get_csv_header")]
 mod get_csv_header;

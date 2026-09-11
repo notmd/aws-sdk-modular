@@ -21,6 +21,10 @@ pub mod admin_confirm_sign_up;
 /// Types for the `AdminCreateUser` operation.
 pub mod admin_create_user;
 
+#[cfg(feature = "op_admin_delete_software_token")]
+/// Types for the `AdminDeleteSoftwareToken` operation.
+pub mod admin_delete_software_token;
+
 #[cfg(feature = "op_admin_delete_user")]
 /// Types for the `AdminDeleteUser` operation.
 pub mod admin_delete_user;
@@ -257,6 +261,10 @@ pub mod describe_risk_configuration;
 /// Types for the `DescribeTerms` operation.
 pub mod describe_terms;
 
+#[cfg(feature = "op_describe_terms_by_client")]
+/// Types for the `DescribeTermsByClient` operation.
+pub mod describe_terms_by_client;
+
 #[cfg(feature = "op_describe_user_import_job")]
 /// Types for the `DescribeUserImportJob` operation.
 pub mod describe_user_import_job;
@@ -280,6 +288,10 @@ pub mod forget_device;
 #[cfg(feature = "op_forgot_password")]
 /// Types for the `ForgotPassword` operation.
 pub mod forgot_password;
+
+#[cfg(feature = "op_get_client_token")]
+/// Types for the `GetClientToken` operation.
+pub mod get_client_token;
 
 #[cfg(feature = "op_get_csv_header")]
 /// Types for the `GetCSVHeader` operation.

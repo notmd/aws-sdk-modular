@@ -1562,6 +1562,69 @@ impl CopyObjectFluentBuilder {
     pub fn get_object_lock_legal_hold_status(&self) -> &::std::option::Option<crate::types::ObjectLockLegalHoldStatus> {
         self.inner.get_object_lock_legal_hold_status()
     }
+    /// <p>The event hold status to apply to the object copy. Set to <code>ON</code> to enable or <code>OFF</code> to disable.</p><note>
+    /// <p>This functionality is not supported for directory buckets.</p>
+    /// </note>
+    pub fn object_lock_event_hold(mut self, input: crate::types::ObjectLockEventHold) -> Self {
+        self.inner = self.inner.object_lock_event_hold(input);
+        self
+    }
+    /// <p>The event hold status to apply to the object copy. Set to <code>ON</code> to enable or <code>OFF</code> to disable.</p><note>
+    /// <p>This functionality is not supported for directory buckets.</p>
+    /// </note>
+    pub fn set_object_lock_event_hold(
+        mut self,
+        input: ::std::option::Option<crate::types::ObjectLockEventHold>,
+    ) -> Self {
+        self.inner = self.inner.set_object_lock_event_hold(input);
+        self
+    }
+    /// <p>The event hold status to apply to the object copy. Set to <code>ON</code> to enable or <code>OFF</code> to disable.</p><note>
+    /// <p>This functionality is not supported for directory buckets.</p>
+    /// </note>
+    pub fn get_object_lock_event_hold(&self) -> &::std::option::Option<crate::types::ObjectLockEventHold> {
+        self.inner.get_object_lock_event_hold()
+    }
+    /// <p>The event hold duration in days to apply to the object copy.</p><note>
+    /// <p>This functionality is not supported for directory buckets.</p>
+    /// </note>
+    pub fn object_lock_event_hold_duration_days(mut self, input: i32) -> Self {
+        self.inner = self.inner.object_lock_event_hold_duration_days(input);
+        self
+    }
+    /// <p>The event hold duration in days to apply to the object copy.</p><note>
+    /// <p>This functionality is not supported for directory buckets.</p>
+    /// </note>
+    pub fn set_object_lock_event_hold_duration_days(mut self, input: ::std::option::Option<i32>) -> Self {
+        self.inner = self.inner.set_object_lock_event_hold_duration_days(input);
+        self
+    }
+    /// <p>The event hold duration in days to apply to the object copy.</p><note>
+    /// <p>This functionality is not supported for directory buckets.</p>
+    /// </note>
+    pub fn get_object_lock_event_hold_duration_days(&self) -> &::std::option::Option<i32> {
+        self.inner.get_object_lock_event_hold_duration_days()
+    }
+    /// <p>The event hold duration in years to apply to the object copy.</p><note>
+    /// <p>This functionality is not supported for directory buckets.</p>
+    /// </note>
+    pub fn object_lock_event_hold_duration_years(mut self, input: i32) -> Self {
+        self.inner = self.inner.object_lock_event_hold_duration_years(input);
+        self
+    }
+    /// <p>The event hold duration in years to apply to the object copy.</p><note>
+    /// <p>This functionality is not supported for directory buckets.</p>
+    /// </note>
+    pub fn set_object_lock_event_hold_duration_years(mut self, input: ::std::option::Option<i32>) -> Self {
+        self.inner = self.inner.set_object_lock_event_hold_duration_years(input);
+        self
+    }
+    /// <p>The event hold duration in years to apply to the object copy.</p><note>
+    /// <p>This functionality is not supported for directory buckets.</p>
+    /// </note>
+    pub fn get_object_lock_event_hold_duration_years(&self) -> &::std::option::Option<i32> {
+        self.inner.get_object_lock_event_hold_duration_years()
+    }
     /// <p>The account ID of the expected destination bucket owner. If the account ID that you provide does not match the actual owner of the destination bucket, the request fails with the HTTP status code <code>403 Forbidden</code> (access denied).</p>
     pub fn expected_bucket_owner(mut self, input: impl ::std::convert::Into<::std::string::String>) -> Self {
         self.inner = self.inner.expected_bucket_owner(input.into());

@@ -5,6 +5,7 @@
     feature = "op_admin_add_user_to_group",
     feature = "op_admin_confirm_sign_up",
     feature = "op_admin_create_user",
+    feature = "op_admin_delete_software_token",
     feature = "op_admin_delete_user",
     feature = "op_admin_delete_user_attributes",
     feature = "op_admin_disable_provider_for_user",
@@ -64,12 +65,14 @@
     feature = "op_describe_resource_server",
     feature = "op_describe_risk_configuration",
     feature = "op_describe_terms",
+    feature = "op_describe_terms_by_client",
     feature = "op_describe_user_import_job",
     feature = "op_describe_user_pool",
     feature = "op_describe_user_pool_client",
     feature = "op_describe_user_pool_domain",
     feature = "op_forget_device",
     feature = "op_forgot_password",
+    feature = "op_get_client_token",
     feature = "op_get_csv_header",
     feature = "op_get_device",
     feature = "op_get_group",
@@ -154,6 +157,7 @@ where
     feature = "op_admin_add_user_to_group",
     feature = "op_admin_confirm_sign_up",
     feature = "op_admin_create_user",
+    feature = "op_admin_delete_software_token",
     feature = "op_admin_delete_user",
     feature = "op_admin_delete_user_attributes",
     feature = "op_admin_disable_provider_for_user",
@@ -213,12 +217,14 @@ where
     feature = "op_describe_resource_server",
     feature = "op_describe_risk_configuration",
     feature = "op_describe_terms",
+    feature = "op_describe_terms_by_client",
     feature = "op_describe_user_import_job",
     feature = "op_describe_user_pool",
     feature = "op_describe_user_pool_client",
     feature = "op_describe_user_pool_domain",
     feature = "op_forget_device",
     feature = "op_forgot_password",
+    feature = "op_get_client_token",
     feature = "op_get_csv_header",
     feature = "op_get_device",
     feature = "op_get_group",
@@ -304,6 +310,9 @@ pub(crate) mod shape_admin_confirm_sign_up;
 
 #[cfg(feature = "op_admin_create_user")]
 pub(crate) mod shape_admin_create_user;
+
+#[cfg(feature = "op_admin_delete_software_token")]
+pub(crate) mod shape_admin_delete_software_token;
 
 #[cfg(feature = "op_admin_delete_user")]
 pub(crate) mod shape_admin_delete_user;
@@ -482,6 +491,9 @@ pub(crate) mod shape_describe_risk_configuration;
 #[cfg(feature = "op_describe_terms")]
 pub(crate) mod shape_describe_terms;
 
+#[cfg(feature = "op_describe_terms_by_client")]
+pub(crate) mod shape_describe_terms_by_client;
+
 #[cfg(feature = "op_describe_user_import_job")]
 pub(crate) mod shape_describe_user_import_job;
 
@@ -499,6 +511,9 @@ pub(crate) mod shape_forget_device;
 
 #[cfg(feature = "op_forgot_password")]
 pub(crate) mod shape_forgot_password;
+
+#[cfg(feature = "op_get_client_token")]
+pub(crate) mod shape_get_client_token;
 
 #[cfg(feature = "op_get_csv_header")]
 pub(crate) mod shape_get_csv_header;
@@ -683,6 +698,7 @@ pub(crate) mod shape_verify_user_attribute;
     feature = "op_admin_add_user_to_group",
     feature = "op_admin_confirm_sign_up",
     feature = "op_admin_create_user",
+    feature = "op_admin_delete_software_token",
     feature = "op_admin_delete_user",
     feature = "op_admin_delete_user_attributes",
     feature = "op_admin_disable_provider_for_user",
@@ -742,12 +758,14 @@ pub(crate) mod shape_verify_user_attribute;
     feature = "op_describe_resource_server",
     feature = "op_describe_risk_configuration",
     feature = "op_describe_terms",
+    feature = "op_describe_terms_by_client",
     feature = "op_describe_user_import_job",
     feature = "op_describe_user_pool",
     feature = "op_describe_user_pool_client",
     feature = "op_describe_user_pool_domain",
     feature = "op_forget_device",
     feature = "op_forgot_password",
+    feature = "op_get_client_token",
     feature = "op_get_csv_header",
     feature = "op_get_device",
     feature = "op_get_group",
@@ -833,6 +851,9 @@ pub(crate) mod shape_admin_confirm_sign_up_input;
 
 #[cfg(feature = "op_admin_create_user")]
 pub(crate) mod shape_admin_create_user_input;
+
+#[cfg(feature = "op_admin_delete_software_token")]
+pub(crate) mod shape_admin_delete_software_token_input;
 
 #[cfg(feature = "op_admin_delete_user_attributes")]
 pub(crate) mod shape_admin_delete_user_attributes_input;
@@ -1062,6 +1083,9 @@ pub(crate) mod shape_describe_resource_server_input;
 #[cfg(feature = "op_describe_risk_configuration")]
 pub(crate) mod shape_describe_risk_configuration_input;
 
+#[cfg(feature = "op_describe_terms_by_client")]
+pub(crate) mod shape_describe_terms_by_client_input;
+
 #[cfg(feature = "op_describe_terms")]
 pub(crate) mod shape_describe_terms_input;
 
@@ -1121,6 +1145,7 @@ pub(crate) mod shape_feature_unavailable_in_tier_exception;
     feature = "op_delete_web_authn_credential",
     feature = "op_forget_device",
     feature = "op_forgot_password",
+    feature = "op_get_client_token",
     feature = "op_get_device",
     feature = "op_get_tokens_from_refresh_token",
     feature = "op_get_user",
@@ -1149,6 +1174,9 @@ pub(crate) mod shape_forget_device_input;
 
 #[cfg(feature = "op_forgot_password")]
 pub(crate) mod shape_forgot_password_input;
+
+#[cfg(feature = "op_get_client_token")]
+pub(crate) mod shape_get_client_token_input;
 
 #[cfg(feature = "op_get_csv_header")]
 pub(crate) mod shape_get_csv_header_input;
@@ -1203,6 +1231,7 @@ pub(crate) mod shape_initiate_auth_input;
     feature = "op_admin_add_user_to_group",
     feature = "op_admin_confirm_sign_up",
     feature = "op_admin_create_user",
+    feature = "op_admin_delete_software_token",
     feature = "op_admin_delete_user",
     feature = "op_admin_delete_user_attributes",
     feature = "op_admin_disable_provider_for_user",
@@ -1261,12 +1290,14 @@ pub(crate) mod shape_initiate_auth_input;
     feature = "op_describe_resource_server",
     feature = "op_describe_risk_configuration",
     feature = "op_describe_terms",
+    feature = "op_describe_terms_by_client",
     feature = "op_describe_user_import_job",
     feature = "op_describe_user_pool",
     feature = "op_describe_user_pool_client",
     feature = "op_describe_user_pool_domain",
     feature = "op_forget_device",
     feature = "op_forgot_password",
+    feature = "op_get_client_token",
     feature = "op_get_csv_header",
     feature = "op_get_device",
     feature = "op_get_group",
@@ -1383,6 +1414,7 @@ pub(crate) mod shape_invalid_o_auth_flow_exception;
     feature = "op_admin_add_user_to_group",
     feature = "op_admin_confirm_sign_up",
     feature = "op_admin_create_user",
+    feature = "op_admin_delete_software_token",
     feature = "op_admin_delete_user",
     feature = "op_admin_delete_user_attributes",
     feature = "op_admin_disable_provider_for_user",
@@ -1442,12 +1474,14 @@ pub(crate) mod shape_invalid_o_auth_flow_exception;
     feature = "op_describe_resource_server",
     feature = "op_describe_risk_configuration",
     feature = "op_describe_terms",
+    feature = "op_describe_terms_by_client",
     feature = "op_describe_user_import_job",
     feature = "op_describe_user_pool",
     feature = "op_describe_user_pool_client",
     feature = "op_describe_user_pool_domain",
     feature = "op_forget_device",
     feature = "op_forgot_password",
+    feature = "op_get_client_token",
     feature = "op_get_csv_header",
     feature = "op_get_device",
     feature = "op_get_group",
@@ -1667,6 +1701,7 @@ pub(crate) mod shape_mfa_method_not_found_exception;
     feature = "op_admin_add_user_to_group",
     feature = "op_admin_confirm_sign_up",
     feature = "op_admin_create_user",
+    feature = "op_admin_delete_software_token",
     feature = "op_admin_delete_user",
     feature = "op_admin_delete_user_attributes",
     feature = "op_admin_disable_provider_for_user",
@@ -1725,12 +1760,14 @@ pub(crate) mod shape_mfa_method_not_found_exception;
     feature = "op_describe_resource_server",
     feature = "op_describe_risk_configuration",
     feature = "op_describe_terms",
+    feature = "op_describe_terms_by_client",
     feature = "op_describe_user_import_job",
     feature = "op_describe_user_pool",
     feature = "op_describe_user_pool_client",
     feature = "op_describe_user_pool_domain",
     feature = "op_forget_device",
     feature = "op_forgot_password",
+    feature = "op_get_client_token",
     feature = "op_get_csv_header",
     feature = "op_get_device",
     feature = "op_get_group",
@@ -1795,6 +1832,7 @@ pub(crate) mod shape_not_authorized_exception;
     feature = "op_admin_add_user_to_group",
     feature = "op_admin_confirm_sign_up",
     feature = "op_admin_create_user",
+    feature = "op_admin_delete_software_token",
     feature = "op_admin_delete_user",
     feature = "op_admin_delete_user_attributes",
     feature = "op_admin_disable_provider_for_user",
@@ -1849,12 +1887,14 @@ pub(crate) mod shape_not_authorized_exception;
     feature = "op_describe_resource_server",
     feature = "op_describe_risk_configuration",
     feature = "op_describe_terms",
+    feature = "op_describe_terms_by_client",
     feature = "op_describe_user_import_job",
     feature = "op_describe_user_pool",
     feature = "op_describe_user_pool_client",
     feature = "op_describe_user_pool_domain",
     feature = "op_forget_device",
     feature = "op_forgot_password",
+    feature = "op_get_client_token",
     feature = "op_get_csv_header",
     feature = "op_get_device",
     feature = "op_get_group",
@@ -1966,6 +2006,7 @@ pub(crate) mod shape_resend_confirmation_code_input;
     feature = "op_admin_add_user_to_group",
     feature = "op_admin_confirm_sign_up",
     feature = "op_admin_create_user",
+    feature = "op_admin_delete_software_token",
     feature = "op_admin_delete_user",
     feature = "op_admin_delete_user_attributes",
     feature = "op_admin_disable_provider_for_user",
@@ -2023,12 +2064,14 @@ pub(crate) mod shape_resend_confirmation_code_input;
     feature = "op_describe_resource_server",
     feature = "op_describe_risk_configuration",
     feature = "op_describe_terms",
+    feature = "op_describe_terms_by_client",
     feature = "op_describe_user_import_job",
     feature = "op_describe_user_pool",
     feature = "op_describe_user_pool_client",
     feature = "op_describe_user_pool_domain",
     feature = "op_forget_device",
     feature = "op_forgot_password",
+    feature = "op_get_client_token",
     feature = "op_get_csv_header",
     feature = "op_get_device",
     feature = "op_get_group",
@@ -2159,6 +2202,7 @@ pub(crate) mod shape_too_many_failed_attempts_exception;
     feature = "op_admin_add_user_to_group",
     feature = "op_admin_confirm_sign_up",
     feature = "op_admin_create_user",
+    feature = "op_admin_delete_software_token",
     feature = "op_admin_delete_user",
     feature = "op_admin_delete_user_attributes",
     feature = "op_admin_disable_provider_for_user",
@@ -2213,11 +2257,13 @@ pub(crate) mod shape_too_many_failed_attempts_exception;
     feature = "op_describe_resource_server",
     feature = "op_describe_risk_configuration",
     feature = "op_describe_terms",
+    feature = "op_describe_terms_by_client",
     feature = "op_describe_user_import_job",
     feature = "op_describe_user_pool",
     feature = "op_describe_user_pool_client",
     feature = "op_forget_device",
     feature = "op_forgot_password",
+    feature = "op_get_client_token",
     feature = "op_get_csv_header",
     feature = "op_get_device",
     feature = "op_get_group",
@@ -2386,6 +2432,7 @@ pub(crate) mod shape_user_import_in_progress_exception;
 pub(crate) mod shape_user_lambda_validation_exception;
 
 #[cfg(any(
+    feature = "op_admin_delete_software_token",
     feature = "op_admin_initiate_auth",
     feature = "op_admin_respond_to_auth_challenge",
     feature = "op_admin_set_user_mfa_preference",
@@ -2416,6 +2463,7 @@ pub(crate) mod shape_user_not_confirmed_exception;
     feature = "op_admin_add_user_to_group",
     feature = "op_admin_confirm_sign_up",
     feature = "op_admin_create_user",
+    feature = "op_admin_delete_software_token",
     feature = "op_admin_delete_user",
     feature = "op_admin_delete_user_attributes",
     feature = "op_admin_disable_provider_for_user",
@@ -2615,6 +2663,9 @@ pub(crate) mod shape_available_challenge_list_type;
     feature = "op_respond_to_auth_challenge"
 ))]
 pub(crate) mod shape_challenge_parameters_type;
+
+#[cfg(feature = "op_get_client_token")]
+pub(crate) mod shape_client_authentication_result_type;
 
 #[cfg(feature = "op_list_user_pool_client_secrets")]
 pub(crate) mod shape_client_secret_descriptor_list_type;
@@ -2863,6 +2914,7 @@ pub(crate) mod shape_terms_description_list_type;
 #[cfg(any(
     feature = "op_create_terms",
     feature = "op_describe_terms",
+    feature = "op_describe_terms_by_client",
     feature = "op_update_terms"
 ))]
 pub(crate) mod shape_terms_type;
@@ -3114,6 +3166,7 @@ pub(crate) mod shape_inbound_federation_lambda_type;
 #[cfg(any(
     feature = "op_create_terms",
     feature = "op_describe_terms",
+    feature = "op_describe_terms_by_client",
     feature = "op_update_terms"
 ))]
 pub(crate) mod shape_links_type;

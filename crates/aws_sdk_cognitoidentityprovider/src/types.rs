@@ -154,6 +154,7 @@ pub use crate::types::_resource_server_type::ResourceServerType;
 #[cfg(any(
     feature = "op_create_terms",
     feature = "op_describe_terms",
+    feature = "op_describe_terms_by_client",
     feature = "op_update_terms"
 ))]
 pub use crate::types::_terms_source_type::TermsSourceType;
@@ -161,6 +162,7 @@ pub use crate::types::_terms_source_type::TermsSourceType;
 #[cfg(any(
     feature = "op_create_terms",
     feature = "op_describe_terms",
+    feature = "op_describe_terms_by_client",
     feature = "op_list_terms",
     feature = "op_update_terms"
 ))]
@@ -169,6 +171,7 @@ pub use crate::types::_terms_enforcement_type::TermsEnforcementType;
 #[cfg(any(
     feature = "op_create_terms",
     feature = "op_describe_terms",
+    feature = "op_describe_terms_by_client",
     feature = "op_update_terms"
 ))]
 pub use crate::types::_terms_type::TermsType;
@@ -378,6 +381,9 @@ pub use crate::types::_domain_description_type::DomainDescriptionType;
     feature = "op_update_user_attributes"
 ))]
 pub use crate::types::_code_delivery_details_type::CodeDeliveryDetailsType;
+
+#[cfg(feature = "op_get_client_token")]
+pub use crate::types::_client_authentication_result_type::ClientAuthenticationResultType;
 
 #[cfg(any(
     feature = "op_get_log_delivery_configuration",
@@ -1075,6 +1081,9 @@ mod _challenge_response;
 #[cfg(feature = "op_admin_list_user_auth_events")]
 mod _challenge_response_type;
 
+#[cfg(feature = "op_get_client_token")]
+mod _client_authentication_result_type;
+
 #[cfg(any(
     feature = "op_add_user_pool_client_secret",
     feature = "op_list_user_pool_client_secrets"
@@ -1653,6 +1662,7 @@ mod _terms_description_type;
 #[cfg(any(
     feature = "op_create_terms",
     feature = "op_describe_terms",
+    feature = "op_describe_terms_by_client",
     feature = "op_list_terms",
     feature = "op_update_terms"
 ))]
@@ -1661,6 +1671,7 @@ mod _terms_enforcement_type;
 #[cfg(any(
     feature = "op_create_terms",
     feature = "op_describe_terms",
+    feature = "op_describe_terms_by_client",
     feature = "op_update_terms"
 ))]
 mod _terms_source_type;
@@ -1668,6 +1679,7 @@ mod _terms_source_type;
 #[cfg(any(
     feature = "op_create_terms",
     feature = "op_describe_terms",
+    feature = "op_describe_terms_by_client",
     feature = "op_update_terms"
 ))]
 mod _terms_type;

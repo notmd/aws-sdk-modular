@@ -1,7 +1,7 @@
 # AWS SDK modularizer diff
 
 - repository: `https://github.com/awslabs/aws-sdk-rust`
-- revision: `3c6d526c9d4775f41a8ef1ed2ef574d1b14481db`
+- revision: `26155f26ed36d90263a2c9058a67b08543c96f85`
 - service: `sdk/cognitoidentityprovider`
 - model: `aws-models/cognito-identity-provider.json`
 - package: `aws-sdk-cognitoidentityprovider`
@@ -15,6 +15,7 @@
 - `op_admin_add_user_to_group`: `AdminAddUserToGroup`
 - `op_admin_confirm_sign_up`: `AdminConfirmSignUp`
 - `op_admin_create_user`: `AdminCreateUser`
+- `op_admin_delete_software_token`: `AdminDeleteSoftwareToken`
 - `op_admin_delete_user`: `AdminDeleteUser`
 - `op_admin_delete_user_attributes`: `AdminDeleteUserAttributes`
 - `op_admin_disable_provider_for_user`: `AdminDisableProviderForUser`
@@ -74,12 +75,14 @@
 - `op_describe_resource_server`: `DescribeResourceServer`
 - `op_describe_risk_configuration`: `DescribeRiskConfiguration`
 - `op_describe_terms`: `DescribeTerms`
+- `op_describe_terms_by_client`: `DescribeTermsByClient`
 - `op_describe_user_import_job`: `DescribeUserImportJob`
 - `op_describe_user_pool`: `DescribeUserPool`
 - `op_describe_user_pool_client`: `DescribeUserPoolClient`
 - `op_describe_user_pool_domain`: `DescribeUserPoolDomain`
 - `op_forget_device`: `ForgetDevice`
 - `op_forgot_password`: `ForgotPassword`
+- `op_get_client_token`: `GetClientToken`
 - `op_get_csv_header`: `GetCSVHeader`
 - `op_get_device`: `GetDevice`
 - `op_get_group`: `GetGroup`
@@ -171,7 +174,7 @@ diff --git a/Cargo.toml b/Cargo.toml
 
  [dependencies.aws-runtime]
 -path = "../aws-runtime"
- version = "1.9.1"
+ version = "1.9.2"
 
  [dependencies.aws-smithy-async]
 -path = "../aws-smithy-async"
@@ -197,7 +200,7 @@ diff --git a/Cargo.toml b/Cargo.toml
  [dependencies.aws-smithy-runtime-api]
 -path = "../aws-smithy-runtime-api"
  features = ["client", "http-1x"]
- version = "1.15.0"
+ version = "1.16.0"
 
  [dependencies.aws-smithy-schema]
 -path = "../aws-smithy-schema"
@@ -206,11 +209,11 @@ diff --git a/Cargo.toml b/Cargo.toml
  [dependencies.aws-smithy-types]
 -path = "../aws-smithy-types"
  features = ["http-body-1-x"]
- version = "1.6.2"
+ version = "1.6.3"
 
  [dependencies.aws-types]
 -path = "../aws-types"
- version = "1.5.0"
+ version = "1.6.0"
 
  [dependencies.bytes]
 @@ -84,11 +73,9 @@
@@ -218,14 +221,14 @@ diff --git a/Cargo.toml b/Cargo.toml
  version = "0.1"
  [dev-dependencies.aws-config]
 -path = "../aws-config"
- version = "1.11.0"
+ version = "1.12.0"
 
  [dev-dependencies.aws-credential-types]
 -path = "../aws-credential-types"
  features = ["test-util"]
  version = "1.3.0"
 
-@@ -107,3 +94,132 @@
+@@ -107,3 +94,135 @@
  test-util = ["aws-credential-types/test-util", "aws-smithy-runtime/legacy-test-util", "aws-smithy-runtime/test-util"]
  gated-tests = []
  default = ["rustls", "default-https-client", "rt-tokio"]
@@ -234,6 +237,7 @@ diff --git a/Cargo.toml b/Cargo.toml
 +op_admin_add_user_to_group = []
 +op_admin_confirm_sign_up = []
 +op_admin_create_user = []
++op_admin_delete_software_token = []
 +op_admin_delete_user = []
 +op_admin_delete_user_attributes = []
 +op_admin_disable_provider_for_user = []
@@ -293,12 +297,14 @@ diff --git a/Cargo.toml b/Cargo.toml
 +op_describe_resource_server = []
 +op_describe_risk_configuration = []
 +op_describe_terms = []
++op_describe_terms_by_client = []
 +op_describe_user_import_job = []
 +op_describe_user_pool = []
 +op_describe_user_pool_client = []
 +op_describe_user_pool_domain = []
 +op_forget_device = []
 +op_forgot_password = []
++op_get_client_token = []
 +op_get_csv_header = []
 +op_get_device = []
 +op_get_group = []
@@ -366,7 +372,7 @@ diff --git a/Cargo.toml b/Cargo.toml
 diff --git a/src/client.rs b/src/client.rs
 --- a/src/client.rs
 +++ b/src/client.rs
-@@ -136,94 +136,139 @@
+@@ -136,96 +136,142 @@
      }
  }
 
@@ -384,6 +390,9 @@ diff --git a/src/client.rs b/src/client.rs
 
 +#[cfg(feature = "op_admin_create_user")]
  mod admin_create_user;
+
++#[cfg(feature = "op_admin_delete_software_token")]
+ mod admin_delete_software_token;
 
 +#[cfg(feature = "op_admin_delete_user")]
  mod admin_delete_user;
@@ -506,7 +515,7 @@ diff --git a/src/client.rs b/src/client.rs
  mod create_user_pool_replica;
 
  /// Operation customization and supporting types.
-@@ -253,170 +298,254 @@
+@@ -255,174 +301,260 @@
  /// ```
  pub mod customize;
 
@@ -567,6 +576,9 @@ diff --git a/src/client.rs b/src/client.rs
 +#[cfg(feature = "op_describe_terms")]
  mod describe_terms;
 
++#[cfg(feature = "op_describe_terms_by_client")]
+ mod describe_terms_by_client;
+
 +#[cfg(feature = "op_describe_user_import_job")]
  mod describe_user_import_job;
 
@@ -584,6 +596,9 @@ diff --git a/src/client.rs b/src/client.rs
 
 +#[cfg(feature = "op_forgot_password")]
  mod forgot_password;
+
++#[cfg(feature = "op_get_client_token")]
+ mod get_client_token;
 
 +#[cfg(feature = "op_get_csv_header")]
  mod get_csv_header;
@@ -769,7 +784,7 @@ diff --git a/src/client.rs b/src/client.rs
 diff --git a/src/error_meta.rs b/src/error_meta.rs
 --- a/src/error_meta.rs
 +++ b/src/error_meta.rs
-@@ -3,122 +3,1320 @@
+@@ -3,122 +3,1341 @@
  #[non_exhaustive]
  #[derive(::std::fmt::Debug)]
  pub enum Error {
@@ -874,6 +889,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
 +        feature = "op_delete_web_authn_credential",
 +        feature = "op_forget_device",
 +        feature = "op_forgot_password",
++        feature = "op_get_client_token",
 +        feature = "op_get_device",
 +        feature = "op_get_tokens_from_refresh_token",
 +        feature = "op_get_user",
@@ -905,6 +921,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
 +        feature = "op_admin_add_user_to_group",
 +        feature = "op_admin_confirm_sign_up",
 +        feature = "op_admin_create_user",
++        feature = "op_admin_delete_software_token",
 +        feature = "op_admin_delete_user",
 +        feature = "op_admin_delete_user_attributes",
 +        feature = "op_admin_disable_provider_for_user",
@@ -963,12 +980,14 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
 +        feature = "op_describe_resource_server",
 +        feature = "op_describe_risk_configuration",
 +        feature = "op_describe_terms",
++        feature = "op_describe_terms_by_client",
 +        feature = "op_describe_user_import_job",
 +        feature = "op_describe_user_pool",
 +        feature = "op_describe_user_pool_client",
 +        feature = "op_describe_user_pool_domain",
 +        feature = "op_forget_device",
 +        feature = "op_forgot_password",
++        feature = "op_get_client_token",
 +        feature = "op_get_csv_header",
 +        feature = "op_get_device",
 +        feature = "op_get_group",
@@ -1085,6 +1104,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
 +        feature = "op_admin_add_user_to_group",
 +        feature = "op_admin_confirm_sign_up",
 +        feature = "op_admin_create_user",
++        feature = "op_admin_delete_software_token",
 +        feature = "op_admin_delete_user",
 +        feature = "op_admin_delete_user_attributes",
 +        feature = "op_admin_disable_provider_for_user",
@@ -1144,12 +1164,14 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
 +        feature = "op_describe_resource_server",
 +        feature = "op_describe_risk_configuration",
 +        feature = "op_describe_terms",
++        feature = "op_describe_terms_by_client",
 +        feature = "op_describe_user_import_job",
 +        feature = "op_describe_user_pool",
 +        feature = "op_describe_user_pool_client",
 +        feature = "op_describe_user_pool_domain",
 +        feature = "op_forget_device",
 +        feature = "op_forgot_password",
++        feature = "op_get_client_token",
 +        feature = "op_get_csv_header",
 +        feature = "op_get_device",
 +        feature = "op_get_group",
@@ -1327,6 +1349,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
 +        feature = "op_admin_add_user_to_group",
 +        feature = "op_admin_confirm_sign_up",
 +        feature = "op_admin_create_user",
++        feature = "op_admin_delete_software_token",
 +        feature = "op_admin_delete_user",
 +        feature = "op_admin_delete_user_attributes",
 +        feature = "op_admin_disable_provider_for_user",
@@ -1385,12 +1408,14 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
 +        feature = "op_describe_resource_server",
 +        feature = "op_describe_risk_configuration",
 +        feature = "op_describe_terms",
++        feature = "op_describe_terms_by_client",
 +        feature = "op_describe_user_import_job",
 +        feature = "op_describe_user_pool",
 +        feature = "op_describe_user_pool_client",
 +        feature = "op_describe_user_pool_domain",
 +        feature = "op_forget_device",
 +        feature = "op_forgot_password",
++        feature = "op_get_client_token",
 +        feature = "op_get_csv_header",
 +        feature = "op_get_device",
 +        feature = "op_get_group",
@@ -1455,6 +1480,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
 +        feature = "op_admin_add_user_to_group",
 +        feature = "op_admin_confirm_sign_up",
 +        feature = "op_admin_create_user",
++        feature = "op_admin_delete_software_token",
 +        feature = "op_admin_delete_user",
 +        feature = "op_admin_delete_user_attributes",
 +        feature = "op_admin_disable_provider_for_user",
@@ -1509,12 +1535,14 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
 +        feature = "op_describe_resource_server",
 +        feature = "op_describe_risk_configuration",
 +        feature = "op_describe_terms",
++        feature = "op_describe_terms_by_client",
 +        feature = "op_describe_user_import_job",
 +        feature = "op_describe_user_pool",
 +        feature = "op_describe_user_pool_client",
 +        feature = "op_describe_user_pool_domain",
 +        feature = "op_forget_device",
 +        feature = "op_forgot_password",
++        feature = "op_get_client_token",
 +        feature = "op_get_csv_header",
 +        feature = "op_get_device",
 +        feature = "op_get_group",
@@ -1623,6 +1651,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
 +        feature = "op_admin_add_user_to_group",
 +        feature = "op_admin_confirm_sign_up",
 +        feature = "op_admin_create_user",
++        feature = "op_admin_delete_software_token",
 +        feature = "op_admin_delete_user",
 +        feature = "op_admin_delete_user_attributes",
 +        feature = "op_admin_disable_provider_for_user",
@@ -1680,12 +1709,14 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
 +        feature = "op_describe_resource_server",
 +        feature = "op_describe_risk_configuration",
 +        feature = "op_describe_terms",
++        feature = "op_describe_terms_by_client",
 +        feature = "op_describe_user_import_job",
 +        feature = "op_describe_user_pool",
 +        feature = "op_describe_user_pool_client",
 +        feature = "op_describe_user_pool_domain",
 +        feature = "op_forget_device",
 +        feature = "op_forgot_password",
++        feature = "op_get_client_token",
 +        feature = "op_get_csv_header",
 +        feature = "op_get_device",
 +        feature = "op_get_group",
@@ -1777,6 +1808,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
 +        feature = "op_admin_add_user_to_group",
 +        feature = "op_admin_confirm_sign_up",
 +        feature = "op_admin_create_user",
++        feature = "op_admin_delete_software_token",
 +        feature = "op_admin_delete_user",
 +        feature = "op_admin_delete_user_attributes",
 +        feature = "op_admin_disable_provider_for_user",
@@ -1831,11 +1863,13 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
 +        feature = "op_describe_resource_server",
 +        feature = "op_describe_risk_configuration",
 +        feature = "op_describe_terms",
++        feature = "op_describe_terms_by_client",
 +        feature = "op_describe_user_import_job",
 +        feature = "op_describe_user_pool",
 +        feature = "op_describe_user_pool_client",
 +        feature = "op_forget_device",
 +        feature = "op_forgot_password",
++        feature = "op_get_client_token",
 +        feature = "op_get_csv_header",
 +        feature = "op_get_device",
 +        feature = "op_get_group",
@@ -1962,6 +1996,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
      /// <p>This exception is thrown when the Amazon Cognito service encounters a user validation exception with the Lambda service.</p>
      UserLambdaValidationException(crate::types::error::UserLambdaValidationException),
 +    #[cfg(any(
++        feature = "op_admin_delete_software_token",
 +        feature = "op_admin_initiate_auth",
 +        feature = "op_admin_respond_to_auth_challenge",
 +        feature = "op_admin_set_user_mfa_preference",
@@ -1992,6 +2027,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
 +        feature = "op_admin_add_user_to_group",
 +        feature = "op_admin_confirm_sign_up",
 +        feature = "op_admin_create_user",
++        feature = "op_admin_delete_software_token",
 +        feature = "op_admin_delete_user",
 +        feature = "op_admin_delete_user_attributes",
 +        feature = "op_admin_disable_provider_for_user",
@@ -2090,7 +2126,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
      /// <p>This exception is thrown when the given passkey credential is associated with a different relying party ID than the user pool relying party ID.</p>
      WebAuthnRelyingPartyMismatchException(crate::types::error::WebAuthnRelyingPartyMismatchException),
      /// An unexpected error occurred (e.g., invalid JSON returned by the service or an unknown error code).
-@@ -135,64 +1333,1262 @@
+@@ -135,64 +1354,1283 @@
  impl ::std::fmt::Display for Error {
      fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
          match self {
@@ -2185,6 +2221,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
 +                feature = "op_delete_web_authn_credential",
 +                feature = "op_forget_device",
 +                feature = "op_forgot_password",
++                feature = "op_get_client_token",
 +                feature = "op_get_device",
 +                feature = "op_get_tokens_from_refresh_token",
 +                feature = "op_get_user",
@@ -2214,6 +2251,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
 +                feature = "op_admin_add_user_to_group",
 +                feature = "op_admin_confirm_sign_up",
 +                feature = "op_admin_create_user",
++                feature = "op_admin_delete_software_token",
 +                feature = "op_admin_delete_user",
 +                feature = "op_admin_delete_user_attributes",
 +                feature = "op_admin_disable_provider_for_user",
@@ -2272,12 +2310,14 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
 +                feature = "op_describe_resource_server",
 +                feature = "op_describe_risk_configuration",
 +                feature = "op_describe_terms",
++                feature = "op_describe_terms_by_client",
 +                feature = "op_describe_user_import_job",
 +                feature = "op_describe_user_pool",
 +                feature = "op_describe_user_pool_client",
 +                feature = "op_describe_user_pool_domain",
 +                feature = "op_forget_device",
 +                feature = "op_forgot_password",
++                feature = "op_get_client_token",
 +                feature = "op_get_csv_header",
 +                feature = "op_get_device",
 +                feature = "op_get_group",
@@ -2389,6 +2429,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
 +                feature = "op_admin_add_user_to_group",
 +                feature = "op_admin_confirm_sign_up",
 +                feature = "op_admin_create_user",
++                feature = "op_admin_delete_software_token",
 +                feature = "op_admin_delete_user",
 +                feature = "op_admin_delete_user_attributes",
 +                feature = "op_admin_disable_provider_for_user",
@@ -2448,12 +2489,14 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
 +                feature = "op_describe_resource_server",
 +                feature = "op_describe_risk_configuration",
 +                feature = "op_describe_terms",
++                feature = "op_describe_terms_by_client",
 +                feature = "op_describe_user_import_job",
 +                feature = "op_describe_user_pool",
 +                feature = "op_describe_user_pool_client",
 +                feature = "op_describe_user_pool_domain",
 +                feature = "op_forget_device",
 +                feature = "op_forgot_password",
++                feature = "op_get_client_token",
 +                feature = "op_get_csv_header",
 +                feature = "op_get_device",
 +                feature = "op_get_group",
@@ -2623,6 +2666,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
 +                feature = "op_admin_add_user_to_group",
 +                feature = "op_admin_confirm_sign_up",
 +                feature = "op_admin_create_user",
++                feature = "op_admin_delete_software_token",
 +                feature = "op_admin_delete_user",
 +                feature = "op_admin_delete_user_attributes",
 +                feature = "op_admin_disable_provider_for_user",
@@ -2681,12 +2725,14 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
 +                feature = "op_describe_resource_server",
 +                feature = "op_describe_risk_configuration",
 +                feature = "op_describe_terms",
++                feature = "op_describe_terms_by_client",
 +                feature = "op_describe_user_import_job",
 +                feature = "op_describe_user_pool",
 +                feature = "op_describe_user_pool_client",
 +                feature = "op_describe_user_pool_domain",
 +                feature = "op_forget_device",
 +                feature = "op_forgot_password",
++                feature = "op_get_client_token",
 +                feature = "op_get_csv_header",
 +                feature = "op_get_device",
 +                feature = "op_get_group",
@@ -2750,6 +2796,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
 +                feature = "op_admin_add_user_to_group",
 +                feature = "op_admin_confirm_sign_up",
 +                feature = "op_admin_create_user",
++                feature = "op_admin_delete_software_token",
 +                feature = "op_admin_delete_user",
 +                feature = "op_admin_delete_user_attributes",
 +                feature = "op_admin_disable_provider_for_user",
@@ -2804,12 +2851,14 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
 +                feature = "op_describe_resource_server",
 +                feature = "op_describe_risk_configuration",
 +                feature = "op_describe_terms",
++                feature = "op_describe_terms_by_client",
 +                feature = "op_describe_user_import_job",
 +                feature = "op_describe_user_pool",
 +                feature = "op_describe_user_pool_client",
 +                feature = "op_describe_user_pool_domain",
 +                feature = "op_forget_device",
 +                feature = "op_forgot_password",
++                feature = "op_get_client_token",
 +                feature = "op_get_csv_header",
 +                feature = "op_get_device",
 +                feature = "op_get_group",
@@ -2913,6 +2962,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
 +                feature = "op_admin_add_user_to_group",
 +                feature = "op_admin_confirm_sign_up",
 +                feature = "op_admin_create_user",
++                feature = "op_admin_delete_software_token",
 +                feature = "op_admin_delete_user",
 +                feature = "op_admin_delete_user_attributes",
 +                feature = "op_admin_disable_provider_for_user",
@@ -2970,12 +3020,14 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
 +                feature = "op_describe_resource_server",
 +                feature = "op_describe_risk_configuration",
 +                feature = "op_describe_terms",
++                feature = "op_describe_terms_by_client",
 +                feature = "op_describe_user_import_job",
 +                feature = "op_describe_user_pool",
 +                feature = "op_describe_user_pool_client",
 +                feature = "op_describe_user_pool_domain",
 +                feature = "op_forget_device",
 +                feature = "op_forgot_password",
++                feature = "op_get_client_token",
 +                feature = "op_get_csv_header",
 +                feature = "op_get_device",
 +                feature = "op_get_group",
@@ -3060,6 +3112,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
 +                feature = "op_admin_add_user_to_group",
 +                feature = "op_admin_confirm_sign_up",
 +                feature = "op_admin_create_user",
++                feature = "op_admin_delete_software_token",
 +                feature = "op_admin_delete_user",
 +                feature = "op_admin_delete_user_attributes",
 +                feature = "op_admin_disable_provider_for_user",
@@ -3114,11 +3167,13 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
 +                feature = "op_describe_resource_server",
 +                feature = "op_describe_risk_configuration",
 +                feature = "op_describe_terms",
++                feature = "op_describe_terms_by_client",
 +                feature = "op_describe_user_import_job",
 +                feature = "op_describe_user_pool",
 +                feature = "op_describe_user_pool_client",
 +                feature = "op_forget_device",
 +                feature = "op_forgot_password",
++                feature = "op_get_client_token",
 +                feature = "op_get_csv_header",
 +                feature = "op_get_device",
 +                feature = "op_get_group",
@@ -3236,6 +3291,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
 +            ))]
              Error::UserLambdaValidationException(inner) => inner.fmt(f),
 +            #[cfg(any(
++                feature = "op_admin_delete_software_token",
 +                feature = "op_admin_initiate_auth",
 +                feature = "op_admin_respond_to_auth_challenge",
 +                feature = "op_admin_set_user_mfa_preference",
@@ -3265,6 +3321,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
 +                feature = "op_admin_add_user_to_group",
 +                feature = "op_admin_confirm_sign_up",
 +                feature = "op_admin_create_user",
++                feature = "op_admin_delete_software_token",
 +                feature = "op_admin_delete_user",
 +                feature = "op_admin_delete_user_attributes",
 +                feature = "op_admin_disable_provider_for_user",
@@ -3353,7 +3410,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
              Error::WebAuthnRelyingPartyMismatchException(inner) => inner.fmt(f),
              Error::Unhandled(_) => {
                  if let ::std::option::Option::Some(code) =
-@@ -217,69 +2613,1268 @@
+@@ -217,69 +2655,1289 @@
  impl ::aws_smithy_types::error::metadata::ProvideErrorMetadata for Error {
      fn meta(&self) -> &::aws_smithy_types::error::metadata::ErrorMetadata {
          match self {
@@ -3448,6 +3505,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
 +                feature = "op_delete_web_authn_credential",
 +                feature = "op_forget_device",
 +                feature = "op_forgot_password",
++                feature = "op_get_client_token",
 +                feature = "op_get_device",
 +                feature = "op_get_tokens_from_refresh_token",
 +                feature = "op_get_user",
@@ -3477,6 +3535,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
 +                feature = "op_admin_add_user_to_group",
 +                feature = "op_admin_confirm_sign_up",
 +                feature = "op_admin_create_user",
++                feature = "op_admin_delete_software_token",
 +                feature = "op_admin_delete_user",
 +                feature = "op_admin_delete_user_attributes",
 +                feature = "op_admin_disable_provider_for_user",
@@ -3535,12 +3594,14 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
 +                feature = "op_describe_resource_server",
 +                feature = "op_describe_risk_configuration",
 +                feature = "op_describe_terms",
++                feature = "op_describe_terms_by_client",
 +                feature = "op_describe_user_import_job",
 +                feature = "op_describe_user_pool",
 +                feature = "op_describe_user_pool_client",
 +                feature = "op_describe_user_pool_domain",
 +                feature = "op_forget_device",
 +                feature = "op_forgot_password",
++                feature = "op_get_client_token",
 +                feature = "op_get_csv_header",
 +                feature = "op_get_device",
 +                feature = "op_get_group",
@@ -3652,6 +3713,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
 +                feature = "op_admin_add_user_to_group",
 +                feature = "op_admin_confirm_sign_up",
 +                feature = "op_admin_create_user",
++                feature = "op_admin_delete_software_token",
 +                feature = "op_admin_delete_user",
 +                feature = "op_admin_delete_user_attributes",
 +                feature = "op_admin_disable_provider_for_user",
@@ -3711,12 +3773,14 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
 +                feature = "op_describe_resource_server",
 +                feature = "op_describe_risk_configuration",
 +                feature = "op_describe_terms",
++                feature = "op_describe_terms_by_client",
 +                feature = "op_describe_user_import_job",
 +                feature = "op_describe_user_pool",
 +                feature = "op_describe_user_pool_client",
 +                feature = "op_describe_user_pool_domain",
 +                feature = "op_forget_device",
 +                feature = "op_forgot_password",
++                feature = "op_get_client_token",
 +                feature = "op_get_csv_header",
 +                feature = "op_get_device",
 +                feature = "op_get_group",
@@ -3886,6 +3950,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
 +                feature = "op_admin_add_user_to_group",
 +                feature = "op_admin_confirm_sign_up",
 +                feature = "op_admin_create_user",
++                feature = "op_admin_delete_software_token",
 +                feature = "op_admin_delete_user",
 +                feature = "op_admin_delete_user_attributes",
 +                feature = "op_admin_disable_provider_for_user",
@@ -3944,12 +4009,14 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
 +                feature = "op_describe_resource_server",
 +                feature = "op_describe_risk_configuration",
 +                feature = "op_describe_terms",
++                feature = "op_describe_terms_by_client",
 +                feature = "op_describe_user_import_job",
 +                feature = "op_describe_user_pool",
 +                feature = "op_describe_user_pool_client",
 +                feature = "op_describe_user_pool_domain",
 +                feature = "op_forget_device",
 +                feature = "op_forgot_password",
++                feature = "op_get_client_token",
 +                feature = "op_get_csv_header",
 +                feature = "op_get_device",
 +                feature = "op_get_group",
@@ -4013,6 +4080,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
 +                feature = "op_admin_add_user_to_group",
 +                feature = "op_admin_confirm_sign_up",
 +                feature = "op_admin_create_user",
++                feature = "op_admin_delete_software_token",
 +                feature = "op_admin_delete_user",
 +                feature = "op_admin_delete_user_attributes",
 +                feature = "op_admin_disable_provider_for_user",
@@ -4067,12 +4135,14 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
 +                feature = "op_describe_resource_server",
 +                feature = "op_describe_risk_configuration",
 +                feature = "op_describe_terms",
++                feature = "op_describe_terms_by_client",
 +                feature = "op_describe_user_import_job",
 +                feature = "op_describe_user_pool",
 +                feature = "op_describe_user_pool_client",
 +                feature = "op_describe_user_pool_domain",
 +                feature = "op_forget_device",
 +                feature = "op_forgot_password",
++                feature = "op_get_client_token",
 +                feature = "op_get_csv_header",
 +                feature = "op_get_device",
 +                feature = "op_get_group",
@@ -4176,6 +4246,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
 +                feature = "op_admin_add_user_to_group",
 +                feature = "op_admin_confirm_sign_up",
 +                feature = "op_admin_create_user",
++                feature = "op_admin_delete_software_token",
 +                feature = "op_admin_delete_user",
 +                feature = "op_admin_delete_user_attributes",
 +                feature = "op_admin_disable_provider_for_user",
@@ -4233,12 +4304,14 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
 +                feature = "op_describe_resource_server",
 +                feature = "op_describe_risk_configuration",
 +                feature = "op_describe_terms",
++                feature = "op_describe_terms_by_client",
 +                feature = "op_describe_user_import_job",
 +                feature = "op_describe_user_pool",
 +                feature = "op_describe_user_pool_client",
 +                feature = "op_describe_user_pool_domain",
 +                feature = "op_forget_device",
 +                feature = "op_forgot_password",
++                feature = "op_get_client_token",
 +                feature = "op_get_csv_header",
 +                feature = "op_get_device",
 +                feature = "op_get_group",
@@ -4323,6 +4396,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
 +                feature = "op_admin_add_user_to_group",
 +                feature = "op_admin_confirm_sign_up",
 +                feature = "op_admin_create_user",
++                feature = "op_admin_delete_software_token",
 +                feature = "op_admin_delete_user",
 +                feature = "op_admin_delete_user_attributes",
 +                feature = "op_admin_disable_provider_for_user",
@@ -4377,11 +4451,13 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
 +                feature = "op_describe_resource_server",
 +                feature = "op_describe_risk_configuration",
 +                feature = "op_describe_terms",
++                feature = "op_describe_terms_by_client",
 +                feature = "op_describe_user_import_job",
 +                feature = "op_describe_user_pool",
 +                feature = "op_describe_user_pool_client",
 +                feature = "op_forget_device",
 +                feature = "op_forgot_password",
++                feature = "op_get_client_token",
 +                feature = "op_get_csv_header",
 +                feature = "op_get_device",
 +                feature = "op_get_group",
@@ -4499,6 +4575,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
 +            ))]
              Self::UserLambdaValidationException(inner) => inner.meta(),
 +            #[cfg(any(
++                feature = "op_admin_delete_software_token",
 +                feature = "op_admin_initiate_auth",
 +                feature = "op_admin_respond_to_auth_challenge",
 +                feature = "op_admin_set_user_mfa_preference",
@@ -4528,6 +4605,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
 +                feature = "op_admin_add_user_to_group",
 +                feature = "op_admin_confirm_sign_up",
 +                feature = "op_admin_create_user",
++                feature = "op_admin_delete_software_token",
 +                feature = "op_admin_delete_user",
 +                feature = "op_admin_delete_user_attributes",
 +                feature = "op_admin_disable_provider_for_user",
@@ -4622,7 +4700,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl<R>
      From<
          ::aws_smithy_runtime_api::client::result::SdkError<
-@@ -305,6 +3900,7 @@
+@@ -305,6 +3963,7 @@
          }
      }
  }
@@ -4630,7 +4708,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl From<crate::operation::add_custom_attributes::AddCustomAttributesError> for Error {
      fn from(err: crate::operation::add_custom_attributes::AddCustomAttributesError) -> Self {
          match err {
-@@ -335,6 +3931,7 @@
+@@ -335,6 +3994,7 @@
          }
      }
  }
@@ -4638,7 +4716,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl<R>
      From<
          ::aws_smithy_runtime_api::client::result::SdkError<
-@@ -360,6 +3957,7 @@
+@@ -360,6 +4020,7 @@
          }
      }
  }
@@ -4646,7 +4724,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl From<crate::operation::add_user_pool_client_secret::AddUserPoolClientSecretError> for Error {
      fn from(err: crate::operation::add_user_pool_client_secret::AddUserPoolClientSecretError) -> Self {
          match err {
-@@ -387,6 +3985,7 @@
+@@ -387,6 +4048,7 @@
          }
      }
  }
@@ -4654,7 +4732,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl<R>
      From<
          ::aws_smithy_runtime_api::client::result::SdkError<
-@@ -412,6 +4011,7 @@
+@@ -412,6 +4074,7 @@
          }
      }
  }
@@ -4662,7 +4740,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl From<crate::operation::admin_add_user_to_group::AdminAddUserToGroupError> for Error {
      fn from(err: crate::operation::admin_add_user_to_group::AdminAddUserToGroupError) -> Self {
          match err {
-@@ -442,6 +4042,7 @@
+@@ -442,6 +4105,7 @@
          }
      }
  }
@@ -4670,7 +4748,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl<R>
      From<
          ::aws_smithy_runtime_api::client::result::SdkError<
-@@ -467,6 +4068,7 @@
+@@ -467,6 +4131,7 @@
          }
      }
  }
@@ -4678,7 +4756,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl From<crate::operation::admin_confirm_sign_up::AdminConfirmSignUpError> for Error {
      fn from(err: crate::operation::admin_confirm_sign_up::AdminConfirmSignUpError) -> Self {
          match err {
-@@ -512,6 +4114,7 @@
+@@ -512,6 +4177,7 @@
          }
      }
  }
@@ -4686,7 +4764,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl<R>
      From<
          ::aws_smithy_runtime_api::client::result::SdkError<
-@@ -537,6 +4140,7 @@
+@@ -537,6 +4203,7 @@
          }
      }
  }
@@ -4694,7 +4772,23 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl From<crate::operation::admin_create_user::AdminCreateUserError> for Error {
      fn from(err: crate::operation::admin_create_user::AdminCreateUserError) -> Self {
          match err {
-@@ -595,6 +4199,7 @@
+@@ -595,6 +4262,7 @@
+         }
+     }
+ }
++#[cfg(feature = "op_admin_delete_software_token")]
+ impl<R>
+     From<
+         ::aws_smithy_runtime_api::client::result::SdkError<
+@@ -620,6 +4288,7 @@
+         }
+     }
+ }
++#[cfg(feature = "op_admin_delete_software_token")]
+ impl From<crate::operation::admin_delete_software_token::AdminDeleteSoftwareTokenError> for Error {
+     fn from(err: crate::operation::admin_delete_software_token::AdminDeleteSoftwareTokenError) -> Self {
+         match err {
+@@ -651,6 +4320,7 @@
          }
      }
  }
@@ -4702,7 +4796,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl<R>
      From<
          ::aws_smithy_runtime_api::client::result::SdkError<
-@@ -620,6 +4225,7 @@
+@@ -676,6 +4346,7 @@
          }
      }
  }
@@ -4710,7 +4804,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl From<crate::operation::admin_delete_user::AdminDeleteUserError> for Error {
      fn from(err: crate::operation::admin_delete_user::AdminDeleteUserError) -> Self {
          match err {
-@@ -648,6 +4254,7 @@
+@@ -704,6 +4375,7 @@
          }
      }
  }
@@ -4718,7 +4812,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl<R>
      From<
          ::aws_smithy_runtime_api::client::result::SdkError<
-@@ -673,6 +4280,7 @@
+@@ -729,6 +4401,7 @@
          }
      }
  }
@@ -4726,7 +4820,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl From<crate::operation::admin_delete_user_attributes::AdminDeleteUserAttributesError> for Error {
      fn from(err: crate::operation::admin_delete_user_attributes::AdminDeleteUserAttributesError) -> Self {
          match err {
-@@ -701,6 +4309,7 @@
+@@ -757,6 +4430,7 @@
          }
      }
  }
@@ -4734,7 +4828,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl<R>
      From<
          ::aws_smithy_runtime_api::client::result::SdkError<
-@@ -726,6 +4335,7 @@
+@@ -782,6 +4456,7 @@
          }
      }
  }
@@ -4742,7 +4836,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl From<crate::operation::admin_disable_provider_for_user::AdminDisableProviderForUserError> for Error {
      fn from(err: crate::operation::admin_disable_provider_for_user::AdminDisableProviderForUserError) -> Self {
          match err {
-@@ -757,6 +4367,7 @@
+@@ -813,6 +4488,7 @@
          }
      }
  }
@@ -4750,7 +4844,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl<R>
      From<
          ::aws_smithy_runtime_api::client::result::SdkError<
-@@ -782,6 +4393,7 @@
+@@ -838,6 +4514,7 @@
          }
      }
  }
@@ -4758,7 +4852,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl From<crate::operation::admin_disable_user::AdminDisableUserError> for Error {
      fn from(err: crate::operation::admin_disable_user::AdminDisableUserError) -> Self {
          match err {
-@@ -810,6 +4422,7 @@
+@@ -866,6 +4543,7 @@
          }
      }
  }
@@ -4766,7 +4860,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl<R>
      From<
          ::aws_smithy_runtime_api::client::result::SdkError<
-@@ -835,6 +4448,7 @@
+@@ -891,6 +4569,7 @@
          }
      }
  }
@@ -4774,7 +4868,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl From<crate::operation::admin_enable_user::AdminEnableUserError> for Error {
      fn from(err: crate::operation::admin_enable_user::AdminEnableUserError) -> Self {
          match err {
-@@ -863,6 +4477,7 @@
+@@ -919,6 +4598,7 @@
          }
      }
  }
@@ -4782,7 +4876,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl<R>
      From<
          ::aws_smithy_runtime_api::client::result::SdkError<
-@@ -888,6 +4503,7 @@
+@@ -944,6 +4624,7 @@
          }
      }
  }
@@ -4790,7 +4884,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl From<crate::operation::admin_forget_device::AdminForgetDeviceError> for Error {
      fn from(err: crate::operation::admin_forget_device::AdminForgetDeviceError) -> Self {
          match err {
-@@ -919,6 +4535,7 @@
+@@ -975,6 +4656,7 @@
          }
      }
  }
@@ -4798,7 +4892,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl<R>
      From<::aws_smithy_runtime_api::client::result::SdkError<crate::operation::admin_get_device::AdminGetDeviceError, R>>
      for Error
-@@ -940,6 +4557,7 @@
+@@ -996,6 +4678,7 @@
          }
      }
  }
@@ -4806,7 +4900,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl From<crate::operation::admin_get_device::AdminGetDeviceError> for Error {
      fn from(err: crate::operation::admin_get_device::AdminGetDeviceError) -> Self {
          match err {
-@@ -968,6 +4586,7 @@
+@@ -1024,6 +4707,7 @@
          }
      }
  }
@@ -4814,7 +4908,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl<R> From<::aws_smithy_runtime_api::client::result::SdkError<crate::operation::admin_get_user::AdminGetUserError, R>>
      for Error
  where
-@@ -985,6 +4604,7 @@
+@@ -1041,6 +4725,7 @@
          }
      }
  }
@@ -4822,7 +4916,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl From<crate::operation::admin_get_user::AdminGetUserError> for Error {
      fn from(err: crate::operation::admin_get_user::AdminGetUserError) -> Self {
          match err {
-@@ -1013,6 +4633,7 @@
+@@ -1069,6 +4754,7 @@
          }
      }
  }
@@ -4830,7 +4924,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl<R>
      From<
          ::aws_smithy_runtime_api::client::result::SdkError<
-@@ -1038,6 +4659,7 @@
+@@ -1094,6 +4780,7 @@
          }
      }
  }
@@ -4838,7 +4932,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl From<crate::operation::admin_get_user_auth_factors::AdminGetUserAuthFactorsError> for Error {
      fn from(err: crate::operation::admin_get_user_auth_factors::AdminGetUserAuthFactorsError) -> Self {
          match err {
-@@ -1066,6 +4688,7 @@
+@@ -1122,6 +4809,7 @@
          }
      }
  }
@@ -4846,7 +4940,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl<R>
      From<
          ::aws_smithy_runtime_api::client::result::SdkError<
-@@ -1091,6 +4714,7 @@
+@@ -1147,6 +4835,7 @@
          }
      }
  }
@@ -4854,7 +4948,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl From<crate::operation::admin_initiate_auth::AdminInitiateAuthError> for Error {
      fn from(err: crate::operation::admin_initiate_auth::AdminInitiateAuthError) -> Self {
          match err {
-@@ -1152,6 +4776,7 @@
+@@ -1208,6 +4897,7 @@
          }
      }
  }
@@ -4862,7 +4956,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl<R>
      From<
          ::aws_smithy_runtime_api::client::result::SdkError<
-@@ -1177,6 +4802,7 @@
+@@ -1233,6 +4923,7 @@
          }
      }
  }
@@ -4870,7 +4964,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl From<crate::operation::admin_link_provider_for_user::AdminLinkProviderForUserError> for Error {
      fn from(err: crate::operation::admin_link_provider_for_user::AdminLinkProviderForUserError) -> Self {
          match err {
-@@ -1211,6 +4837,7 @@
+@@ -1267,6 +4958,7 @@
          }
      }
  }
@@ -4878,7 +4972,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl<R>
      From<
          ::aws_smithy_runtime_api::client::result::SdkError<
-@@ -1236,6 +4863,7 @@
+@@ -1292,6 +4984,7 @@
          }
      }
  }
@@ -4886,7 +4980,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl From<crate::operation::admin_list_devices::AdminListDevicesError> for Error {
      fn from(err: crate::operation::admin_list_devices::AdminListDevicesError) -> Self {
          match err {
-@@ -1264,6 +4892,7 @@
+@@ -1320,6 +5013,7 @@
          }
      }
  }
@@ -4894,7 +4988,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl<R>
      From<
          ::aws_smithy_runtime_api::client::result::SdkError<
-@@ -1289,6 +4918,7 @@
+@@ -1345,6 +5039,7 @@
          }
      }
  }
@@ -4902,7 +4996,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl From<crate::operation::admin_list_groups_for_user::AdminListGroupsForUserError> for Error {
      fn from(err: crate::operation::admin_list_groups_for_user::AdminListGroupsForUserError) -> Self {
          match err {
-@@ -1319,6 +4949,7 @@
+@@ -1375,6 +5070,7 @@
          }
      }
  }
@@ -4910,7 +5004,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl<R>
      From<
          ::aws_smithy_runtime_api::client::result::SdkError<
-@@ -1344,6 +4975,7 @@
+@@ -1400,6 +5096,7 @@
          }
      }
  }
@@ -4918,7 +5012,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl From<crate::operation::admin_list_user_auth_events::AdminListUserAuthEventsError> for Error {
      fn from(err: crate::operation::admin_list_user_auth_events::AdminListUserAuthEventsError) -> Self {
          match err {
-@@ -1375,6 +5007,7 @@
+@@ -1431,6 +5128,7 @@
          }
      }
  }
@@ -4926,7 +5020,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl<R>
      From<
          ::aws_smithy_runtime_api::client::result::SdkError<
-@@ -1400,6 +5033,7 @@
+@@ -1456,6 +5154,7 @@
          }
      }
  }
@@ -4934,7 +5028,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl From<crate::operation::admin_remove_user_from_group::AdminRemoveUserFromGroupError> for Error {
      fn from(err: crate::operation::admin_remove_user_from_group::AdminRemoveUserFromGroupError) -> Self {
          match err {
-@@ -1428,6 +5062,7 @@
+@@ -1484,6 +5183,7 @@
          }
      }
  }
@@ -4942,7 +5036,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl<R>
      From<
          ::aws_smithy_runtime_api::client::result::SdkError<
-@@ -1453,6 +5088,7 @@
+@@ -1509,6 +5209,7 @@
          }
      }
  }
@@ -4950,7 +5044,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl From<crate::operation::admin_reset_user_password::AdminResetUserPasswordError> for Error {
      fn from(err: crate::operation::admin_reset_user_password::AdminResetUserPasswordError) -> Self {
          match err {
-@@ -1502,6 +5138,7 @@
+@@ -1558,6 +5259,7 @@
          }
      }
  }
@@ -4958,7 +5052,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl<R>
      From<
          ::aws_smithy_runtime_api::client::result::SdkError<
-@@ -1527,6 +5164,7 @@
+@@ -1583,6 +5285,7 @@
          }
      }
  }
@@ -4966,7 +5060,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl From<crate::operation::admin_respond_to_auth_challenge::AdminRespondToAuthChallengeError> for Error {
      fn from(err: crate::operation::admin_respond_to_auth_challenge::AdminRespondToAuthChallengeError) -> Self {
          match err {
-@@ -1603,6 +5241,7 @@
+@@ -1659,6 +5362,7 @@
          }
      }
  }
@@ -4974,7 +5068,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl<R>
      From<
          ::aws_smithy_runtime_api::client::result::SdkError<
-@@ -1628,6 +5267,7 @@
+@@ -1684,6 +5388,7 @@
          }
      }
  }
@@ -4982,7 +5076,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl From<crate::operation::admin_set_user_mfa_preference::AdminSetUserMFAPreferenceError> for Error {
      fn from(err: crate::operation::admin_set_user_mfa_preference::AdminSetUserMFAPreferenceError) -> Self {
          match err {
-@@ -1659,6 +5299,7 @@
+@@ -1715,6 +5420,7 @@
          }
      }
  }
@@ -4990,7 +5084,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl<R>
      From<
          ::aws_smithy_runtime_api::client::result::SdkError<
-@@ -1684,6 +5325,7 @@
+@@ -1740,6 +5446,7 @@
          }
      }
  }
@@ -4998,7 +5092,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl From<crate::operation::admin_set_user_password::AdminSetUserPasswordError> for Error {
      fn from(err: crate::operation::admin_set_user_password::AdminSetUserPasswordError) -> Self {
          match err {
-@@ -1716,6 +5358,7 @@
+@@ -1772,6 +5479,7 @@
          }
      }
  }
@@ -5006,7 +5100,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl<R>
      From<
          ::aws_smithy_runtime_api::client::result::SdkError<
-@@ -1741,6 +5384,7 @@
+@@ -1797,6 +5505,7 @@
          }
      }
  }
@@ -5014,7 +5108,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl From<crate::operation::admin_set_user_settings::AdminSetUserSettingsError> for Error {
      fn from(err: crate::operation::admin_set_user_settings::AdminSetUserSettingsError) -> Self {
          match err {
-@@ -1768,6 +5412,7 @@
+@@ -1824,6 +5533,7 @@
          }
      }
  }
@@ -5022,7 +5116,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl<R>
      From<
          ::aws_smithy_runtime_api::client::result::SdkError<
-@@ -1793,6 +5438,7 @@
+@@ -1849,6 +5559,7 @@
          }
      }
  }
@@ -5030,7 +5124,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl From<crate::operation::admin_update_auth_event_feedback::AdminUpdateAuthEventFeedbackError> for Error {
      fn from(err: crate::operation::admin_update_auth_event_feedback::AdminUpdateAuthEventFeedbackError) -> Self {
          match err {
-@@ -1824,6 +5470,7 @@
+@@ -1880,6 +5591,7 @@
          }
      }
  }
@@ -5038,7 +5132,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl<R>
      From<
          ::aws_smithy_runtime_api::client::result::SdkError<
-@@ -1849,6 +5496,7 @@
+@@ -1905,6 +5617,7 @@
          }
      }
  }
@@ -5046,7 +5140,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl From<crate::operation::admin_update_device_status::AdminUpdateDeviceStatusError> for Error {
      fn from(err: crate::operation::admin_update_device_status::AdminUpdateDeviceStatusError) -> Self {
          match err {
-@@ -1880,6 +5528,7 @@
+@@ -1936,6 +5649,7 @@
          }
      }
  }
@@ -5054,7 +5148,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl<R>
      From<
          ::aws_smithy_runtime_api::client::result::SdkError<
-@@ -1905,6 +5554,7 @@
+@@ -1961,6 +5675,7 @@
          }
      }
  }
@@ -5062,7 +5156,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl From<crate::operation::admin_update_user_attributes::AdminUpdateUserAttributesError> for Error {
      fn from(err: crate::operation::admin_update_user_attributes::AdminUpdateUserAttributesError) -> Self {
          match err {
-@@ -1954,6 +5604,7 @@
+@@ -2010,6 +5725,7 @@
          }
      }
  }
@@ -5070,7 +5164,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl<R>
      From<
          ::aws_smithy_runtime_api::client::result::SdkError<
-@@ -1979,6 +5630,7 @@
+@@ -2035,6 +5751,7 @@
          }
      }
  }
@@ -5078,7 +5172,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl From<crate::operation::admin_user_global_sign_out::AdminUserGlobalSignOutError> for Error {
      fn from(err: crate::operation::admin_user_global_sign_out::AdminUserGlobalSignOutError) -> Self {
          match err {
-@@ -2009,6 +5661,7 @@
+@@ -2065,6 +5782,7 @@
          }
      }
  }
@@ -5086,7 +5180,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl<R>
      From<
          ::aws_smithy_runtime_api::client::result::SdkError<
-@@ -2034,6 +5687,7 @@
+@@ -2090,6 +5808,7 @@
          }
      }
  }
@@ -5094,7 +5188,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl From<crate::operation::associate_software_token::AssociateSoftwareTokenError> for Error {
      fn from(err: crate::operation::associate_software_token::AssociateSoftwareTokenError) -> Self {
          match err {
-@@ -2063,6 +5717,7 @@
+@@ -2119,6 +5838,7 @@
          }
      }
  }
@@ -5102,7 +5196,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl<R>
      From<::aws_smithy_runtime_api::client::result::SdkError<crate::operation::change_password::ChangePasswordError, R>>
      for Error
-@@ -2084,6 +5739,7 @@
+@@ -2140,6 +5860,7 @@
          }
      }
  }
@@ -5110,7 +5204,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl From<crate::operation::change_password::ChangePasswordError> for Error {
      fn from(err: crate::operation::change_password::ChangePasswordError) -> Self {
          match err {
-@@ -2130,6 +5786,7 @@
+@@ -2186,6 +5907,7 @@
          }
      }
  }
@@ -5118,7 +5212,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl<R>
      From<
          ::aws_smithy_runtime_api::client::result::SdkError<
-@@ -2155,6 +5812,7 @@
+@@ -2211,6 +5933,7 @@
          }
      }
  }
@@ -5126,7 +5220,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl From<crate::operation::complete_web_authn_registration::CompleteWebAuthnRegistrationError> for Error {
      fn from(err: crate::operation::complete_web_authn_registration::CompleteWebAuthnRegistrationError) -> Self {
          match err {
-@@ -2204,6 +5862,7 @@
+@@ -2260,6 +5983,7 @@
          }
      }
  }
@@ -5134,7 +5228,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl<R>
      From<::aws_smithy_runtime_api::client::result::SdkError<crate::operation::confirm_device::ConfirmDeviceError, R>>
      for Error
-@@ -2225,6 +5884,7 @@
+@@ -2281,6 +6005,7 @@
          }
      }
  }
@@ -5142,7 +5236,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl From<crate::operation::confirm_device::ConfirmDeviceError> for Error {
      fn from(err: crate::operation::confirm_device::ConfirmDeviceError) -> Self {
          match err {
-@@ -2277,6 +5937,7 @@
+@@ -2333,6 +6058,7 @@
          }
      }
  }
@@ -5150,7 +5244,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl<R>
      From<
          ::aws_smithy_runtime_api::client::result::SdkError<
-@@ -2302,6 +5963,7 @@
+@@ -2358,6 +6084,7 @@
          }
      }
  }
@@ -5158,7 +5252,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl From<crate::operation::confirm_forgot_password::ConfirmForgotPasswordError> for Error {
      fn from(err: crate::operation::confirm_forgot_password::ConfirmForgotPasswordError) -> Self {
          match err {
-@@ -2359,6 +6021,7 @@
+@@ -2415,6 +6142,7 @@
          }
      }
  }
@@ -5166,7 +5260,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl<R>
      From<::aws_smithy_runtime_api::client::result::SdkError<crate::operation::confirm_sign_up::ConfirmSignUpError, R>>
      for Error
-@@ -2380,6 +6043,7 @@
+@@ -2436,6 +6164,7 @@
          }
      }
  }
@@ -5174,7 +5268,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl From<crate::operation::confirm_sign_up::ConfirmSignUpError> for Error {
      fn from(err: crate::operation::confirm_sign_up::ConfirmSignUpError) -> Self {
          match err {
-@@ -2435,6 +6099,7 @@
+@@ -2491,6 +6220,7 @@
          }
      }
  }
@@ -5182,7 +5276,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl<R> From<::aws_smithy_runtime_api::client::result::SdkError<crate::operation::create_group::CreateGroupError, R>>
      for Error
  where
-@@ -2452,6 +6117,7 @@
+@@ -2508,6 +6238,7 @@
          }
      }
  }
@@ -5190,7 +5284,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl From<crate::operation::create_group::CreateGroupError> for Error {
      fn from(err: crate::operation::create_group::CreateGroupError) -> Self {
          match err {
-@@ -2483,6 +6149,7 @@
+@@ -2539,6 +6270,7 @@
          }
      }
  }
@@ -5198,7 +5292,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl<R>
      From<
          ::aws_smithy_runtime_api::client::result::SdkError<
-@@ -2508,6 +6175,7 @@
+@@ -2564,6 +6296,7 @@
          }
      }
  }
@@ -5206,7 +5300,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl From<crate::operation::create_identity_provider::CreateIdentityProviderError> for Error {
      fn from(err: crate::operation::create_identity_provider::CreateIdentityProviderError) -> Self {
          match err {
-@@ -2538,6 +6206,7 @@
+@@ -2594,6 +6327,7 @@
          }
      }
  }
@@ -5214,7 +5308,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl<R>
      From<
          ::aws_smithy_runtime_api::client::result::SdkError<
-@@ -2563,6 +6232,7 @@
+@@ -2619,6 +6353,7 @@
          }
      }
  }
@@ -5222,7 +5316,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl From<crate::operation::create_managed_login_branding::CreateManagedLoginBrandingError> for Error {
      fn from(err: crate::operation::create_managed_login_branding::CreateManagedLoginBrandingError) -> Self {
          match err {
-@@ -2597,6 +6267,7 @@
+@@ -2653,6 +6388,7 @@
          }
      }
  }
@@ -5230,7 +5324,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl<R>
      From<
          ::aws_smithy_runtime_api::client::result::SdkError<
-@@ -2622,6 +6293,7 @@
+@@ -2678,6 +6414,7 @@
          }
      }
  }
@@ -5238,7 +5332,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl From<crate::operation::create_resource_server::CreateResourceServerError> for Error {
      fn from(err: crate::operation::create_resource_server::CreateResourceServerError) -> Self {
          match err {
-@@ -2652,6 +6324,7 @@
+@@ -2708,6 +6445,7 @@
          }
      }
  }
@@ -5246,7 +5340,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl<R> From<::aws_smithy_runtime_api::client::result::SdkError<crate::operation::create_terms::CreateTermsError, R>>
      for Error
  where
-@@ -2669,6 +6342,7 @@
+@@ -2725,6 +6463,7 @@
          }
      }
  }
@@ -5254,7 +5348,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl From<crate::operation::create_terms::CreateTermsError> for Error {
      fn from(err: crate::operation::create_terms::CreateTermsError) -> Self {
          match err {
-@@ -2703,6 +6377,7 @@
+@@ -2759,6 +6498,7 @@
          }
      }
  }
@@ -5262,7 +5356,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl<R>
      From<
          ::aws_smithy_runtime_api::client::result::SdkError<
-@@ -2728,6 +6403,7 @@
+@@ -2784,6 +6524,7 @@
          }
      }
  }
@@ -5270,7 +5364,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl From<crate::operation::create_user_import_job::CreateUserImportJobError> for Error {
      fn from(err: crate::operation::create_user_import_job::CreateUserImportJobError) -> Self {
          match err {
-@@ -2761,6 +6437,7 @@
+@@ -2817,6 +6558,7 @@
          }
      }
  }
@@ -5278,7 +5372,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl<R>
      From<::aws_smithy_runtime_api::client::result::SdkError<crate::operation::create_user_pool::CreateUserPoolError, R>>
      for Error
-@@ -2782,6 +6459,7 @@
+@@ -2838,6 +6580,7 @@
          }
      }
  }
@@ -5286,7 +5380,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl From<crate::operation::create_user_pool::CreateUserPoolError> for Error {
      fn from(err: crate::operation::create_user_pool::CreateUserPoolError) -> Self {
          match err {
-@@ -2822,6 +6500,7 @@
+@@ -2878,6 +6621,7 @@
          }
      }
  }
@@ -5294,7 +5388,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl<R>
      From<
          ::aws_smithy_runtime_api::client::result::SdkError<
-@@ -2847,6 +6526,7 @@
+@@ -2903,6 +6647,7 @@
          }
      }
  }
@@ -5302,7 +5396,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl From<crate::operation::create_user_pool_client::CreateUserPoolClientError> for Error {
      fn from(err: crate::operation::create_user_pool_client::CreateUserPoolClientError) -> Self {
          match err {
-@@ -2886,6 +6566,7 @@
+@@ -2942,6 +6687,7 @@
          }
      }
  }
@@ -5310,7 +5404,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl<R>
      From<
          ::aws_smithy_runtime_api::client::result::SdkError<
-@@ -2911,6 +6592,7 @@
+@@ -2967,6 +6713,7 @@
          }
      }
  }
@@ -5318,7 +5412,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl From<crate::operation::create_user_pool_domain::CreateUserPoolDomainError> for Error {
      fn from(err: crate::operation::create_user_pool_domain::CreateUserPoolDomainError) -> Self {
          match err {
-@@ -2944,6 +6626,7 @@
+@@ -3000,6 +6747,7 @@
          }
      }
  }
@@ -5326,7 +5420,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl<R>
      From<
          ::aws_smithy_runtime_api::client::result::SdkError<
-@@ -2969,6 +6652,7 @@
+@@ -3025,6 +6773,7 @@
          }
      }
  }
@@ -5334,7 +5428,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl From<crate::operation::create_user_pool_replica::CreateUserPoolReplicaError> for Error {
      fn from(err: crate::operation::create_user_pool_replica::CreateUserPoolReplicaError) -> Self {
          match err {
-@@ -3003,6 +6687,7 @@
+@@ -3059,6 +6808,7 @@
          }
      }
  }
@@ -5342,7 +5436,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl<R> From<::aws_smithy_runtime_api::client::result::SdkError<crate::operation::delete_group::DeleteGroupError, R>>
      for Error
  where
-@@ -3020,6 +6705,7 @@
+@@ -3076,6 +6826,7 @@
          }
      }
  }
@@ -5350,7 +5444,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl From<crate::operation::delete_group::DeleteGroupError> for Error {
      fn from(err: crate::operation::delete_group::DeleteGroupError) -> Self {
          match err {
-@@ -3045,6 +6731,7 @@
+@@ -3101,6 +6852,7 @@
          }
      }
  }
@@ -5358,7 +5452,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl<R>
      From<
          ::aws_smithy_runtime_api::client::result::SdkError<
-@@ -3070,6 +6757,7 @@
+@@ -3126,6 +6878,7 @@
          }
      }
  }
@@ -5366,7 +5460,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl From<crate::operation::delete_identity_provider::DeleteIdentityProviderError> for Error {
      fn from(err: crate::operation::delete_identity_provider::DeleteIdentityProviderError) -> Self {
          match err {
-@@ -3098,6 +6786,7 @@
+@@ -3154,6 +6907,7 @@
          }
      }
  }
@@ -5374,7 +5468,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl<R>
      From<
          ::aws_smithy_runtime_api::client::result::SdkError<
-@@ -3123,6 +6812,7 @@
+@@ -3179,6 +6933,7 @@
          }
      }
  }
@@ -5382,7 +5476,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl From<crate::operation::delete_managed_login_branding::DeleteManagedLoginBrandingError> for Error {
      fn from(err: crate::operation::delete_managed_login_branding::DeleteManagedLoginBrandingError) -> Self {
          match err {
-@@ -3151,6 +6841,7 @@
+@@ -3207,6 +6962,7 @@
          }
      }
  }
@@ -5390,7 +5484,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl<R>
      From<
          ::aws_smithy_runtime_api::client::result::SdkError<
-@@ -3176,6 +6867,7 @@
+@@ -3232,6 +6988,7 @@
          }
      }
  }
@@ -5398,7 +5492,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl From<crate::operation::delete_resource_server::DeleteResourceServerError> for Error {
      fn from(err: crate::operation::delete_resource_server::DeleteResourceServerError) -> Self {
          match err {
-@@ -3203,6 +6895,7 @@
+@@ -3259,6 +7016,7 @@
          }
      }
  }
@@ -5406,7 +5500,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl<R> From<::aws_smithy_runtime_api::client::result::SdkError<crate::operation::delete_terms::DeleteTermsError, R>>
      for Error
  where
-@@ -3220,6 +6913,7 @@
+@@ -3276,6 +7034,7 @@
          }
      }
  }
@@ -5414,7 +5508,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl From<crate::operation::delete_terms::DeleteTermsError> for Error {
      fn from(err: crate::operation::delete_terms::DeleteTermsError) -> Self {
          match err {
-@@ -3248,6 +6942,7 @@
+@@ -3304,6 +7063,7 @@
          }
      }
  }
@@ -5422,7 +5516,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl<R> From<::aws_smithy_runtime_api::client::result::SdkError<crate::operation::delete_user::DeleteUserError, R>>
      for Error
  where
-@@ -3265,6 +6960,7 @@
+@@ -3321,6 +7081,7 @@
          }
      }
  }
@@ -5430,7 +5524,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl From<crate::operation::delete_user::DeleteUserError> for Error {
      fn from(err: crate::operation::delete_user::DeleteUserError) -> Self {
          match err {
-@@ -3302,6 +6998,7 @@
+@@ -3358,6 +7119,7 @@
          }
      }
  }
@@ -5438,7 +5532,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl<R>
      From<
          ::aws_smithy_runtime_api::client::result::SdkError<
-@@ -3327,6 +7024,7 @@
+@@ -3383,6 +7145,7 @@
          }
      }
  }
@@ -5446,7 +5540,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl From<crate::operation::delete_user_attributes::DeleteUserAttributesError> for Error {
      fn from(err: crate::operation::delete_user_attributes::DeleteUserAttributesError) -> Self {
          match err {
-@@ -3366,6 +7064,7 @@
+@@ -3422,6 +7185,7 @@
          }
      }
  }
@@ -5454,7 +5548,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl<R>
      From<::aws_smithy_runtime_api::client::result::SdkError<crate::operation::delete_user_pool::DeleteUserPoolError, R>>
      for Error
-@@ -3387,6 +7086,7 @@
+@@ -3443,6 +7207,7 @@
          }
      }
  }
@@ -5462,7 +5556,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl From<crate::operation::delete_user_pool::DeleteUserPoolError> for Error {
      fn from(err: crate::operation::delete_user_pool::DeleteUserPoolError) -> Self {
          match err {
-@@ -3415,6 +7115,7 @@
+@@ -3471,6 +7236,7 @@
          }
      }
  }
@@ -5470,7 +5564,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl<R>
      From<
          ::aws_smithy_runtime_api::client::result::SdkError<
-@@ -3440,6 +7141,7 @@
+@@ -3496,6 +7262,7 @@
          }
      }
  }
@@ -5478,7 +5572,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl From<crate::operation::delete_user_pool_client::DeleteUserPoolClientError> for Error {
      fn from(err: crate::operation::delete_user_pool_client::DeleteUserPoolClientError) -> Self {
          match err {
-@@ -3470,6 +7172,7 @@
+@@ -3526,6 +7293,7 @@
          }
      }
  }
@@ -5486,7 +5580,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl<R>
      From<
          ::aws_smithy_runtime_api::client::result::SdkError<
-@@ -3495,6 +7198,7 @@
+@@ -3551,6 +7319,7 @@
          }
      }
  }
@@ -5494,7 +5588,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl From<crate::operation::delete_user_pool_client_secret::DeleteUserPoolClientSecretError> for Error {
      fn from(err: crate::operation::delete_user_pool_client_secret::DeleteUserPoolClientSecretError) -> Self {
          match err {
-@@ -3517,6 +7221,7 @@
+@@ -3573,6 +7342,7 @@
          }
      }
  }
@@ -5502,7 +5596,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl<R>
      From<
          ::aws_smithy_runtime_api::client::result::SdkError<
-@@ -3542,6 +7247,7 @@
+@@ -3598,6 +7368,7 @@
          }
      }
  }
@@ -5510,7 +5604,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl From<crate::operation::delete_user_pool_domain::DeleteUserPoolDomainError> for Error {
      fn from(err: crate::operation::delete_user_pool_domain::DeleteUserPoolDomainError) -> Self {
          match err {
-@@ -3569,6 +7275,7 @@
+@@ -3625,6 +7396,7 @@
          }
      }
  }
@@ -5518,7 +5612,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl<R>
      From<
          ::aws_smithy_runtime_api::client::result::SdkError<
-@@ -3594,6 +7301,7 @@
+@@ -3650,6 +7422,7 @@
          }
      }
  }
@@ -5526,7 +5620,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl From<crate::operation::delete_user_pool_replica::DeleteUserPoolReplicaError> for Error {
      fn from(err: crate::operation::delete_user_pool_replica::DeleteUserPoolReplicaError) -> Self {
          match err {
-@@ -3621,6 +7329,7 @@
+@@ -3677,6 +7450,7 @@
          }
      }
  }
@@ -5534,7 +5628,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl<R>
      From<
          ::aws_smithy_runtime_api::client::result::SdkError<
-@@ -3646,6 +7355,7 @@
+@@ -3702,6 +7476,7 @@
          }
      }
  }
@@ -5542,7 +5636,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl From<crate::operation::delete_web_authn_credential::DeleteWebAuthnCredentialError> for Error {
      fn from(err: crate::operation::delete_web_authn_credential::DeleteWebAuthnCredentialError) -> Self {
          match err {
-@@ -3680,6 +7390,7 @@
+@@ -3736,6 +7511,7 @@
          }
      }
  }
@@ -5550,7 +5644,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl<R>
      From<
          ::aws_smithy_runtime_api::client::result::SdkError<
-@@ -3705,6 +7416,7 @@
+@@ -3761,6 +7537,7 @@
          }
      }
  }
@@ -5558,7 +5652,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl From<crate::operation::describe_identity_provider::DescribeIdentityProviderError> for Error {
      fn from(err: crate::operation::describe_identity_provider::DescribeIdentityProviderError) -> Self {
          match err {
-@@ -3729,6 +7441,7 @@
+@@ -3785,6 +7562,7 @@
          }
      }
  }
@@ -5566,7 +5660,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl<R>
      From<
          ::aws_smithy_runtime_api::client::result::SdkError<
-@@ -3754,6 +7467,7 @@
+@@ -3810,6 +7588,7 @@
          }
      }
  }
@@ -5574,7 +5668,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl From<crate::operation::describe_managed_login_branding::DescribeManagedLoginBrandingError> for Error {
      fn from(err: crate::operation::describe_managed_login_branding::DescribeManagedLoginBrandingError) -> Self {
          match err {
-@@ -3779,6 +7493,7 @@
+@@ -3835,6 +7614,7 @@
          }
      }
  }
@@ -5582,7 +5676,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl<R>
      From<
          ::aws_smithy_runtime_api::client::result::SdkError<
-@@ -3804,6 +7519,7 @@
+@@ -3860,6 +7640,7 @@
          }
      }
  }
@@ -5590,7 +5684,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl From<crate::operation::describe_managed_login_branding_by_client::DescribeManagedLoginBrandingByClientError>
      for Error
  {
-@@ -3835,6 +7551,7 @@
+@@ -3891,6 +7672,7 @@
          }
      }
  }
@@ -5598,7 +5692,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl<R>
      From<
          ::aws_smithy_runtime_api::client::result::SdkError<
-@@ -3860,6 +7577,7 @@
+@@ -3916,6 +7698,7 @@
          }
      }
  }
@@ -5606,7 +5700,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl From<crate::operation::describe_resource_server::DescribeResourceServerError> for Error {
      fn from(err: crate::operation::describe_resource_server::DescribeResourceServerError) -> Self {
          match err {
-@@ -3887,6 +7605,7 @@
+@@ -3943,6 +7726,7 @@
          }
      }
  }
@@ -5614,7 +5708,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl<R>
      From<
          ::aws_smithy_runtime_api::client::result::SdkError<
-@@ -3912,6 +7631,7 @@
+@@ -3968,6 +7752,7 @@
          }
      }
  }
@@ -5622,7 +5716,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl From<crate::operation::describe_risk_configuration::DescribeRiskConfigurationError> for Error {
      fn from(err: crate::operation::describe_risk_configuration::DescribeRiskConfigurationError) -> Self {
          match err {
-@@ -3940,6 +7660,7 @@
+@@ -3996,6 +7781,7 @@
          }
      }
  }
@@ -5630,7 +5724,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl<R>
      From<::aws_smithy_runtime_api::client::result::SdkError<crate::operation::describe_terms::DescribeTermsError, R>>
      for Error
-@@ -3961,6 +7682,7 @@
+@@ -4017,6 +7803,7 @@
          }
      }
  }
@@ -5638,7 +5732,23 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl From<crate::operation::describe_terms::DescribeTermsError> for Error {
      fn from(err: crate::operation::describe_terms::DescribeTermsError) -> Self {
          match err {
-@@ -3986,6 +7708,7 @@
+@@ -4042,6 +7829,7 @@
+         }
+     }
+ }
++#[cfg(feature = "op_describe_terms_by_client")]
+ impl<R>
+     From<
+         ::aws_smithy_runtime_api::client::result::SdkError<
+@@ -4067,6 +7855,7 @@
+         }
+     }
+ }
++#[cfg(feature = "op_describe_terms_by_client")]
+ impl From<crate::operation::describe_terms_by_client::DescribeTermsByClientError> for Error {
+     fn from(err: crate::operation::describe_terms_by_client::DescribeTermsByClientError) -> Self {
+         match err {
+@@ -4094,6 +7883,7 @@
          }
      }
  }
@@ -5646,7 +5756,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl<R>
      From<
          ::aws_smithy_runtime_api::client::result::SdkError<
-@@ -4011,6 +7734,7 @@
+@@ -4119,6 +7909,7 @@
          }
      }
  }
@@ -5654,7 +5764,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl From<crate::operation::describe_user_import_job::DescribeUserImportJobError> for Error {
      fn from(err: crate::operation::describe_user_import_job::DescribeUserImportJobError) -> Self {
          match err {
-@@ -4038,6 +7762,7 @@
+@@ -4146,6 +7937,7 @@
          }
      }
  }
@@ -5662,7 +5772,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl<R>
      From<
          ::aws_smithy_runtime_api::client::result::SdkError<
-@@ -4063,6 +7788,7 @@
+@@ -4171,6 +7963,7 @@
          }
      }
  }
@@ -5670,7 +5780,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl From<crate::operation::describe_user_pool::DescribeUserPoolError> for Error {
      fn from(err: crate::operation::describe_user_pool::DescribeUserPoolError) -> Self {
          match err {
-@@ -4091,6 +7817,7 @@
+@@ -4199,6 +7992,7 @@
          }
      }
  }
@@ -5678,7 +5788,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl<R>
      From<
          ::aws_smithy_runtime_api::client::result::SdkError<
-@@ -4116,6 +7843,7 @@
+@@ -4224,6 +8018,7 @@
          }
      }
  }
@@ -5686,7 +5796,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl From<crate::operation::describe_user_pool_client::DescribeUserPoolClientError> for Error {
      fn from(err: crate::operation::describe_user_pool_client::DescribeUserPoolClientError) -> Self {
          match err {
-@@ -4143,6 +7871,7 @@
+@@ -4251,6 +8046,7 @@
          }
      }
  }
@@ -5694,7 +5804,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl<R>
      From<
          ::aws_smithy_runtime_api::client::result::SdkError<
-@@ -4168,6 +7897,7 @@
+@@ -4276,6 +8072,7 @@
          }
      }
  }
@@ -5702,7 +5812,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl From<crate::operation::describe_user_pool_domain::DescribeUserPoolDomainError> for Error {
      fn from(err: crate::operation::describe_user_pool_domain::DescribeUserPoolDomainError) -> Self {
          match err {
-@@ -4192,6 +7922,7 @@
+@@ -4300,6 +8097,7 @@
          }
      }
  }
@@ -5710,7 +5820,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl<R> From<::aws_smithy_runtime_api::client::result::SdkError<crate::operation::forget_device::ForgetDeviceError, R>>
      for Error
  where
-@@ -4209,6 +7940,7 @@
+@@ -4317,6 +8115,7 @@
          }
      }
  }
@@ -5718,7 +5828,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl From<crate::operation::forget_device::ForgetDeviceError> for Error {
      fn from(err: crate::operation::forget_device::ForgetDeviceError) -> Self {
          match err {
-@@ -4249,6 +7981,7 @@
+@@ -4357,6 +8156,7 @@
          }
      }
  }
@@ -5726,7 +5836,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl<R>
      From<::aws_smithy_runtime_api::client::result::SdkError<crate::operation::forgot_password::ForgotPasswordError, R>>
      for Error
-@@ -4270,6 +8003,7 @@
+@@ -4378,6 +8178,7 @@
          }
      }
  }
@@ -5734,7 +5844,23 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl From<crate::operation::forgot_password::ForgotPasswordError> for Error {
      fn from(err: crate::operation::forgot_password::ForgotPasswordError) -> Self {
          match err {
-@@ -4325,6 +8059,7 @@
+@@ -4433,6 +8234,7 @@
+         }
+     }
+ }
++#[cfg(feature = "op_get_client_token")]
+ impl<R>
+     From<::aws_smithy_runtime_api::client::result::SdkError<crate::operation::get_client_token::GetClientTokenError, R>>
+     for Error
+@@ -4454,6 +8256,7 @@
+         }
+     }
+ }
++#[cfg(feature = "op_get_client_token")]
+ impl From<crate::operation::get_client_token::GetClientTokenError> for Error {
+     fn from(err: crate::operation::get_client_token::GetClientTokenError) -> Self {
+         match err {
+@@ -4482,6 +8285,7 @@
          }
      }
  }
@@ -5742,7 +5868,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl<R> From<::aws_smithy_runtime_api::client::result::SdkError<crate::operation::get_csv_header::GetCSVHeaderError, R>>
      for Error
  where
-@@ -4342,6 +8077,7 @@
+@@ -4499,6 +8303,7 @@
          }
      }
  }
@@ -5750,7 +5876,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl From<crate::operation::get_csv_header::GetCSVHeaderError> for Error {
      fn from(err: crate::operation::get_csv_header::GetCSVHeaderError) -> Self {
          match err {
-@@ -4367,6 +8103,7 @@
+@@ -4524,6 +8329,7 @@
          }
      }
  }
@@ -5758,7 +5884,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl<R> From<::aws_smithy_runtime_api::client::result::SdkError<crate::operation::get_device::GetDeviceError, R>>
      for Error
  where
-@@ -4384,6 +8121,7 @@
+@@ -4541,6 +8347,7 @@
          }
      }
  }
@@ -5766,7 +5892,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl From<crate::operation::get_device::GetDeviceError> for Error {
      fn from(err: crate::operation::get_device::GetDeviceError) -> Self {
          match err {
-@@ -4422,6 +8160,7 @@
+@@ -4579,6 +8386,7 @@
          }
      }
  }
@@ -5774,7 +5900,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl<R> From<::aws_smithy_runtime_api::client::result::SdkError<crate::operation::get_group::GetGroupError, R>>
      for Error
  where
-@@ -4439,6 +8178,7 @@
+@@ -4596,6 +8404,7 @@
          }
      }
  }
@@ -5782,7 +5908,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl From<crate::operation::get_group::GetGroupError> for Error {
      fn from(err: crate::operation::get_group::GetGroupError) -> Self {
          match err {
-@@ -4464,6 +8204,7 @@
+@@ -4621,6 +8430,7 @@
          }
      }
  }
@@ -5790,7 +5916,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl<R>
      From<
          ::aws_smithy_runtime_api::client::result::SdkError<
-@@ -4489,6 +8230,7 @@
+@@ -4646,6 +8456,7 @@
          }
      }
  }
@@ -5798,7 +5924,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl From<crate::operation::get_identity_provider_by_identifier::GetIdentityProviderByIdentifierError> for Error {
      fn from(err: crate::operation::get_identity_provider_by_identifier::GetIdentityProviderByIdentifierError) -> Self {
          match err {
-@@ -4511,6 +8253,7 @@
+@@ -4668,6 +8479,7 @@
          }
      }
  }
@@ -5806,7 +5932,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl<R>
      From<
          ::aws_smithy_runtime_api::client::result::SdkError<
-@@ -4536,6 +8279,7 @@
+@@ -4693,6 +8505,7 @@
          }
      }
  }
@@ -5814,7 +5940,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl From<crate::operation::get_log_delivery_configuration::GetLogDeliveryConfigurationError> for Error {
      fn from(err: crate::operation::get_log_delivery_configuration::GetLogDeliveryConfigurationError) -> Self {
          match err {
-@@ -4558,6 +8302,7 @@
+@@ -4715,6 +8528,7 @@
          }
      }
  }
@@ -5822,7 +5948,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl<R>
      From<
          ::aws_smithy_runtime_api::client::result::SdkError<
-@@ -4583,6 +8328,7 @@
+@@ -4740,6 +8554,7 @@
          }
      }
  }
@@ -5830,7 +5956,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl From<crate::operation::get_provisioned_limit::GetProvisionedLimitError> for Error {
      fn from(err: crate::operation::get_provisioned_limit::GetProvisionedLimitError) -> Self {
          match err {
-@@ -4607,6 +8353,7 @@
+@@ -4764,6 +8579,7 @@
          }
      }
  }
@@ -5838,7 +5964,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl<R>
      From<
          ::aws_smithy_runtime_api::client::result::SdkError<
-@@ -4632,6 +8379,7 @@
+@@ -4789,6 +8605,7 @@
          }
      }
  }
@@ -5846,7 +5972,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl From<crate::operation::get_signing_certificate::GetSigningCertificateError> for Error {
      fn from(err: crate::operation::get_signing_certificate::GetSigningCertificateError) -> Self {
          match err {
-@@ -4653,6 +8401,7 @@
+@@ -4810,6 +8627,7 @@
          }
      }
  }
@@ -5854,7 +5980,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl<R>
      From<
          ::aws_smithy_runtime_api::client::result::SdkError<
-@@ -4678,6 +8427,7 @@
+@@ -4835,6 +8653,7 @@
          }
      }
  }
@@ -5862,7 +5988,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl From<crate::operation::get_tokens_from_refresh_token::GetTokensFromRefreshTokenError> for Error {
      fn from(err: crate::operation::get_tokens_from_refresh_token::GetTokensFromRefreshTokenError) -> Self {
          match err {
-@@ -4721,6 +8471,7 @@
+@@ -4878,6 +8697,7 @@
          }
      }
  }
@@ -5870,7 +5996,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl<R>
      From<
          ::aws_smithy_runtime_api::client::result::SdkError<
-@@ -4746,6 +8497,7 @@
+@@ -4903,6 +8723,7 @@
          }
      }
  }
@@ -5878,7 +6004,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl From<crate::operation::get_ui_customization::GetUICustomizationError> for Error {
      fn from(err: crate::operation::get_ui_customization::GetUICustomizationError) -> Self {
          match err {
-@@ -4773,6 +8525,7 @@
+@@ -4930,6 +8751,7 @@
          }
      }
  }
@@ -5886,7 +6012,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl<R> From<::aws_smithy_runtime_api::client::result::SdkError<crate::operation::get_user::GetUserError, R>> for Error
  where
      R: Send + Sync + std::fmt::Debug + 'static,
-@@ -4789,6 +8542,7 @@
+@@ -4946,6 +8768,7 @@
          }
      }
  }
@@ -5894,7 +6020,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl From<crate::operation::get_user::GetUserError> for Error {
      fn from(err: crate::operation::get_user::GetUserError) -> Self {
          match err {
-@@ -4824,6 +8578,7 @@
+@@ -4981,6 +8804,7 @@
          }
      }
  }
@@ -5902,7 +6028,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl<R>
      From<
          ::aws_smithy_runtime_api::client::result::SdkError<
-@@ -4849,6 +8604,7 @@
+@@ -5006,6 +8830,7 @@
          }
      }
  }
@@ -5910,7 +6036,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl From<crate::operation::get_user_attribute_verification_code::GetUserAttributeVerificationCodeError> for Error {
      fn from(
          err: crate::operation::get_user_attribute_verification_code::GetUserAttributeVerificationCodeError,
-@@ -4876,6 +8632,7 @@
+@@ -5033,6 +8858,7 @@
          }
      }
  }
@@ -5918,7 +6044,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl<R>
      From<
          ::aws_smithy_runtime_api::client::result::SdkError<
-@@ -4901,6 +8658,7 @@
+@@ -5058,6 +8884,7 @@
          }
      }
  }
@@ -5926,7 +6052,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl From<crate::operation::get_user_auth_factors::GetUserAuthFactorsError> for Error {
      fn from(err: crate::operation::get_user_auth_factors::GetUserAuthFactorsError) -> Self {
          match err {
-@@ -4940,6 +8698,7 @@
+@@ -5097,6 +8924,7 @@
          }
      }
  }
@@ -5934,7 +6060,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl<R>
      From<
          ::aws_smithy_runtime_api::client::result::SdkError<
-@@ -4965,6 +8724,7 @@
+@@ -5122,6 +8950,7 @@
          }
      }
  }
@@ -5942,7 +6068,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl From<crate::operation::get_user_pool_mfa_config::GetUserPoolMfaConfigError> for Error {
      fn from(err: crate::operation::get_user_pool_mfa_config::GetUserPoolMfaConfigError) -> Self {
          match err {
-@@ -4989,6 +8749,7 @@
+@@ -5146,6 +8975,7 @@
          }
      }
  }
@@ -5950,7 +6076,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl<R>
      From<::aws_smithy_runtime_api::client::result::SdkError<crate::operation::global_sign_out::GlobalSignOutError, R>>
      for Error
-@@ -5010,6 +8771,7 @@
+@@ -5167,6 +8997,7 @@
          }
      }
  }
@@ -5958,7 +6084,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl From<crate::operation::global_sign_out::GlobalSignOutError> for Error {
      fn from(err: crate::operation::global_sign_out::GlobalSignOutError) -> Self {
          match err {
-@@ -5044,6 +8806,7 @@
+@@ -5201,6 +9032,7 @@
          }
      }
  }
@@ -5966,7 +6092,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl<R> From<::aws_smithy_runtime_api::client::result::SdkError<crate::operation::initiate_auth::InitiateAuthError, R>>
      for Error
  where
-@@ -5061,6 +8824,7 @@
+@@ -5218,6 +9050,7 @@
          }
      }
  }
@@ -5974,7 +6100,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl From<crate::operation::initiate_auth::InitiateAuthError> for Error {
      fn from(err: crate::operation::initiate_auth::InitiateAuthError) -> Self {
          match err {
-@@ -5122,6 +8886,7 @@
+@@ -5279,6 +9112,7 @@
          }
      }
  }
@@ -5982,7 +6108,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl<R> From<::aws_smithy_runtime_api::client::result::SdkError<crate::operation::list_devices::ListDevicesError, R>>
      for Error
  where
-@@ -5139,6 +8904,7 @@
+@@ -5296,6 +9130,7 @@
          }
      }
  }
@@ -5990,7 +6116,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl From<crate::operation::list_devices::ListDevicesError> for Error {
      fn from(err: crate::operation::list_devices::ListDevicesError) -> Self {
          match err {
-@@ -5179,6 +8945,7 @@
+@@ -5336,6 +9171,7 @@
          }
      }
  }
@@ -5998,7 +6124,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl<R> From<::aws_smithy_runtime_api::client::result::SdkError<crate::operation::list_groups::ListGroupsError, R>>
      for Error
  where
-@@ -5196,6 +8963,7 @@
+@@ -5353,6 +9189,7 @@
          }
      }
  }
@@ -6006,7 +6132,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl From<crate::operation::list_groups::ListGroupsError> for Error {
      fn from(err: crate::operation::list_groups::ListGroupsError) -> Self {
          match err {
-@@ -5221,6 +8989,7 @@
+@@ -5378,6 +9215,7 @@
          }
      }
  }
@@ -6014,7 +6140,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl<R>
      From<
          ::aws_smithy_runtime_api::client::result::SdkError<
-@@ -5246,6 +9015,7 @@
+@@ -5403,6 +9241,7 @@
          }
      }
  }
@@ -6022,7 +6148,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl From<crate::operation::list_identity_providers::ListIdentityProvidersError> for Error {
      fn from(err: crate::operation::list_identity_providers::ListIdentityProvidersError) -> Self {
          match err {
-@@ -5270,6 +9040,7 @@
+@@ -5427,6 +9266,7 @@
          }
      }
  }
@@ -6030,7 +6156,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl<R>
      From<
          ::aws_smithy_runtime_api::client::result::SdkError<
-@@ -5295,6 +9066,7 @@
+@@ -5452,6 +9292,7 @@
          }
      }
  }
@@ -6038,7 +6164,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl From<crate::operation::list_resource_servers::ListResourceServersError> for Error {
      fn from(err: crate::operation::list_resource_servers::ListResourceServersError) -> Self {
          match err {
-@@ -5322,6 +9094,7 @@
+@@ -5479,6 +9320,7 @@
          }
      }
  }
@@ -6046,7 +6172,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl<R>
      From<
          ::aws_smithy_runtime_api::client::result::SdkError<
-@@ -5347,6 +9120,7 @@
+@@ -5504,6 +9346,7 @@
          }
      }
  }
@@ -6054,7 +6180,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl From<crate::operation::list_tags_for_resource::ListTagsForResourceError> for Error {
      fn from(err: crate::operation::list_tags_for_resource::ListTagsForResourceError) -> Self {
          match err {
-@@ -5374,6 +9148,7 @@
+@@ -5531,6 +9374,7 @@
          }
      }
  }
@@ -6062,7 +6188,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl<R> From<::aws_smithy_runtime_api::client::result::SdkError<crate::operation::list_terms::ListTermsError, R>>
      for Error
  where
-@@ -5391,6 +9166,7 @@
+@@ -5548,6 +9392,7 @@
          }
      }
  }
@@ -6070,7 +6196,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl From<crate::operation::list_terms::ListTermsError> for Error {
      fn from(err: crate::operation::list_terms::ListTermsError) -> Self {
          match err {
-@@ -5416,6 +9192,7 @@
+@@ -5573,6 +9418,7 @@
          }
      }
  }
@@ -6078,7 +6204,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl<R>
      From<
          ::aws_smithy_runtime_api::client::result::SdkError<
-@@ -5441,6 +9218,7 @@
+@@ -5598,6 +9444,7 @@
          }
      }
  }
@@ -6086,7 +6212,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl From<crate::operation::list_user_import_jobs::ListUserImportJobsError> for Error {
      fn from(err: crate::operation::list_user_import_jobs::ListUserImportJobsError) -> Self {
          match err {
-@@ -5468,6 +9246,7 @@
+@@ -5625,6 +9472,7 @@
          }
      }
  }
@@ -6094,7 +6220,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl<R>
      From<
          ::aws_smithy_runtime_api::client::result::SdkError<
-@@ -5493,6 +9272,7 @@
+@@ -5650,6 +9498,7 @@
          }
      }
  }
@@ -6102,7 +6228,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl From<crate::operation::list_user_pool_clients::ListUserPoolClientsError> for Error {
      fn from(err: crate::operation::list_user_pool_clients::ListUserPoolClientsError) -> Self {
          match err {
-@@ -5520,6 +9300,7 @@
+@@ -5677,6 +9526,7 @@
          }
      }
  }
@@ -6110,7 +6236,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl<R>
      From<
          ::aws_smithy_runtime_api::client::result::SdkError<
-@@ -5545,6 +9326,7 @@
+@@ -5702,6 +9552,7 @@
          }
      }
  }
@@ -6118,7 +6244,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl From<crate::operation::list_user_pool_client_secrets::ListUserPoolClientSecretsError> for Error {
      fn from(err: crate::operation::list_user_pool_client_secrets::ListUserPoolClientSecretsError) -> Self {
          match err {
-@@ -5567,6 +9349,7 @@
+@@ -5724,6 +9575,7 @@
          }
      }
  }
@@ -6126,7 +6252,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl<R>
      From<
          ::aws_smithy_runtime_api::client::result::SdkError<
-@@ -5592,6 +9375,7 @@
+@@ -5749,6 +9601,7 @@
          }
      }
  }
@@ -6134,7 +6260,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl From<crate::operation::list_user_pool_replicas::ListUserPoolReplicasError> for Error {
      fn from(err: crate::operation::list_user_pool_replicas::ListUserPoolReplicasError) -> Self {
          match err {
-@@ -5619,6 +9403,7 @@
+@@ -5776,6 +9629,7 @@
          }
      }
  }
@@ -6142,7 +6268,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl<R>
      From<::aws_smithy_runtime_api::client::result::SdkError<crate::operation::list_user_pools::ListUserPoolsError, R>>
      for Error
-@@ -5640,6 +9425,7 @@
+@@ -5797,6 +9651,7 @@
          }
      }
  }
@@ -6150,7 +6276,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl From<crate::operation::list_user_pools::ListUserPoolsError> for Error {
      fn from(err: crate::operation::list_user_pools::ListUserPoolsError) -> Self {
          match err {
-@@ -5659,6 +9445,7 @@
+@@ -5816,6 +9671,7 @@
          }
      }
  }
@@ -6158,7 +6284,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl<R> From<::aws_smithy_runtime_api::client::result::SdkError<crate::operation::list_users::ListUsersError, R>>
      for Error
  where
-@@ -5676,6 +9463,7 @@
+@@ -5833,6 +9689,7 @@
          }
      }
  }
@@ -6166,7 +6292,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl From<crate::operation::list_users::ListUsersError> for Error {
      fn from(err: crate::operation::list_users::ListUsersError) -> Self {
          match err {
-@@ -5701,6 +9489,7 @@
+@@ -5858,6 +9715,7 @@
          }
      }
  }
@@ -6174,7 +6300,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl<R>
      From<
          ::aws_smithy_runtime_api::client::result::SdkError<
-@@ -5726,6 +9515,7 @@
+@@ -5883,6 +9741,7 @@
          }
      }
  }
@@ -6182,7 +6308,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl From<crate::operation::list_users_in_group::ListUsersInGroupError> for Error {
      fn from(err: crate::operation::list_users_in_group::ListUsersInGroupError) -> Self {
          match err {
-@@ -5751,6 +9541,7 @@
+@@ -5908,6 +9767,7 @@
          }
      }
  }
@@ -6190,7 +6316,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl<R>
      From<
          ::aws_smithy_runtime_api::client::result::SdkError<
-@@ -5776,6 +9567,7 @@
+@@ -5933,6 +9793,7 @@
          }
      }
  }
@@ -6198,7 +6324,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl From<crate::operation::list_web_authn_credentials::ListWebAuthnCredentialsError> for Error {
      fn from(err: crate::operation::list_web_authn_credentials::ListWebAuthnCredentialsError) -> Self {
          match err {
-@@ -5805,6 +9597,7 @@
+@@ -5962,6 +9823,7 @@
          }
      }
  }
@@ -6206,7 +6332,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl<R>
      From<
          ::aws_smithy_runtime_api::client::result::SdkError<
-@@ -5830,6 +9623,7 @@
+@@ -5987,6 +9849,7 @@
          }
      }
  }
@@ -6214,7 +6340,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl From<crate::operation::resend_confirmation_code::ResendConfirmationCodeError> for Error {
      fn from(err: crate::operation::resend_confirmation_code::ResendConfirmationCodeError) -> Self {
          match err {
-@@ -5883,6 +9677,7 @@
+@@ -6040,6 +9903,7 @@
          }
      }
  }
@@ -6222,7 +6348,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl<R>
      From<
          ::aws_smithy_runtime_api::client::result::SdkError<
-@@ -5908,6 +9703,7 @@
+@@ -6065,6 +9929,7 @@
          }
      }
  }
@@ -6230,7 +6356,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl From<crate::operation::respond_to_auth_challenge::RespondToAuthChallengeError> for Error {
      fn from(err: crate::operation::respond_to_auth_challenge::RespondToAuthChallengeError) -> Self {
          match err {
-@@ -5985,6 +9781,7 @@
+@@ -6142,6 +10007,7 @@
          }
      }
  }
@@ -6238,7 +6364,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl<R> From<::aws_smithy_runtime_api::client::result::SdkError<crate::operation::revoke_token::RevokeTokenError, R>>
      for Error
  where
-@@ -6002,6 +9799,7 @@
+@@ -6159,6 +10025,7 @@
          }
      }
  }
@@ -6246,7 +6372,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl From<crate::operation::revoke_token::RevokeTokenError> for Error {
      fn from(err: crate::operation::revoke_token::RevokeTokenError) -> Self {
          match err {
-@@ -6033,6 +9831,7 @@
+@@ -6190,6 +10057,7 @@
          }
      }
  }
@@ -6254,7 +6380,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl<R>
      From<
          ::aws_smithy_runtime_api::client::result::SdkError<
-@@ -6058,6 +9857,7 @@
+@@ -6215,6 +10083,7 @@
          }
      }
  }
@@ -6262,7 +6388,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl From<crate::operation::set_log_delivery_configuration::SetLogDeliveryConfigurationError> for Error {
      fn from(err: crate::operation::set_log_delivery_configuration::SetLogDeliveryConfigurationError) -> Self {
          match err {
-@@ -6083,6 +9883,7 @@
+@@ -6240,6 +10109,7 @@
          }
      }
  }
@@ -6270,7 +6396,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl<R>
      From<
          ::aws_smithy_runtime_api::client::result::SdkError<
-@@ -6108,6 +9909,7 @@
+@@ -6265,6 +10135,7 @@
          }
      }
  }
@@ -6278,7 +6404,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl From<crate::operation::set_risk_configuration::SetRiskConfigurationError> for Error {
      fn from(err: crate::operation::set_risk_configuration::SetRiskConfigurationError) -> Self {
          match err {
-@@ -6142,6 +9944,7 @@
+@@ -6299,6 +10170,7 @@
          }
      }
  }
@@ -6286,7 +6412,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl<R>
      From<
          ::aws_smithy_runtime_api::client::result::SdkError<
-@@ -6167,6 +9970,7 @@
+@@ -6324,6 +10196,7 @@
          }
      }
  }
@@ -6294,7 +6420,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl From<crate::operation::set_ui_customization::SetUICustomizationError> for Error {
      fn from(err: crate::operation::set_ui_customization::SetUICustomizationError) -> Self {
          match err {
-@@ -6194,6 +9998,7 @@
+@@ -6351,6 +10224,7 @@
          }
      }
  }
@@ -6302,7 +6428,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl<R>
      From<
          ::aws_smithy_runtime_api::client::result::SdkError<
-@@ -6219,6 +10024,7 @@
+@@ -6376,6 +10250,7 @@
          }
      }
  }
@@ -6310,7 +6436,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl From<crate::operation::set_user_mfa_preference::SetUserMFAPreferenceError> for Error {
      fn from(err: crate::operation::set_user_mfa_preference::SetUserMFAPreferenceError) -> Self {
          match err {
-@@ -6255,6 +10061,7 @@
+@@ -6412,6 +10287,7 @@
          }
      }
  }
@@ -6318,7 +6444,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl<R>
      From<
          ::aws_smithy_runtime_api::client::result::SdkError<
-@@ -6280,6 +10087,7 @@
+@@ -6437,6 +10313,7 @@
          }
      }
  }
@@ -6326,7 +6452,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl From<crate::operation::set_user_pool_mfa_config::SetUserPoolMfaConfigError> for Error {
      fn from(err: crate::operation::set_user_pool_mfa_config::SetUserPoolMfaConfigError) -> Self {
          match err {
-@@ -6317,6 +10125,7 @@
+@@ -6474,6 +10351,7 @@
          }
      }
  }
@@ -6334,7 +6460,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl<R>
      From<
          ::aws_smithy_runtime_api::client::result::SdkError<
-@@ -6342,6 +10151,7 @@
+@@ -6499,6 +10377,7 @@
          }
      }
  }
@@ -6342,7 +6468,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl From<crate::operation::set_user_settings::SetUserSettingsError> for Error {
      fn from(err: crate::operation::set_user_settings::SetUserSettingsError) -> Self {
          match err {
-@@ -6376,6 +10186,7 @@
+@@ -6533,6 +10412,7 @@
          }
      }
  }
@@ -6350,7 +6476,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl<R> From<::aws_smithy_runtime_api::client::result::SdkError<crate::operation::sign_up::SignUpError, R>> for Error
  where
      R: Send + Sync + std::fmt::Debug + 'static,
-@@ -6392,6 +10203,7 @@
+@@ -6549,6 +10429,7 @@
          }
      }
  }
@@ -6358,7 +6484,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl From<crate::operation::sign_up::SignUpError> for Error {
      fn from(err: crate::operation::sign_up::SignUpError) -> Self {
          match err {
-@@ -6448,6 +10260,7 @@
+@@ -6605,6 +10486,7 @@
          }
      }
  }
@@ -6366,7 +6492,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl<R>
      From<
          ::aws_smithy_runtime_api::client::result::SdkError<
-@@ -6473,6 +10286,7 @@
+@@ -6630,6 +10512,7 @@
          }
      }
  }
@@ -6374,7 +6500,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl From<crate::operation::start_user_import_job::StartUserImportJobError> for Error {
      fn from(err: crate::operation::start_user_import_job::StartUserImportJobError) -> Self {
          match err {
-@@ -6503,6 +10317,7 @@
+@@ -6660,6 +10543,7 @@
          }
      }
  }
@@ -6382,7 +6508,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl<R>
      From<
          ::aws_smithy_runtime_api::client::result::SdkError<
-@@ -6528,6 +10343,7 @@
+@@ -6685,6 +10569,7 @@
          }
      }
  }
@@ -6390,7 +6516,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl From<crate::operation::start_web_authn_registration::StartWebAuthnRegistrationError> for Error {
      fn from(err: crate::operation::start_web_authn_registration::StartWebAuthnRegistrationError) -> Self {
          match err {
-@@ -6565,6 +10381,7 @@
+@@ -6722,6 +10607,7 @@
          }
      }
  }
@@ -6398,7 +6524,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl<R>
      From<
          ::aws_smithy_runtime_api::client::result::SdkError<
-@@ -6590,6 +10407,7 @@
+@@ -6747,6 +10633,7 @@
          }
      }
  }
@@ -6406,7 +6532,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl From<crate::operation::stop_user_import_job::StopUserImportJobError> for Error {
      fn from(err: crate::operation::stop_user_import_job::StopUserImportJobError) -> Self {
          match err {
-@@ -6618,6 +10436,7 @@
+@@ -6775,6 +10662,7 @@
          }
      }
  }
@@ -6414,7 +6540,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl<R> From<::aws_smithy_runtime_api::client::result::SdkError<crate::operation::tag_resource::TagResourceError, R>>
      for Error
  where
-@@ -6635,6 +10454,7 @@
+@@ -6792,6 +10680,7 @@
          }
      }
  }
@@ -6422,7 +6548,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl From<crate::operation::tag_resource::TagResourceError> for Error {
      fn from(err: crate::operation::tag_resource::TagResourceError) -> Self {
          match err {
-@@ -6660,6 +10480,7 @@
+@@ -6817,6 +10706,7 @@
          }
      }
  }
@@ -6430,7 +6556,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl<R>
      From<::aws_smithy_runtime_api::client::result::SdkError<crate::operation::untag_resource::UntagResourceError, R>>
      for Error
-@@ -6681,6 +10502,7 @@
+@@ -6838,6 +10728,7 @@
          }
      }
  }
@@ -6438,7 +6564,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl From<crate::operation::untag_resource::UntagResourceError> for Error {
      fn from(err: crate::operation::untag_resource::UntagResourceError) -> Self {
          match err {
-@@ -6706,6 +10528,7 @@
+@@ -6863,6 +10754,7 @@
          }
      }
  }
@@ -6446,7 +6572,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl<R>
      From<
          ::aws_smithy_runtime_api::client::result::SdkError<
-@@ -6731,6 +10554,7 @@
+@@ -6888,6 +10780,7 @@
          }
      }
  }
@@ -6454,7 +6580,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl From<crate::operation::update_auth_event_feedback::UpdateAuthEventFeedbackError> for Error {
      fn from(err: crate::operation::update_auth_event_feedback::UpdateAuthEventFeedbackError) -> Self {
          match err {
-@@ -6762,6 +10586,7 @@
+@@ -6919,6 +10812,7 @@
          }
      }
  }
@@ -6462,7 +6588,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl<R>
      From<
          ::aws_smithy_runtime_api::client::result::SdkError<
-@@ -6787,6 +10612,7 @@
+@@ -6944,6 +10838,7 @@
          }
      }
  }
@@ -6470,7 +6596,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl From<crate::operation::update_device_status::UpdateDeviceStatusError> for Error {
      fn from(err: crate::operation::update_device_status::UpdateDeviceStatusError) -> Self {
          match err {
-@@ -6829,6 +10655,7 @@
+@@ -6986,6 +10881,7 @@
          }
      }
  }
@@ -6478,7 +6604,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl<R> From<::aws_smithy_runtime_api::client::result::SdkError<crate::operation::update_group::UpdateGroupError, R>>
      for Error
  where
-@@ -6846,6 +10673,7 @@
+@@ -7003,6 +10899,7 @@
          }
      }
  }
@@ -6486,7 +6612,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl From<crate::operation::update_group::UpdateGroupError> for Error {
      fn from(err: crate::operation::update_group::UpdateGroupError) -> Self {
          match err {
-@@ -6871,6 +10699,7 @@
+@@ -7028,6 +10925,7 @@
          }
      }
  }
@@ -6494,7 +6620,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl<R>
      From<
          ::aws_smithy_runtime_api::client::result::SdkError<
-@@ -6896,6 +10725,7 @@
+@@ -7053,6 +10951,7 @@
          }
      }
  }
@@ -6502,7 +6628,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl From<crate::operation::update_identity_provider::UpdateIdentityProviderError> for Error {
      fn from(err: crate::operation::update_identity_provider::UpdateIdentityProviderError) -> Self {
          match err {
-@@ -6924,6 +10754,7 @@
+@@ -7081,6 +10980,7 @@
          }
      }
  }
@@ -6510,7 +6636,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl<R>
      From<
          ::aws_smithy_runtime_api::client::result::SdkError<
-@@ -6949,6 +10780,7 @@
+@@ -7106,6 +11006,7 @@
          }
      }
  }
@@ -6518,7 +6644,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl From<crate::operation::update_managed_login_branding::UpdateManagedLoginBrandingError> for Error {
      fn from(err: crate::operation::update_managed_login_branding::UpdateManagedLoginBrandingError) -> Self {
          match err {
-@@ -6977,6 +10809,7 @@
+@@ -7134,6 +11035,7 @@
          }
      }
  }
@@ -6526,7 +6652,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl<R>
      From<
          ::aws_smithy_runtime_api::client::result::SdkError<
-@@ -7002,6 +10835,7 @@
+@@ -7159,6 +11061,7 @@
          }
      }
  }
@@ -6534,7 +6660,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl From<crate::operation::update_provisioned_limit::UpdateProvisionedLimitError> for Error {
      fn from(err: crate::operation::update_provisioned_limit::UpdateProvisionedLimitError) -> Self {
          match err {
-@@ -7029,6 +10863,7 @@
+@@ -7186,6 +11089,7 @@
          }
      }
  }
@@ -6542,7 +6668,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl<R>
      From<
          ::aws_smithy_runtime_api::client::result::SdkError<
-@@ -7054,6 +10889,7 @@
+@@ -7211,6 +11115,7 @@
          }
      }
  }
@@ -6550,7 +6676,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl From<crate::operation::update_resource_server::UpdateResourceServerError> for Error {
      fn from(err: crate::operation::update_resource_server::UpdateResourceServerError) -> Self {
          match err {
-@@ -7081,6 +10917,7 @@
+@@ -7238,6 +11143,7 @@
          }
      }
  }
@@ -6558,7 +6684,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl<R> From<::aws_smithy_runtime_api::client::result::SdkError<crate::operation::update_terms::UpdateTermsError, R>>
      for Error
  where
-@@ -7098,6 +10935,7 @@
+@@ -7255,6 +11161,7 @@
          }
      }
  }
@@ -6566,7 +6692,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl From<crate::operation::update_terms::UpdateTermsError> for Error {
      fn from(err: crate::operation::update_terms::UpdateTermsError) -> Self {
          match err {
-@@ -7129,6 +10967,7 @@
+@@ -7286,6 +11193,7 @@
          }
      }
  }
@@ -6574,7 +6700,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl<R>
      From<
          ::aws_smithy_runtime_api::client::result::SdkError<
-@@ -7154,6 +10993,7 @@
+@@ -7311,6 +11219,7 @@
          }
      }
  }
@@ -6582,7 +6708,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl From<crate::operation::update_user_attributes::UpdateUserAttributesError> for Error {
      fn from(err: crate::operation::update_user_attributes::UpdateUserAttributesError) -> Self {
          match err {
-@@ -7211,6 +11051,7 @@
+@@ -7368,6 +11277,7 @@
          }
      }
  }
@@ -6590,7 +6716,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl<R>
      From<::aws_smithy_runtime_api::client::result::SdkError<crate::operation::update_user_pool::UpdateUserPoolError, R>>
      for Error
-@@ -7232,6 +11073,7 @@
+@@ -7389,6 +11299,7 @@
          }
      }
  }
@@ -6598,7 +6724,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl From<crate::operation::update_user_pool::UpdateUserPoolError> for Error {
      fn from(err: crate::operation::update_user_pool::UpdateUserPoolError) -> Self {
          match err {
-@@ -7281,6 +11123,7 @@
+@@ -7438,6 +11349,7 @@
          }
      }
  }
@@ -6606,7 +6732,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl<R>
      From<
          ::aws_smithy_runtime_api::client::result::SdkError<
-@@ -7306,6 +11149,7 @@
+@@ -7463,6 +11375,7 @@
          }
      }
  }
@@ -6614,7 +6740,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl From<crate::operation::update_user_pool_client::UpdateUserPoolClientError> for Error {
      fn from(err: crate::operation::update_user_pool_client::UpdateUserPoolClientError) -> Self {
          match err {
-@@ -7345,6 +11189,7 @@
+@@ -7502,6 +11415,7 @@
          }
      }
  }
@@ -6622,7 +6748,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl<R>
      From<
          ::aws_smithy_runtime_api::client::result::SdkError<
-@@ -7370,6 +11215,7 @@
+@@ -7527,6 +11441,7 @@
          }
      }
  }
@@ -6630,7 +6756,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl From<crate::operation::update_user_pool_domain::UpdateUserPoolDomainError> for Error {
      fn from(err: crate::operation::update_user_pool_domain::UpdateUserPoolDomainError) -> Self {
          match err {
-@@ -7403,6 +11249,7 @@
+@@ -7560,6 +11475,7 @@
          }
      }
  }
@@ -6638,7 +6764,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl<R>
      From<
          ::aws_smithy_runtime_api::client::result::SdkError<
-@@ -7428,6 +11275,7 @@
+@@ -7585,6 +11501,7 @@
          }
      }
  }
@@ -6646,7 +6772,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl From<crate::operation::update_user_pool_replica::UpdateUserPoolReplicaError> for Error {
      fn from(err: crate::operation::update_user_pool_replica::UpdateUserPoolReplicaError) -> Self {
          match err {
-@@ -7455,6 +11303,7 @@
+@@ -7612,6 +11529,7 @@
          }
      }
  }
@@ -6654,7 +6780,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl<R>
      From<
          ::aws_smithy_runtime_api::client::result::SdkError<
-@@ -7480,6 +11329,7 @@
+@@ -7637,6 +11555,7 @@
          }
      }
  }
@@ -6662,7 +6788,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl From<crate::operation::verify_software_token::VerifySoftwareTokenError> for Error {
      fn from(err: crate::operation::verify_software_token::VerifySoftwareTokenError) -> Self {
          match err {
-@@ -7519,6 +11369,7 @@
+@@ -7676,6 +11595,7 @@
          }
      }
  }
@@ -6670,7 +6796,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl<R>
      From<
          ::aws_smithy_runtime_api::client::result::SdkError<
-@@ -7544,6 +11395,7 @@
+@@ -7701,6 +11621,7 @@
          }
      }
  }
@@ -6678,7 +6804,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl From<crate::operation::verify_user_attribute::VerifyUserAttributeError> for Error {
      fn from(err: crate::operation::verify_user_attribute::VerifyUserAttributeError) -> Self {
          match err {
-@@ -7598,64 +11450,1262 @@
+@@ -7755,64 +11676,1283 @@
  impl ::std::error::Error for Error {
      fn source(&self) -> std::option::Option<&(dyn ::std::error::Error + 'static)> {
          match self {
@@ -6773,6 +6899,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
 +                feature = "op_delete_web_authn_credential",
 +                feature = "op_forget_device",
 +                feature = "op_forgot_password",
++                feature = "op_get_client_token",
 +                feature = "op_get_device",
 +                feature = "op_get_tokens_from_refresh_token",
 +                feature = "op_get_user",
@@ -6802,6 +6929,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
 +                feature = "op_admin_add_user_to_group",
 +                feature = "op_admin_confirm_sign_up",
 +                feature = "op_admin_create_user",
++                feature = "op_admin_delete_software_token",
 +                feature = "op_admin_delete_user",
 +                feature = "op_admin_delete_user_attributes",
 +                feature = "op_admin_disable_provider_for_user",
@@ -6860,12 +6988,14 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
 +                feature = "op_describe_resource_server",
 +                feature = "op_describe_risk_configuration",
 +                feature = "op_describe_terms",
++                feature = "op_describe_terms_by_client",
 +                feature = "op_describe_user_import_job",
 +                feature = "op_describe_user_pool",
 +                feature = "op_describe_user_pool_client",
 +                feature = "op_describe_user_pool_domain",
 +                feature = "op_forget_device",
 +                feature = "op_forgot_password",
++                feature = "op_get_client_token",
 +                feature = "op_get_csv_header",
 +                feature = "op_get_device",
 +                feature = "op_get_group",
@@ -6977,6 +7107,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
 +                feature = "op_admin_add_user_to_group",
 +                feature = "op_admin_confirm_sign_up",
 +                feature = "op_admin_create_user",
++                feature = "op_admin_delete_software_token",
 +                feature = "op_admin_delete_user",
 +                feature = "op_admin_delete_user_attributes",
 +                feature = "op_admin_disable_provider_for_user",
@@ -7036,12 +7167,14 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
 +                feature = "op_describe_resource_server",
 +                feature = "op_describe_risk_configuration",
 +                feature = "op_describe_terms",
++                feature = "op_describe_terms_by_client",
 +                feature = "op_describe_user_import_job",
 +                feature = "op_describe_user_pool",
 +                feature = "op_describe_user_pool_client",
 +                feature = "op_describe_user_pool_domain",
 +                feature = "op_forget_device",
 +                feature = "op_forgot_password",
++                feature = "op_get_client_token",
 +                feature = "op_get_csv_header",
 +                feature = "op_get_device",
 +                feature = "op_get_group",
@@ -7211,6 +7344,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
 +                feature = "op_admin_add_user_to_group",
 +                feature = "op_admin_confirm_sign_up",
 +                feature = "op_admin_create_user",
++                feature = "op_admin_delete_software_token",
 +                feature = "op_admin_delete_user",
 +                feature = "op_admin_delete_user_attributes",
 +                feature = "op_admin_disable_provider_for_user",
@@ -7269,12 +7403,14 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
 +                feature = "op_describe_resource_server",
 +                feature = "op_describe_risk_configuration",
 +                feature = "op_describe_terms",
++                feature = "op_describe_terms_by_client",
 +                feature = "op_describe_user_import_job",
 +                feature = "op_describe_user_pool",
 +                feature = "op_describe_user_pool_client",
 +                feature = "op_describe_user_pool_domain",
 +                feature = "op_forget_device",
 +                feature = "op_forgot_password",
++                feature = "op_get_client_token",
 +                feature = "op_get_csv_header",
 +                feature = "op_get_device",
 +                feature = "op_get_group",
@@ -7338,6 +7474,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
 +                feature = "op_admin_add_user_to_group",
 +                feature = "op_admin_confirm_sign_up",
 +                feature = "op_admin_create_user",
++                feature = "op_admin_delete_software_token",
 +                feature = "op_admin_delete_user",
 +                feature = "op_admin_delete_user_attributes",
 +                feature = "op_admin_disable_provider_for_user",
@@ -7392,12 +7529,14 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
 +                feature = "op_describe_resource_server",
 +                feature = "op_describe_risk_configuration",
 +                feature = "op_describe_terms",
++                feature = "op_describe_terms_by_client",
 +                feature = "op_describe_user_import_job",
 +                feature = "op_describe_user_pool",
 +                feature = "op_describe_user_pool_client",
 +                feature = "op_describe_user_pool_domain",
 +                feature = "op_forget_device",
 +                feature = "op_forgot_password",
++                feature = "op_get_client_token",
 +                feature = "op_get_csv_header",
 +                feature = "op_get_device",
 +                feature = "op_get_group",
@@ -7501,6 +7640,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
 +                feature = "op_admin_add_user_to_group",
 +                feature = "op_admin_confirm_sign_up",
 +                feature = "op_admin_create_user",
++                feature = "op_admin_delete_software_token",
 +                feature = "op_admin_delete_user",
 +                feature = "op_admin_delete_user_attributes",
 +                feature = "op_admin_disable_provider_for_user",
@@ -7558,12 +7698,14 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
 +                feature = "op_describe_resource_server",
 +                feature = "op_describe_risk_configuration",
 +                feature = "op_describe_terms",
++                feature = "op_describe_terms_by_client",
 +                feature = "op_describe_user_import_job",
 +                feature = "op_describe_user_pool",
 +                feature = "op_describe_user_pool_client",
 +                feature = "op_describe_user_pool_domain",
 +                feature = "op_forget_device",
 +                feature = "op_forgot_password",
++                feature = "op_get_client_token",
 +                feature = "op_get_csv_header",
 +                feature = "op_get_device",
 +                feature = "op_get_group",
@@ -7648,6 +7790,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
 +                feature = "op_admin_add_user_to_group",
 +                feature = "op_admin_confirm_sign_up",
 +                feature = "op_admin_create_user",
++                feature = "op_admin_delete_software_token",
 +                feature = "op_admin_delete_user",
 +                feature = "op_admin_delete_user_attributes",
 +                feature = "op_admin_disable_provider_for_user",
@@ -7702,11 +7845,13 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
 +                feature = "op_describe_resource_server",
 +                feature = "op_describe_risk_configuration",
 +                feature = "op_describe_terms",
++                feature = "op_describe_terms_by_client",
 +                feature = "op_describe_user_import_job",
 +                feature = "op_describe_user_pool",
 +                feature = "op_describe_user_pool_client",
 +                feature = "op_forget_device",
 +                feature = "op_forgot_password",
++                feature = "op_get_client_token",
 +                feature = "op_get_csv_header",
 +                feature = "op_get_device",
 +                feature = "op_get_group",
@@ -7824,6 +7969,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
 +            ))]
              Error::UserLambdaValidationException(inner) => inner.source(),
 +            #[cfg(any(
++                feature = "op_admin_delete_software_token",
 +                feature = "op_admin_initiate_auth",
 +                feature = "op_admin_respond_to_auth_challenge",
 +                feature = "op_admin_set_user_mfa_preference",
@@ -7853,6 +7999,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
 +                feature = "op_admin_add_user_to_group",
 +                feature = "op_admin_confirm_sign_up",
 +                feature = "op_admin_create_user",
++                feature = "op_admin_delete_software_token",
 +                feature = "op_admin_delete_user",
 +                feature = "op_admin_delete_user_attributes",
 +                feature = "op_admin_disable_provider_for_user",
@@ -7941,7 +8088,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
              Error::WebAuthnRelyingPartyMismatchException(inner) => inner.source(),
              Error::Unhandled(inner) => ::std::option::Option::Some(&*inner.source),
          }
-@@ -7664,64 +12714,1262 @@
+@@ -7821,64 +12961,1283 @@
  impl ::aws_types::request_id::RequestId for Error {
      fn request_id(&self) -> Option<&str> {
          match self {
@@ -8036,6 +8183,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
 +                feature = "op_delete_web_authn_credential",
 +                feature = "op_forget_device",
 +                feature = "op_forgot_password",
++                feature = "op_get_client_token",
 +                feature = "op_get_device",
 +                feature = "op_get_tokens_from_refresh_token",
 +                feature = "op_get_user",
@@ -8065,6 +8213,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
 +                feature = "op_admin_add_user_to_group",
 +                feature = "op_admin_confirm_sign_up",
 +                feature = "op_admin_create_user",
++                feature = "op_admin_delete_software_token",
 +                feature = "op_admin_delete_user",
 +                feature = "op_admin_delete_user_attributes",
 +                feature = "op_admin_disable_provider_for_user",
@@ -8123,12 +8272,14 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
 +                feature = "op_describe_resource_server",
 +                feature = "op_describe_risk_configuration",
 +                feature = "op_describe_terms",
++                feature = "op_describe_terms_by_client",
 +                feature = "op_describe_user_import_job",
 +                feature = "op_describe_user_pool",
 +                feature = "op_describe_user_pool_client",
 +                feature = "op_describe_user_pool_domain",
 +                feature = "op_forget_device",
 +                feature = "op_forgot_password",
++                feature = "op_get_client_token",
 +                feature = "op_get_csv_header",
 +                feature = "op_get_device",
 +                feature = "op_get_group",
@@ -8240,6 +8391,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
 +                feature = "op_admin_add_user_to_group",
 +                feature = "op_admin_confirm_sign_up",
 +                feature = "op_admin_create_user",
++                feature = "op_admin_delete_software_token",
 +                feature = "op_admin_delete_user",
 +                feature = "op_admin_delete_user_attributes",
 +                feature = "op_admin_disable_provider_for_user",
@@ -8299,12 +8451,14 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
 +                feature = "op_describe_resource_server",
 +                feature = "op_describe_risk_configuration",
 +                feature = "op_describe_terms",
++                feature = "op_describe_terms_by_client",
 +                feature = "op_describe_user_import_job",
 +                feature = "op_describe_user_pool",
 +                feature = "op_describe_user_pool_client",
 +                feature = "op_describe_user_pool_domain",
 +                feature = "op_forget_device",
 +                feature = "op_forgot_password",
++                feature = "op_get_client_token",
 +                feature = "op_get_csv_header",
 +                feature = "op_get_device",
 +                feature = "op_get_group",
@@ -8474,6 +8628,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
 +                feature = "op_admin_add_user_to_group",
 +                feature = "op_admin_confirm_sign_up",
 +                feature = "op_admin_create_user",
++                feature = "op_admin_delete_software_token",
 +                feature = "op_admin_delete_user",
 +                feature = "op_admin_delete_user_attributes",
 +                feature = "op_admin_disable_provider_for_user",
@@ -8532,12 +8687,14 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
 +                feature = "op_describe_resource_server",
 +                feature = "op_describe_risk_configuration",
 +                feature = "op_describe_terms",
++                feature = "op_describe_terms_by_client",
 +                feature = "op_describe_user_import_job",
 +                feature = "op_describe_user_pool",
 +                feature = "op_describe_user_pool_client",
 +                feature = "op_describe_user_pool_domain",
 +                feature = "op_forget_device",
 +                feature = "op_forgot_password",
++                feature = "op_get_client_token",
 +                feature = "op_get_csv_header",
 +                feature = "op_get_device",
 +                feature = "op_get_group",
@@ -8601,6 +8758,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
 +                feature = "op_admin_add_user_to_group",
 +                feature = "op_admin_confirm_sign_up",
 +                feature = "op_admin_create_user",
++                feature = "op_admin_delete_software_token",
 +                feature = "op_admin_delete_user",
 +                feature = "op_admin_delete_user_attributes",
 +                feature = "op_admin_disable_provider_for_user",
@@ -8655,12 +8813,14 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
 +                feature = "op_describe_resource_server",
 +                feature = "op_describe_risk_configuration",
 +                feature = "op_describe_terms",
++                feature = "op_describe_terms_by_client",
 +                feature = "op_describe_user_import_job",
 +                feature = "op_describe_user_pool",
 +                feature = "op_describe_user_pool_client",
 +                feature = "op_describe_user_pool_domain",
 +                feature = "op_forget_device",
 +                feature = "op_forgot_password",
++                feature = "op_get_client_token",
 +                feature = "op_get_csv_header",
 +                feature = "op_get_device",
 +                feature = "op_get_group",
@@ -8764,6 +8924,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
 +                feature = "op_admin_add_user_to_group",
 +                feature = "op_admin_confirm_sign_up",
 +                feature = "op_admin_create_user",
++                feature = "op_admin_delete_software_token",
 +                feature = "op_admin_delete_user",
 +                feature = "op_admin_delete_user_attributes",
 +                feature = "op_admin_disable_provider_for_user",
@@ -8821,12 +8982,14 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
 +                feature = "op_describe_resource_server",
 +                feature = "op_describe_risk_configuration",
 +                feature = "op_describe_terms",
++                feature = "op_describe_terms_by_client",
 +                feature = "op_describe_user_import_job",
 +                feature = "op_describe_user_pool",
 +                feature = "op_describe_user_pool_client",
 +                feature = "op_describe_user_pool_domain",
 +                feature = "op_forget_device",
 +                feature = "op_forgot_password",
++                feature = "op_get_client_token",
 +                feature = "op_get_csv_header",
 +                feature = "op_get_device",
 +                feature = "op_get_group",
@@ -8911,6 +9074,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
 +                feature = "op_admin_add_user_to_group",
 +                feature = "op_admin_confirm_sign_up",
 +                feature = "op_admin_create_user",
++                feature = "op_admin_delete_software_token",
 +                feature = "op_admin_delete_user",
 +                feature = "op_admin_delete_user_attributes",
 +                feature = "op_admin_disable_provider_for_user",
@@ -8965,11 +9129,13 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
 +                feature = "op_describe_resource_server",
 +                feature = "op_describe_risk_configuration",
 +                feature = "op_describe_terms",
++                feature = "op_describe_terms_by_client",
 +                feature = "op_describe_user_import_job",
 +                feature = "op_describe_user_pool",
 +                feature = "op_describe_user_pool_client",
 +                feature = "op_forget_device",
 +                feature = "op_forgot_password",
++                feature = "op_get_client_token",
 +                feature = "op_get_csv_header",
 +                feature = "op_get_device",
 +                feature = "op_get_group",
@@ -9087,6 +9253,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
 +            ))]
              Self::UserLambdaValidationException(e) => e.request_id(),
 +            #[cfg(any(
++                feature = "op_admin_delete_software_token",
 +                feature = "op_admin_initiate_auth",
 +                feature = "op_admin_respond_to_auth_challenge",
 +                feature = "op_admin_set_user_mfa_preference",
@@ -9116,6 +9283,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
 +                feature = "op_admin_add_user_to_group",
 +                feature = "op_admin_confirm_sign_up",
 +                feature = "op_admin_create_user",
++                feature = "op_admin_delete_software_token",
 +                feature = "op_admin_delete_user",
 +                feature = "op_admin_delete_user_attributes",
 +                feature = "op_admin_disable_provider_for_user",
@@ -9362,7 +9530,7 @@ diff --git a/src/lens.rs b/src/lens.rs
 diff --git a/src/operation.rs b/src/operation.rs
 --- a/src/operation.rs
 +++ b/src/operation.rs
-@@ -1,389 +1,518 @@
+@@ -1,398 +1,530 @@
  // Code generated by software.amazon.smithy.rust.codegen.smithy-rs. DO NOT EDIT.
  pub use ::aws_types::request_id::RequestId;
 
@@ -9385,6 +9553,10 @@ diff --git a/src/operation.rs b/src/operation.rs
 +#[cfg(feature = "op_admin_create_user")]
  /// Types for the `AdminCreateUser` operation.
  pub mod admin_create_user;
+
++#[cfg(feature = "op_admin_delete_software_token")]
+ /// Types for the `AdminDeleteSoftwareToken` operation.
+ pub mod admin_delete_software_token;
 
 +#[cfg(feature = "op_admin_delete_user")]
  /// Types for the `AdminDeleteUser` operation.
@@ -9622,6 +9794,10 @@ diff --git a/src/operation.rs b/src/operation.rs
  /// Types for the `DescribeTerms` operation.
  pub mod describe_terms;
 
++#[cfg(feature = "op_describe_terms_by_client")]
+ /// Types for the `DescribeTermsByClient` operation.
+ pub mod describe_terms_by_client;
+
 +#[cfg(feature = "op_describe_user_import_job")]
  /// Types for the `DescribeUserImportJob` operation.
  pub mod describe_user_import_job;
@@ -9645,6 +9821,10 @@ diff --git a/src/operation.rs b/src/operation.rs
 +#[cfg(feature = "op_forgot_password")]
  /// Types for the `ForgotPassword` operation.
  pub mod forgot_password;
+
++#[cfg(feature = "op_get_client_token")]
+ /// Types for the `GetClientToken` operation.
+ pub mod get_client_token;
 
 +#[cfg(feature = "op_get_csv_header")]
  /// Types for the `GetCSVHeader` operation.
@@ -9889,7 +10069,7 @@ diff --git a/src/operation.rs b/src/operation.rs
 diff --git a/src/protocol_serde.rs b/src/protocol_serde.rs
 --- a/src/protocol_serde.rs
 +++ b/src/protocol_serde.rs
-@@ -1,4 +1,135 @@
+@@ -1,4 +1,138 @@
  // Code generated by software.amazon.smithy.rust.codegen.smithy-rs. DO NOT EDIT.
 +#[cfg(any(
 +    feature = "op_add_custom_attributes",
@@ -9897,6 +10077,7 @@ diff --git a/src/protocol_serde.rs b/src/protocol_serde.rs
 +    feature = "op_admin_add_user_to_group",
 +    feature = "op_admin_confirm_sign_up",
 +    feature = "op_admin_create_user",
++    feature = "op_admin_delete_software_token",
 +    feature = "op_admin_delete_user",
 +    feature = "op_admin_delete_user_attributes",
 +    feature = "op_admin_disable_provider_for_user",
@@ -9956,12 +10137,14 @@ diff --git a/src/protocol_serde.rs b/src/protocol_serde.rs
 +    feature = "op_describe_resource_server",
 +    feature = "op_describe_risk_configuration",
 +    feature = "op_describe_terms",
++    feature = "op_describe_terms_by_client",
 +    feature = "op_describe_user_import_job",
 +    feature = "op_describe_user_pool",
 +    feature = "op_describe_user_pool_client",
 +    feature = "op_describe_user_pool_domain",
 +    feature = "op_forget_device",
 +    feature = "op_forgot_password",
++    feature = "op_get_client_token",
 +    feature = "op_get_csv_header",
 +    feature = "op_get_device",
 +    feature = "op_get_group",
@@ -10025,7 +10208,7 @@ diff --git a/src/protocol_serde.rs b/src/protocol_serde.rs
  pub(crate) fn type_erase_result<O, E>(
      result: ::std::result::Result<O, E>,
  ) -> ::std::result::Result<
-@@ -17,6 +148,137 @@
+@@ -17,6 +151,140 @@
          .map_err(::std::convert::Into::into)
  }
 
@@ -10035,6 +10218,7 @@ diff --git a/src/protocol_serde.rs b/src/protocol_serde.rs
 +    feature = "op_admin_add_user_to_group",
 +    feature = "op_admin_confirm_sign_up",
 +    feature = "op_admin_create_user",
++    feature = "op_admin_delete_software_token",
 +    feature = "op_admin_delete_user",
 +    feature = "op_admin_delete_user_attributes",
 +    feature = "op_admin_disable_provider_for_user",
@@ -10094,12 +10278,14 @@ diff --git a/src/protocol_serde.rs b/src/protocol_serde.rs
 +    feature = "op_describe_resource_server",
 +    feature = "op_describe_risk_configuration",
 +    feature = "op_describe_terms",
++    feature = "op_describe_terms_by_client",
 +    feature = "op_describe_user_import_job",
 +    feature = "op_describe_user_pool",
 +    feature = "op_describe_user_pool_client",
 +    feature = "op_describe_user_pool_domain",
 +    feature = "op_forget_device",
 +    feature = "op_forgot_password",
++    feature = "op_get_client_token",
 +    feature = "op_get_csv_header",
 +    feature = "op_get_device",
 +    feature = "op_get_group",
@@ -10163,7 +10349,7 @@ diff --git a/src/protocol_serde.rs b/src/protocol_serde.rs
  pub fn parse_http_error_metadata(
      _response_status: u16,
      response_headers: &::aws_smithy_runtime_api::http::Headers,
-@@ -28,264 +290,524 @@
+@@ -28,270 +296,536 @@
      crate::json_errors::parse_error_metadata(response_body, response_headers)
  }
 
@@ -10181,6 +10367,9 @@ diff --git a/src/protocol_serde.rs b/src/protocol_serde.rs
 
 +#[cfg(feature = "op_admin_create_user")]
  pub(crate) mod shape_admin_create_user;
+
++#[cfg(feature = "op_admin_delete_software_token")]
+ pub(crate) mod shape_admin_delete_software_token;
 
 +#[cfg(feature = "op_admin_delete_user")]
  pub(crate) mod shape_admin_delete_user;
@@ -10359,6 +10548,9 @@ diff --git a/src/protocol_serde.rs b/src/protocol_serde.rs
 +#[cfg(feature = "op_describe_terms")]
  pub(crate) mod shape_describe_terms;
 
++#[cfg(feature = "op_describe_terms_by_client")]
+ pub(crate) mod shape_describe_terms_by_client;
+
 +#[cfg(feature = "op_describe_user_import_job")]
  pub(crate) mod shape_describe_user_import_job;
 
@@ -10376,6 +10568,9 @@ diff --git a/src/protocol_serde.rs b/src/protocol_serde.rs
 
 +#[cfg(feature = "op_forgot_password")]
  pub(crate) mod shape_forgot_password;
+
++#[cfg(feature = "op_get_client_token")]
+ pub(crate) mod shape_get_client_token;
 
 +#[cfg(feature = "op_get_csv_header")]
  pub(crate) mod shape_get_csv_header;
@@ -10560,6 +10755,7 @@ diff --git a/src/protocol_serde.rs b/src/protocol_serde.rs
 +    feature = "op_admin_add_user_to_group",
 +    feature = "op_admin_confirm_sign_up",
 +    feature = "op_admin_create_user",
++    feature = "op_admin_delete_software_token",
 +    feature = "op_admin_delete_user",
 +    feature = "op_admin_delete_user_attributes",
 +    feature = "op_admin_disable_provider_for_user",
@@ -10619,12 +10815,14 @@ diff --git a/src/protocol_serde.rs b/src/protocol_serde.rs
 +    feature = "op_describe_resource_server",
 +    feature = "op_describe_risk_configuration",
 +    feature = "op_describe_terms",
++    feature = "op_describe_terms_by_client",
 +    feature = "op_describe_user_import_job",
 +    feature = "op_describe_user_pool",
 +    feature = "op_describe_user_pool_client",
 +    feature = "op_describe_user_pool_domain",
 +    feature = "op_forget_device",
 +    feature = "op_forgot_password",
++    feature = "op_get_client_token",
 +    feature = "op_get_csv_header",
 +    feature = "op_get_device",
 +    feature = "op_get_group",
@@ -10688,7 +10886,7 @@ diff --git a/src/protocol_serde.rs b/src/protocol_serde.rs
  pub(crate) fn or_empty_doc(data: &[u8]) -> &[u8] {
      if data.is_empty() {
          b"{}"
-@@ -294,664 +816,2506 @@
+@@ -300,672 +834,2541 @@
      }
  }
 
@@ -10709,6 +10907,9 @@ diff --git a/src/protocol_serde.rs b/src/protocol_serde.rs
 
 +#[cfg(feature = "op_admin_create_user")]
  pub(crate) mod shape_admin_create_user_input;
+
++#[cfg(feature = "op_admin_delete_software_token")]
+ pub(crate) mod shape_admin_delete_software_token_input;
 
 +#[cfg(feature = "op_admin_delete_user_attributes")]
  pub(crate) mod shape_admin_delete_user_attributes_input;
@@ -10938,6 +11139,9 @@ diff --git a/src/protocol_serde.rs b/src/protocol_serde.rs
 +#[cfg(feature = "op_describe_risk_configuration")]
  pub(crate) mod shape_describe_risk_configuration_input;
 
++#[cfg(feature = "op_describe_terms_by_client")]
+ pub(crate) mod shape_describe_terms_by_client_input;
+
 +#[cfg(feature = "op_describe_terms")]
  pub(crate) mod shape_describe_terms_input;
 
@@ -10997,6 +11201,7 @@ diff --git a/src/protocol_serde.rs b/src/protocol_serde.rs
 +    feature = "op_delete_web_authn_credential",
 +    feature = "op_forget_device",
 +    feature = "op_forgot_password",
++    feature = "op_get_client_token",
 +    feature = "op_get_device",
 +    feature = "op_get_tokens_from_refresh_token",
 +    feature = "op_get_user",
@@ -11025,6 +11230,9 @@ diff --git a/src/protocol_serde.rs b/src/protocol_serde.rs
 
 +#[cfg(feature = "op_forgot_password")]
  pub(crate) mod shape_forgot_password_input;
+
++#[cfg(feature = "op_get_client_token")]
+ pub(crate) mod shape_get_client_token_input;
 
 +#[cfg(feature = "op_get_csv_header")]
  pub(crate) mod shape_get_csv_header_input;
@@ -11079,6 +11287,7 @@ diff --git a/src/protocol_serde.rs b/src/protocol_serde.rs
 +    feature = "op_admin_add_user_to_group",
 +    feature = "op_admin_confirm_sign_up",
 +    feature = "op_admin_create_user",
++    feature = "op_admin_delete_software_token",
 +    feature = "op_admin_delete_user",
 +    feature = "op_admin_delete_user_attributes",
 +    feature = "op_admin_disable_provider_for_user",
@@ -11137,12 +11346,14 @@ diff --git a/src/protocol_serde.rs b/src/protocol_serde.rs
 +    feature = "op_describe_resource_server",
 +    feature = "op_describe_risk_configuration",
 +    feature = "op_describe_terms",
++    feature = "op_describe_terms_by_client",
 +    feature = "op_describe_user_import_job",
 +    feature = "op_describe_user_pool",
 +    feature = "op_describe_user_pool_client",
 +    feature = "op_describe_user_pool_domain",
 +    feature = "op_forget_device",
 +    feature = "op_forgot_password",
++    feature = "op_get_client_token",
 +    feature = "op_get_csv_header",
 +    feature = "op_get_device",
 +    feature = "op_get_group",
@@ -11259,6 +11470,7 @@ diff --git a/src/protocol_serde.rs b/src/protocol_serde.rs
 +    feature = "op_admin_add_user_to_group",
 +    feature = "op_admin_confirm_sign_up",
 +    feature = "op_admin_create_user",
++    feature = "op_admin_delete_software_token",
 +    feature = "op_admin_delete_user",
 +    feature = "op_admin_delete_user_attributes",
 +    feature = "op_admin_disable_provider_for_user",
@@ -11318,12 +11530,14 @@ diff --git a/src/protocol_serde.rs b/src/protocol_serde.rs
 +    feature = "op_describe_resource_server",
 +    feature = "op_describe_risk_configuration",
 +    feature = "op_describe_terms",
++    feature = "op_describe_terms_by_client",
 +    feature = "op_describe_user_import_job",
 +    feature = "op_describe_user_pool",
 +    feature = "op_describe_user_pool_client",
 +    feature = "op_describe_user_pool_domain",
 +    feature = "op_forget_device",
 +    feature = "op_forgot_password",
++    feature = "op_get_client_token",
 +    feature = "op_get_csv_header",
 +    feature = "op_get_device",
 +    feature = "op_get_group",
@@ -11543,6 +11757,7 @@ diff --git a/src/protocol_serde.rs b/src/protocol_serde.rs
 +    feature = "op_admin_add_user_to_group",
 +    feature = "op_admin_confirm_sign_up",
 +    feature = "op_admin_create_user",
++    feature = "op_admin_delete_software_token",
 +    feature = "op_admin_delete_user",
 +    feature = "op_admin_delete_user_attributes",
 +    feature = "op_admin_disable_provider_for_user",
@@ -11601,12 +11816,14 @@ diff --git a/src/protocol_serde.rs b/src/protocol_serde.rs
 +    feature = "op_describe_resource_server",
 +    feature = "op_describe_risk_configuration",
 +    feature = "op_describe_terms",
++    feature = "op_describe_terms_by_client",
 +    feature = "op_describe_user_import_job",
 +    feature = "op_describe_user_pool",
 +    feature = "op_describe_user_pool_client",
 +    feature = "op_describe_user_pool_domain",
 +    feature = "op_forget_device",
 +    feature = "op_forgot_password",
++    feature = "op_get_client_token",
 +    feature = "op_get_csv_header",
 +    feature = "op_get_device",
 +    feature = "op_get_group",
@@ -11671,6 +11888,7 @@ diff --git a/src/protocol_serde.rs b/src/protocol_serde.rs
 +    feature = "op_admin_add_user_to_group",
 +    feature = "op_admin_confirm_sign_up",
 +    feature = "op_admin_create_user",
++    feature = "op_admin_delete_software_token",
 +    feature = "op_admin_delete_user",
 +    feature = "op_admin_delete_user_attributes",
 +    feature = "op_admin_disable_provider_for_user",
@@ -11725,12 +11943,14 @@ diff --git a/src/protocol_serde.rs b/src/protocol_serde.rs
 +    feature = "op_describe_resource_server",
 +    feature = "op_describe_risk_configuration",
 +    feature = "op_describe_terms",
++    feature = "op_describe_terms_by_client",
 +    feature = "op_describe_user_import_job",
 +    feature = "op_describe_user_pool",
 +    feature = "op_describe_user_pool_client",
 +    feature = "op_describe_user_pool_domain",
 +    feature = "op_forget_device",
 +    feature = "op_forgot_password",
++    feature = "op_get_client_token",
 +    feature = "op_get_csv_header",
 +    feature = "op_get_device",
 +    feature = "op_get_group",
@@ -11842,6 +12062,7 @@ diff --git a/src/protocol_serde.rs b/src/protocol_serde.rs
 +    feature = "op_admin_add_user_to_group",
 +    feature = "op_admin_confirm_sign_up",
 +    feature = "op_admin_create_user",
++    feature = "op_admin_delete_software_token",
 +    feature = "op_admin_delete_user",
 +    feature = "op_admin_delete_user_attributes",
 +    feature = "op_admin_disable_provider_for_user",
@@ -11899,12 +12120,14 @@ diff --git a/src/protocol_serde.rs b/src/protocol_serde.rs
 +    feature = "op_describe_resource_server",
 +    feature = "op_describe_risk_configuration",
 +    feature = "op_describe_terms",
++    feature = "op_describe_terms_by_client",
 +    feature = "op_describe_user_import_job",
 +    feature = "op_describe_user_pool",
 +    feature = "op_describe_user_pool_client",
 +    feature = "op_describe_user_pool_domain",
 +    feature = "op_forget_device",
 +    feature = "op_forgot_password",
++    feature = "op_get_client_token",
 +    feature = "op_get_csv_header",
 +    feature = "op_get_device",
 +    feature = "op_get_group",
@@ -12035,6 +12258,7 @@ diff --git a/src/protocol_serde.rs b/src/protocol_serde.rs
 +    feature = "op_admin_add_user_to_group",
 +    feature = "op_admin_confirm_sign_up",
 +    feature = "op_admin_create_user",
++    feature = "op_admin_delete_software_token",
 +    feature = "op_admin_delete_user",
 +    feature = "op_admin_delete_user_attributes",
 +    feature = "op_admin_disable_provider_for_user",
@@ -12089,11 +12313,13 @@ diff --git a/src/protocol_serde.rs b/src/protocol_serde.rs
 +    feature = "op_describe_resource_server",
 +    feature = "op_describe_risk_configuration",
 +    feature = "op_describe_terms",
++    feature = "op_describe_terms_by_client",
 +    feature = "op_describe_user_import_job",
 +    feature = "op_describe_user_pool",
 +    feature = "op_describe_user_pool_client",
 +    feature = "op_forget_device",
 +    feature = "op_forgot_password",
++    feature = "op_get_client_token",
 +    feature = "op_get_csv_header",
 +    feature = "op_get_device",
 +    feature = "op_get_group",
@@ -12262,6 +12488,7 @@ diff --git a/src/protocol_serde.rs b/src/protocol_serde.rs
  pub(crate) mod shape_user_lambda_validation_exception;
 
 +#[cfg(any(
++    feature = "op_admin_delete_software_token",
 +    feature = "op_admin_initiate_auth",
 +    feature = "op_admin_respond_to_auth_challenge",
 +    feature = "op_admin_set_user_mfa_preference",
@@ -12292,6 +12519,7 @@ diff --git a/src/protocol_serde.rs b/src/protocol_serde.rs
 +    feature = "op_admin_add_user_to_group",
 +    feature = "op_admin_confirm_sign_up",
 +    feature = "op_admin_create_user",
++    feature = "op_admin_delete_software_token",
 +    feature = "op_admin_delete_user",
 +    feature = "op_admin_delete_user_attributes",
 +    feature = "op_admin_disable_provider_for_user",
@@ -12491,6 +12719,9 @@ diff --git a/src/protocol_serde.rs b/src/protocol_serde.rs
 +    feature = "op_respond_to_auth_challenge"
 +))]
  pub(crate) mod shape_challenge_parameters_type;
+
++#[cfg(feature = "op_get_client_token")]
+ pub(crate) mod shape_client_authentication_result_type;
 
 +#[cfg(feature = "op_list_user_pool_client_secrets")]
  pub(crate) mod shape_client_secret_descriptor_list_type;
@@ -12739,6 +12970,7 @@ diff --git a/src/protocol_serde.rs b/src/protocol_serde.rs
 +#[cfg(any(
 +    feature = "op_create_terms",
 +    feature = "op_describe_terms",
++    feature = "op_describe_terms_by_client",
 +    feature = "op_update_terms"
 +))]
  pub(crate) mod shape_terms_type;
@@ -12990,6 +13222,7 @@ diff --git a/src/protocol_serde.rs b/src/protocol_serde.rs
 +#[cfg(any(
 +    feature = "op_create_terms",
 +    feature = "op_describe_terms",
++    feature = "op_describe_terms_by_client",
 +    feature = "op_update_terms"
 +))]
  pub(crate) mod shape_links_type;
@@ -13420,19 +13653,20 @@ diff --git a/src/serde_util.rs b/src/serde_util.rs
  pub(crate) fn log_delivery_configuration_type_correct_errors(
      mut builder: crate::types::builders::LogDeliveryConfigurationTypeBuilder,
  ) -> crate::types::builders::LogDeliveryConfigurationTypeBuilder {
-@@ -307,6 +337,11 @@
+@@ -307,6 +337,12 @@
      builder
  }
 
 +#[cfg(any(
 +    feature = "op_create_terms",
 +    feature = "op_describe_terms",
++    feature = "op_describe_terms_by_client",
 +    feature = "op_update_terms"
 +))]
  pub(crate) fn terms_type_correct_errors(
      mut builder: crate::types::builders::TermsTypeBuilder,
  ) -> crate::types::builders::TermsTypeBuilder {
-@@ -340,6 +375,7 @@
+@@ -340,6 +376,7 @@
      builder
  }
 
@@ -13440,7 +13674,7 @@ diff --git a/src/serde_util.rs b/src/serde_util.rs
  pub(crate) fn limit_definition_type_correct_errors(
      mut builder: crate::types::builders::LimitDefinitionTypeBuilder,
  ) -> crate::types::builders::LimitDefinitionTypeBuilder {
-@@ -352,6 +388,7 @@
+@@ -352,6 +389,7 @@
      builder
  }
 
@@ -13448,7 +13682,7 @@ diff --git a/src/serde_util.rs b/src/serde_util.rs
  pub(crate) fn account_takeover_risk_configuration_type_correct_errors(
      mut builder: crate::types::builders::AccountTakeoverRiskConfigurationTypeBuilder,
  ) -> crate::types::builders::AccountTakeoverRiskConfigurationTypeBuilder {
-@@ -364,6 +401,20 @@
+@@ -364,6 +402,20 @@
      builder
  }
 
@@ -13469,7 +13703,7 @@ diff --git a/src/serde_util.rs b/src/serde_util.rs
  pub(crate) fn attribute_type_correct_errors(
      mut builder: crate::types::builders::AttributeTypeBuilder,
  ) -> crate::types::builders::AttributeTypeBuilder {
-@@ -373,6 +424,7 @@
+@@ -373,6 +425,7 @@
      builder
  }
 
@@ -13477,7 +13711,7 @@ diff --git a/src/serde_util.rs b/src/serde_util.rs
  pub(crate) fn compromised_credentials_risk_configuration_type_correct_errors(
      mut builder: crate::types::builders::CompromisedCredentialsRiskConfigurationTypeBuilder,
  ) -> crate::types::builders::CompromisedCredentialsRiskConfigurationTypeBuilder {
-@@ -387,6 +439,11 @@
+@@ -387,6 +440,11 @@
      builder
  }
 
@@ -13489,7 +13723,7 @@ diff --git a/src/serde_util.rs b/src/serde_util.rs
  pub(crate) fn custom_domain_config_type_correct_errors(
      mut builder: crate::types::builders::CustomDomainConfigTypeBuilder,
  ) -> crate::types::builders::CustomDomainConfigTypeBuilder {
-@@ -396,6 +453,11 @@
+@@ -396,6 +454,11 @@
      builder
  }
 
@@ -13501,7 +13735,7 @@ diff --git a/src/serde_util.rs b/src/serde_util.rs
  pub(crate) fn failover_type_correct_errors(
      mut builder: crate::types::builders::FailoverTypeBuilder,
  ) -> crate::types::builders::FailoverTypeBuilder {
-@@ -408,6 +470,11 @@
+@@ -408,6 +471,11 @@
      builder
  }
 
@@ -13513,7 +13747,7 @@ diff --git a/src/serde_util.rs b/src/serde_util.rs
  pub(crate) fn refresh_token_rotation_type_correct_errors(
      mut builder: crate::types::builders::RefreshTokenRotationTypeBuilder,
  ) -> crate::types::builders::RefreshTokenRotationTypeBuilder {
-@@ -417,6 +484,7 @@
+@@ -417,6 +485,7 @@
      builder
  }
 
@@ -13521,7 +13755,7 @@ diff --git a/src/serde_util.rs b/src/serde_util.rs
  pub(crate) fn terms_description_type_correct_errors(
      mut builder: crate::types::builders::TermsDescriptionTypeBuilder,
  ) -> crate::types::builders::TermsDescriptionTypeBuilder {
-@@ -438,6 +506,11 @@
+@@ -438,6 +507,11 @@
      builder
  }
 
@@ -13533,7 +13767,7 @@ diff --git a/src/serde_util.rs b/src/serde_util.rs
  pub(crate) fn user_pool_add_ons_type_correct_errors(
      mut builder: crate::types::builders::UserPoolAddOnsTypeBuilder,
  ) -> crate::types::builders::UserPoolAddOnsTypeBuilder {
-@@ -449,6 +522,7 @@
+@@ -449,6 +523,7 @@
      builder
  }
 
@@ -13541,7 +13775,7 @@ diff --git a/src/serde_util.rs b/src/serde_util.rs
  pub(crate) fn username_configuration_type_correct_errors(
      mut builder: crate::types::builders::UsernameConfigurationTypeBuilder,
  ) -> crate::types::builders::UsernameConfigurationTypeBuilder {
-@@ -458,6 +532,7 @@
+@@ -458,6 +533,7 @@
      builder
  }
 
@@ -13549,7 +13783,7 @@ diff --git a/src/serde_util.rs b/src/serde_util.rs
  pub(crate) fn web_authn_credential_description_correct_errors(
      mut builder: crate::types::builders::WebAuthnCredentialDescriptionBuilder,
  ) -> crate::types::builders::WebAuthnCredentialDescriptionBuilder {
-@@ -479,6 +554,12 @@
+@@ -479,6 +555,12 @@
      builder
  }
 
@@ -13562,7 +13796,7 @@ diff --git a/src/serde_util.rs b/src/serde_util.rs
  pub(crate) fn asset_type_correct_errors(
      mut builder: crate::types::builders::AssetTypeBuilder,
  ) -> crate::types::builders::AssetTypeBuilder {
-@@ -494,6 +575,7 @@
+@@ -494,6 +576,7 @@
      builder
  }
 
@@ -13570,7 +13804,7 @@ diff --git a/src/serde_util.rs b/src/serde_util.rs
  pub(crate) fn compromised_credentials_actions_type_correct_errors(
      mut builder: crate::types::builders::CompromisedCredentialsActionsTypeBuilder,
  ) -> crate::types::builders::CompromisedCredentialsActionsTypeBuilder {
-@@ -505,6 +587,12 @@
+@@ -505,6 +588,12 @@
      builder
  }
 
@@ -13583,7 +13817,7 @@ diff --git a/src/serde_util.rs b/src/serde_util.rs
  pub(crate) fn custom_email_lambda_version_config_type_correct_errors(
      mut builder: crate::types::builders::CustomEmailLambdaVersionConfigTypeBuilder,
  ) -> crate::types::builders::CustomEmailLambdaVersionConfigTypeBuilder {
-@@ -519,6 +607,12 @@
+@@ -519,6 +608,12 @@
      builder
  }
 
@@ -13596,7 +13830,7 @@ diff --git a/src/serde_util.rs b/src/serde_util.rs
  pub(crate) fn custom_sms_lambda_version_config_type_correct_errors(
      mut builder: crate::types::builders::CustomSmsLambdaVersionConfigTypeBuilder,
  ) -> crate::types::builders::CustomSmsLambdaVersionConfigTypeBuilder {
-@@ -533,6 +627,13 @@
+@@ -533,6 +628,13 @@
      builder
  }
 
@@ -13610,7 +13844,7 @@ diff --git a/src/serde_util.rs b/src/serde_util.rs
  pub(crate) fn eums_sms_configuration_type_correct_errors(
      mut builder: crate::types::builders::EumsSmsConfigurationTypeBuilder,
  ) -> crate::types::builders::EumsSmsConfigurationTypeBuilder {
-@@ -542,6 +643,7 @@
+@@ -542,6 +644,7 @@
      builder
  }
 
@@ -13618,7 +13852,7 @@ diff --git a/src/serde_util.rs b/src/serde_util.rs
  pub(crate) fn event_feedback_type_correct_errors(
      mut builder: crate::types::builders::EventFeedbackTypeBuilder,
  ) -> crate::types::builders::EventFeedbackTypeBuilder {
-@@ -554,6 +656,12 @@
+@@ -554,6 +657,12 @@
      builder
  }
 
@@ -13631,7 +13865,7 @@ diff --git a/src/serde_util.rs b/src/serde_util.rs
  pub(crate) fn inbound_federation_lambda_type_correct_errors(
      mut builder: crate::types::builders::InboundFederationLambdaTypeBuilder,
  ) -> crate::types::builders::InboundFederationLambdaTypeBuilder {
-@@ -568,6 +676,10 @@
+@@ -568,6 +677,10 @@
      builder
  }
 
@@ -13642,7 +13876,7 @@ diff --git a/src/serde_util.rs b/src/serde_util.rs
  pub(crate) fn log_configuration_type_correct_errors(
      mut builder: crate::types::builders::LogConfigurationTypeBuilder,
  ) -> crate::types::builders::LogConfigurationTypeBuilder {
-@@ -580,6 +692,7 @@
+@@ -580,6 +693,7 @@
      builder
  }
 
@@ -13650,7 +13884,7 @@ diff --git a/src/serde_util.rs b/src/serde_util.rs
  pub(crate) fn notify_configuration_type_correct_errors(
      mut builder: crate::types::builders::NotifyConfigurationTypeBuilder,
  ) -> crate::types::builders::NotifyConfigurationTypeBuilder {
-@@ -589,6 +702,12 @@
+@@ -589,6 +703,12 @@
      builder
  }
 
@@ -13663,7 +13897,7 @@ diff --git a/src/serde_util.rs b/src/serde_util.rs
  pub(crate) fn pre_token_generation_version_config_type_correct_errors(
      mut builder: crate::types::builders::PreTokenGenerationVersionConfigTypeBuilder,
  ) -> crate::types::builders::PreTokenGenerationVersionConfigTypeBuilder {
-@@ -603,6 +722,12 @@
+@@ -603,6 +723,12 @@
      builder
  }
 
@@ -13676,7 +13910,7 @@ diff --git a/src/serde_util.rs b/src/serde_util.rs
  pub(crate) fn resource_server_scope_type_correct_errors(
      mut builder: crate::types::builders::ResourceServerScopeTypeBuilder,
  ) -> crate::types::builders::ResourceServerScopeTypeBuilder {
-@@ -615,6 +740,7 @@
+@@ -615,6 +741,7 @@
      builder
  }
 
@@ -13684,7 +13918,7 @@ diff --git a/src/serde_util.rs b/src/serde_util.rs
  pub(crate) fn account_takeover_action_type_correct_errors(
      mut builder: crate::types::builders::AccountTakeoverActionTypeBuilder,
  ) -> crate::types::builders::AccountTakeoverActionTypeBuilder {
-@@ -629,6 +755,7 @@
+@@ -629,6 +756,7 @@
      builder
  }
 
@@ -13692,7 +13926,7 @@ diff --git a/src/serde_util.rs b/src/serde_util.rs
  pub(crate) fn notify_email_type_correct_errors(
      mut builder: crate::types::builders::NotifyEmailTypeBuilder,
  ) -> crate::types::builders::NotifyEmailTypeBuilder {
-@@ -638,6 +765,11 @@
+@@ -638,6 +766,11 @@
      builder
  }
 
@@ -13712,7 +13946,7 @@ diff --git a/src/serde_util.rs b/src/serde_util.rs
 diff --git a/src/types.rs b/src/types.rs
 --- a/src/types.rs
 +++ b/src/types.rs
-@@ -1,614 +1,1838 @@
+@@ -1,618 +1,1850 @@
  // Code generated by software.amazon.smithy.rust.codegen.smithy-rs. DO NOT EDIT.
 +#[cfg(any(
 +    feature = "op_add_user_pool_client_secret",
@@ -13869,6 +14103,7 @@ diff --git a/src/types.rs b/src/types.rs
 +#[cfg(any(
 +    feature = "op_create_terms",
 +    feature = "op_describe_terms",
++    feature = "op_describe_terms_by_client",
 +    feature = "op_update_terms"
 +))]
  pub use crate::types::_terms_source_type::TermsSourceType;
@@ -13876,6 +14111,7 @@ diff --git a/src/types.rs b/src/types.rs
 +#[cfg(any(
 +    feature = "op_create_terms",
 +    feature = "op_describe_terms",
++    feature = "op_describe_terms_by_client",
 +    feature = "op_list_terms",
 +    feature = "op_update_terms"
 +))]
@@ -13884,6 +14120,7 @@ diff --git a/src/types.rs b/src/types.rs
 +#[cfg(any(
 +    feature = "op_create_terms",
 +    feature = "op_describe_terms",
++    feature = "op_describe_terms_by_client",
 +    feature = "op_update_terms"
 +))]
  pub use crate::types::_terms_type::TermsType;
@@ -14093,6 +14330,9 @@ diff --git a/src/types.rs b/src/types.rs
 +    feature = "op_update_user_attributes"
 +))]
  pub use crate::types::_code_delivery_details_type::CodeDeliveryDetailsType;
+
++#[cfg(feature = "op_get_client_token")]
+ pub use crate::types::_client_authentication_result_type::ClientAuthenticationResultType;
 
 +#[cfg(any(
 +    feature = "op_get_log_delivery_configuration",
@@ -14790,6 +15030,9 @@ diff --git a/src/types.rs b/src/types.rs
 +#[cfg(feature = "op_admin_list_user_auth_events")]
  mod _challenge_response_type;
 
++#[cfg(feature = "op_get_client_token")]
+ mod _client_authentication_result_type;
+
 +#[cfg(any(
 +    feature = "op_add_user_pool_client_secret",
 +    feature = "op_list_user_pool_client_secrets"
@@ -15368,6 +15611,7 @@ diff --git a/src/types.rs b/src/types.rs
 +#[cfg(any(
 +    feature = "op_create_terms",
 +    feature = "op_describe_terms",
++    feature = "op_describe_terms_by_client",
 +    feature = "op_list_terms",
 +    feature = "op_update_terms"
 +))]
@@ -15376,6 +15620,7 @@ diff --git a/src/types.rs b/src/types.rs
 +#[cfg(any(
 +    feature = "op_create_terms",
 +    feature = "op_describe_terms",
++    feature = "op_describe_terms_by_client",
 +    feature = "op_update_terms"
 +))]
  mod _terms_source_type;
@@ -15383,6 +15628,7 @@ diff --git a/src/types.rs b/src/types.rs
 +#[cfg(any(
 +    feature = "op_create_terms",
 +    feature = "op_describe_terms",
++    feature = "op_describe_terms_by_client",
 +    feature = "op_update_terms"
 +))]
  mod _terms_type;
@@ -15559,7 +15805,7 @@ diff --git a/src/types.rs b/src/types.rs
 diff --git a/src/types/builders.rs b/src/types/builders.rs
 --- a/src/types/builders.rs
 +++ b/src/types/builders.rs
-@@ -1,186 +1,549 @@
+@@ -1,188 +1,553 @@
  // Code generated by software.amazon.smithy.rust.codegen.smithy-rs. DO NOT EDIT.
 +#[cfg(any(
 +    feature = "op_add_user_pool_client_secret",
@@ -15675,6 +15921,7 @@ diff --git a/src/types/builders.rs b/src/types/builders.rs
 +#[cfg(any(
 +    feature = "op_create_terms",
 +    feature = "op_describe_terms",
++    feature = "op_describe_terms_by_client",
 +    feature = "op_update_terms"
 +))]
  pub use crate::types::_terms_type::TermsTypeBuilder;
@@ -15845,6 +16092,9 @@ diff --git a/src/types/builders.rs b/src/types/builders.rs
 +    feature = "op_update_user_attributes"
 +))]
  pub use crate::types::_code_delivery_details_type::CodeDeliveryDetailsTypeBuilder;
+
++#[cfg(feature = "op_get_client_token")]
+ pub use crate::types::_client_authentication_result_type::ClientAuthenticationResultTypeBuilder;
 
 +#[cfg(any(
 +    feature = "op_get_log_delivery_configuration",
@@ -16117,13 +16367,14 @@ diff --git a/src/types/builders.rs b/src/types/builders.rs
 diff --git a/src/types/error.rs b/src/types/error.rs
 --- a/src/types/error.rs
 +++ b/src/types/error.rs
-@@ -1,238 +1,2634 @@
+@@ -1,238 +1,2676 @@
  // Code generated by software.amazon.smithy.rust.codegen.smithy-rs. DO NOT EDIT.
 +#[cfg(any(
 +    feature = "op_add_custom_attributes",
 +    feature = "op_admin_add_user_to_group",
 +    feature = "op_admin_confirm_sign_up",
 +    feature = "op_admin_create_user",
++    feature = "op_admin_delete_software_token",
 +    feature = "op_admin_delete_user",
 +    feature = "op_admin_delete_user_attributes",
 +    feature = "op_admin_disable_provider_for_user",
@@ -16182,12 +16433,14 @@ diff --git a/src/types/error.rs b/src/types/error.rs
 +    feature = "op_describe_resource_server",
 +    feature = "op_describe_risk_configuration",
 +    feature = "op_describe_terms",
++    feature = "op_describe_terms_by_client",
 +    feature = "op_describe_user_import_job",
 +    feature = "op_describe_user_pool",
 +    feature = "op_describe_user_pool_client",
 +    feature = "op_describe_user_pool_domain",
 +    feature = "op_forget_device",
 +    feature = "op_forgot_password",
++    feature = "op_get_client_token",
 +    feature = "op_get_csv_header",
 +    feature = "op_get_device",
 +    feature = "op_get_group",
@@ -16255,6 +16508,7 @@ diff --git a/src/types/error.rs b/src/types/error.rs
 +    feature = "op_admin_add_user_to_group",
 +    feature = "op_admin_confirm_sign_up",
 +    feature = "op_admin_create_user",
++    feature = "op_admin_delete_software_token",
 +    feature = "op_admin_delete_user",
 +    feature = "op_admin_delete_user_attributes",
 +    feature = "op_admin_disable_provider_for_user",
@@ -16314,12 +16568,14 @@ diff --git a/src/types/error.rs b/src/types/error.rs
 +    feature = "op_describe_resource_server",
 +    feature = "op_describe_risk_configuration",
 +    feature = "op_describe_terms",
++    feature = "op_describe_terms_by_client",
 +    feature = "op_describe_user_import_job",
 +    feature = "op_describe_user_pool",
 +    feature = "op_describe_user_pool_client",
 +    feature = "op_describe_user_pool_domain",
 +    feature = "op_forget_device",
 +    feature = "op_forgot_password",
++    feature = "op_get_client_token",
 +    feature = "op_get_csv_header",
 +    feature = "op_get_device",
 +    feature = "op_get_group",
@@ -16387,6 +16643,7 @@ diff --git a/src/types/error.rs b/src/types/error.rs
 +    feature = "op_admin_add_user_to_group",
 +    feature = "op_admin_confirm_sign_up",
 +    feature = "op_admin_create_user",
++    feature = "op_admin_delete_software_token",
 +    feature = "op_admin_delete_user",
 +    feature = "op_admin_delete_user_attributes",
 +    feature = "op_admin_disable_provider_for_user",
@@ -16445,12 +16702,14 @@ diff --git a/src/types/error.rs b/src/types/error.rs
 +    feature = "op_describe_resource_server",
 +    feature = "op_describe_risk_configuration",
 +    feature = "op_describe_terms",
++    feature = "op_describe_terms_by_client",
 +    feature = "op_describe_user_import_job",
 +    feature = "op_describe_user_pool",
 +    feature = "op_describe_user_pool_client",
 +    feature = "op_describe_user_pool_domain",
 +    feature = "op_forget_device",
 +    feature = "op_forgot_password",
++    feature = "op_get_client_token",
 +    feature = "op_get_csv_header",
 +    feature = "op_get_device",
 +    feature = "op_get_group",
@@ -16515,6 +16774,7 @@ diff --git a/src/types/error.rs b/src/types/error.rs
 +    feature = "op_admin_add_user_to_group",
 +    feature = "op_admin_confirm_sign_up",
 +    feature = "op_admin_create_user",
++    feature = "op_admin_delete_software_token",
 +    feature = "op_admin_delete_user",
 +    feature = "op_admin_delete_user_attributes",
 +    feature = "op_admin_disable_provider_for_user",
@@ -16569,12 +16829,14 @@ diff --git a/src/types/error.rs b/src/types/error.rs
 +    feature = "op_describe_resource_server",
 +    feature = "op_describe_risk_configuration",
 +    feature = "op_describe_terms",
++    feature = "op_describe_terms_by_client",
 +    feature = "op_describe_user_import_job",
 +    feature = "op_describe_user_pool",
 +    feature = "op_describe_user_pool_client",
 +    feature = "op_describe_user_pool_domain",
 +    feature = "op_forget_device",
 +    feature = "op_forgot_password",
++    feature = "op_get_client_token",
 +    feature = "op_get_csv_header",
 +    feature = "op_get_device",
 +    feature = "op_get_group",
@@ -16633,6 +16895,7 @@ diff --git a/src/types/error.rs b/src/types/error.rs
 +    feature = "op_admin_add_user_to_group",
 +    feature = "op_admin_confirm_sign_up",
 +    feature = "op_admin_create_user",
++    feature = "op_admin_delete_software_token",
 +    feature = "op_admin_delete_user",
 +    feature = "op_admin_delete_user_attributes",
 +    feature = "op_admin_disable_provider_for_user",
@@ -16690,12 +16953,14 @@ diff --git a/src/types/error.rs b/src/types/error.rs
 +    feature = "op_describe_resource_server",
 +    feature = "op_describe_risk_configuration",
 +    feature = "op_describe_terms",
++    feature = "op_describe_terms_by_client",
 +    feature = "op_describe_user_import_job",
 +    feature = "op_describe_user_pool",
 +    feature = "op_describe_user_pool_client",
 +    feature = "op_describe_user_pool_domain",
 +    feature = "op_forget_device",
 +    feature = "op_forgot_password",
++    feature = "op_get_client_token",
 +    feature = "op_get_csv_header",
 +    feature = "op_get_device",
 +    feature = "op_get_group",
@@ -16760,6 +17025,7 @@ diff --git a/src/types/error.rs b/src/types/error.rs
 +    feature = "op_admin_add_user_to_group",
 +    feature = "op_admin_confirm_sign_up",
 +    feature = "op_admin_create_user",
++    feature = "op_admin_delete_software_token",
 +    feature = "op_admin_delete_user",
 +    feature = "op_admin_delete_user_attributes",
 +    feature = "op_admin_disable_provider_for_user",
@@ -16814,11 +17080,13 @@ diff --git a/src/types/error.rs b/src/types/error.rs
 +    feature = "op_describe_resource_server",
 +    feature = "op_describe_risk_configuration",
 +    feature = "op_describe_terms",
++    feature = "op_describe_terms_by_client",
 +    feature = "op_describe_user_import_job",
 +    feature = "op_describe_user_pool",
 +    feature = "op_describe_user_pool_client",
 +    feature = "op_forget_device",
 +    feature = "op_forgot_password",
++    feature = "op_get_client_token",
 +    feature = "op_get_csv_header",
 +    feature = "op_get_device",
 +    feature = "op_get_group",
@@ -16931,6 +17199,7 @@ diff --git a/src/types/error.rs b/src/types/error.rs
 +    feature = "op_admin_add_user_to_group",
 +    feature = "op_admin_confirm_sign_up",
 +    feature = "op_admin_create_user",
++    feature = "op_admin_delete_software_token",
 +    feature = "op_admin_delete_user",
 +    feature = "op_admin_delete_user_attributes",
 +    feature = "op_admin_disable_provider_for_user",
@@ -17128,6 +17397,34 @@ diff --git a/src/types/error.rs b/src/types/error.rs
  pub use crate::types::error::_username_exists_exception::UsernameExistsException;
 
 +#[cfg(any(
++    feature = "op_admin_delete_software_token",
++    feature = "op_admin_initiate_auth",
++    feature = "op_admin_respond_to_auth_challenge",
++    feature = "op_admin_set_user_mfa_preference",
++    feature = "op_change_password",
++    feature = "op_confirm_device",
++    feature = "op_confirm_forgot_password",
++    feature = "op_delete_user",
++    feature = "op_delete_user_attributes",
++    feature = "op_forget_device",
++    feature = "op_get_device",
++    feature = "op_get_user",
++    feature = "op_get_user_attribute_verification_code",
++    feature = "op_get_user_auth_factors",
++    feature = "op_global_sign_out",
++    feature = "op_initiate_auth",
++    feature = "op_list_devices",
++    feature = "op_respond_to_auth_challenge",
++    feature = "op_set_user_mfa_preference",
++    feature = "op_set_user_settings",
++    feature = "op_update_device_status",
++    feature = "op_update_user_attributes",
++    feature = "op_verify_software_token",
++    feature = "op_verify_user_attribute"
++))]
+ pub use crate::types::error::_user_not_confirmed_exception::UserNotConfirmedException;
+
++#[cfg(any(
 +    feature = "op_admin_disable_provider_for_user",
 +    feature = "op_admin_link_provider_for_user",
 +    feature = "op_admin_respond_to_auth_challenge",
@@ -17220,33 +17517,6 @@ diff --git a/src/types/error.rs b/src/types/error.rs
  pub use crate::types::error::_unsupported_operation_exception::UnsupportedOperationException;
 
 +#[cfg(any(
-+    feature = "op_admin_initiate_auth",
-+    feature = "op_admin_respond_to_auth_challenge",
-+    feature = "op_admin_set_user_mfa_preference",
-+    feature = "op_change_password",
-+    feature = "op_confirm_device",
-+    feature = "op_confirm_forgot_password",
-+    feature = "op_delete_user",
-+    feature = "op_delete_user_attributes",
-+    feature = "op_forget_device",
-+    feature = "op_get_device",
-+    feature = "op_get_user",
-+    feature = "op_get_user_attribute_verification_code",
-+    feature = "op_get_user_auth_factors",
-+    feature = "op_global_sign_out",
-+    feature = "op_initiate_auth",
-+    feature = "op_list_devices",
-+    feature = "op_respond_to_auth_challenge",
-+    feature = "op_set_user_mfa_preference",
-+    feature = "op_set_user_settings",
-+    feature = "op_update_device_status",
-+    feature = "op_update_user_attributes",
-+    feature = "op_verify_software_token",
-+    feature = "op_verify_user_attribute"
-+))]
- pub use crate::types::error::_user_not_confirmed_exception::UserNotConfirmedException;
-
-+#[cfg(any(
 +    feature = "op_admin_list_user_auth_events",
 +    feature = "op_admin_update_auth_event_feedback",
 +    feature = "op_describe_risk_configuration",
@@ -17325,6 +17595,7 @@ diff --git a/src/types/error.rs b/src/types/error.rs
 +    feature = "op_delete_web_authn_credential",
 +    feature = "op_forget_device",
 +    feature = "op_forgot_password",
++    feature = "op_get_client_token",
 +    feature = "op_get_device",
 +    feature = "op_get_tokens_from_refresh_token",
 +    feature = "op_get_user",
@@ -17536,6 +17807,7 @@ diff --git a/src/types/error.rs b/src/types/error.rs
 +    feature = "op_delete_web_authn_credential",
 +    feature = "op_forget_device",
 +    feature = "op_forgot_password",
++    feature = "op_get_client_token",
 +    feature = "op_get_device",
 +    feature = "op_get_tokens_from_refresh_token",
 +    feature = "op_get_user",
@@ -17567,6 +17839,7 @@ diff --git a/src/types/error.rs b/src/types/error.rs
 +    feature = "op_admin_add_user_to_group",
 +    feature = "op_admin_confirm_sign_up",
 +    feature = "op_admin_create_user",
++    feature = "op_admin_delete_software_token",
 +    feature = "op_admin_delete_user",
 +    feature = "op_admin_delete_user_attributes",
 +    feature = "op_admin_disable_provider_for_user",
@@ -17625,12 +17898,14 @@ diff --git a/src/types/error.rs b/src/types/error.rs
 +    feature = "op_describe_resource_server",
 +    feature = "op_describe_risk_configuration",
 +    feature = "op_describe_terms",
++    feature = "op_describe_terms_by_client",
 +    feature = "op_describe_user_import_job",
 +    feature = "op_describe_user_pool",
 +    feature = "op_describe_user_pool_client",
 +    feature = "op_describe_user_pool_domain",
 +    feature = "op_forget_device",
 +    feature = "op_forgot_password",
++    feature = "op_get_client_token",
 +    feature = "op_get_csv_header",
 +    feature = "op_get_device",
 +    feature = "op_get_group",
@@ -17747,6 +18022,7 @@ diff --git a/src/types/error.rs b/src/types/error.rs
 +    feature = "op_admin_add_user_to_group",
 +    feature = "op_admin_confirm_sign_up",
 +    feature = "op_admin_create_user",
++    feature = "op_admin_delete_software_token",
 +    feature = "op_admin_delete_user",
 +    feature = "op_admin_delete_user_attributes",
 +    feature = "op_admin_disable_provider_for_user",
@@ -17806,12 +18082,14 @@ diff --git a/src/types/error.rs b/src/types/error.rs
 +    feature = "op_describe_resource_server",
 +    feature = "op_describe_risk_configuration",
 +    feature = "op_describe_terms",
++    feature = "op_describe_terms_by_client",
 +    feature = "op_describe_user_import_job",
 +    feature = "op_describe_user_pool",
 +    feature = "op_describe_user_pool_client",
 +    feature = "op_describe_user_pool_domain",
 +    feature = "op_forget_device",
 +    feature = "op_forgot_password",
++    feature = "op_get_client_token",
 +    feature = "op_get_csv_header",
 +    feature = "op_get_device",
 +    feature = "op_get_group",
@@ -17989,6 +18267,7 @@ diff --git a/src/types/error.rs b/src/types/error.rs
 +    feature = "op_admin_add_user_to_group",
 +    feature = "op_admin_confirm_sign_up",
 +    feature = "op_admin_create_user",
++    feature = "op_admin_delete_software_token",
 +    feature = "op_admin_delete_user",
 +    feature = "op_admin_delete_user_attributes",
 +    feature = "op_admin_disable_provider_for_user",
@@ -18047,12 +18326,14 @@ diff --git a/src/types/error.rs b/src/types/error.rs
 +    feature = "op_describe_resource_server",
 +    feature = "op_describe_risk_configuration",
 +    feature = "op_describe_terms",
++    feature = "op_describe_terms_by_client",
 +    feature = "op_describe_user_import_job",
 +    feature = "op_describe_user_pool",
 +    feature = "op_describe_user_pool_client",
 +    feature = "op_describe_user_pool_domain",
 +    feature = "op_forget_device",
 +    feature = "op_forgot_password",
++    feature = "op_get_client_token",
 +    feature = "op_get_csv_header",
 +    feature = "op_get_device",
 +    feature = "op_get_group",
@@ -18117,6 +18398,7 @@ diff --git a/src/types/error.rs b/src/types/error.rs
 +    feature = "op_admin_add_user_to_group",
 +    feature = "op_admin_confirm_sign_up",
 +    feature = "op_admin_create_user",
++    feature = "op_admin_delete_software_token",
 +    feature = "op_admin_delete_user",
 +    feature = "op_admin_delete_user_attributes",
 +    feature = "op_admin_disable_provider_for_user",
@@ -18171,12 +18453,14 @@ diff --git a/src/types/error.rs b/src/types/error.rs
 +    feature = "op_describe_resource_server",
 +    feature = "op_describe_risk_configuration",
 +    feature = "op_describe_terms",
++    feature = "op_describe_terms_by_client",
 +    feature = "op_describe_user_import_job",
 +    feature = "op_describe_user_pool",
 +    feature = "op_describe_user_pool_client",
 +    feature = "op_describe_user_pool_domain",
 +    feature = "op_forget_device",
 +    feature = "op_forgot_password",
++    feature = "op_get_client_token",
 +    feature = "op_get_csv_header",
 +    feature = "op_get_device",
 +    feature = "op_get_group",
@@ -18285,6 +18569,7 @@ diff --git a/src/types/error.rs b/src/types/error.rs
 +    feature = "op_admin_add_user_to_group",
 +    feature = "op_admin_confirm_sign_up",
 +    feature = "op_admin_create_user",
++    feature = "op_admin_delete_software_token",
 +    feature = "op_admin_delete_user",
 +    feature = "op_admin_delete_user_attributes",
 +    feature = "op_admin_disable_provider_for_user",
@@ -18342,12 +18627,14 @@ diff --git a/src/types/error.rs b/src/types/error.rs
 +    feature = "op_describe_resource_server",
 +    feature = "op_describe_risk_configuration",
 +    feature = "op_describe_terms",
++    feature = "op_describe_terms_by_client",
 +    feature = "op_describe_user_import_job",
 +    feature = "op_describe_user_pool",
 +    feature = "op_describe_user_pool_client",
 +    feature = "op_describe_user_pool_domain",
 +    feature = "op_forget_device",
 +    feature = "op_forgot_password",
++    feature = "op_get_client_token",
 +    feature = "op_get_csv_header",
 +    feature = "op_get_device",
 +    feature = "op_get_group",
@@ -18439,6 +18726,7 @@ diff --git a/src/types/error.rs b/src/types/error.rs
 +    feature = "op_admin_add_user_to_group",
 +    feature = "op_admin_confirm_sign_up",
 +    feature = "op_admin_create_user",
++    feature = "op_admin_delete_software_token",
 +    feature = "op_admin_delete_user",
 +    feature = "op_admin_delete_user_attributes",
 +    feature = "op_admin_disable_provider_for_user",
@@ -18493,11 +18781,13 @@ diff --git a/src/types/error.rs b/src/types/error.rs
 +    feature = "op_describe_resource_server",
 +    feature = "op_describe_risk_configuration",
 +    feature = "op_describe_terms",
++    feature = "op_describe_terms_by_client",
 +    feature = "op_describe_user_import_job",
 +    feature = "op_describe_user_pool",
 +    feature = "op_describe_user_pool_client",
 +    feature = "op_forget_device",
 +    feature = "op_forgot_password",
++    feature = "op_get_client_token",
 +    feature = "op_get_csv_header",
 +    feature = "op_get_device",
 +    feature = "op_get_group",
@@ -18624,6 +18914,7 @@ diff --git a/src/types/error.rs b/src/types/error.rs
  mod _user_lambda_validation_exception;
 
 +#[cfg(any(
++    feature = "op_admin_delete_software_token",
 +    feature = "op_admin_initiate_auth",
 +    feature = "op_admin_respond_to_auth_challenge",
 +    feature = "op_admin_set_user_mfa_preference",
@@ -18654,6 +18945,7 @@ diff --git a/src/types/error.rs b/src/types/error.rs
 +    feature = "op_admin_add_user_to_group",
 +    feature = "op_admin_confirm_sign_up",
 +    feature = "op_admin_create_user",
++    feature = "op_admin_delete_software_token",
 +    feature = "op_admin_delete_user",
 +    feature = "op_admin_delete_user_attributes",
 +    feature = "op_admin_disable_provider_for_user",
@@ -18760,13 +19052,14 @@ diff --git a/src/types/error.rs b/src/types/error.rs
 diff --git a/src/types/error/builders.rs b/src/types/error/builders.rs
 --- a/src/types/error/builders.rs
 +++ b/src/types/error/builders.rs
-@@ -1,118 +1,1316 @@
+@@ -1,118 +1,1337 @@
  // Code generated by software.amazon.smithy.rust.codegen.smithy-rs. DO NOT EDIT.
 +#[cfg(any(
 +    feature = "op_add_custom_attributes",
 +    feature = "op_admin_add_user_to_group",
 +    feature = "op_admin_confirm_sign_up",
 +    feature = "op_admin_create_user",
++    feature = "op_admin_delete_software_token",
 +    feature = "op_admin_delete_user",
 +    feature = "op_admin_delete_user_attributes",
 +    feature = "op_admin_disable_provider_for_user",
@@ -18825,12 +19118,14 @@ diff --git a/src/types/error/builders.rs b/src/types/error/builders.rs
 +    feature = "op_describe_resource_server",
 +    feature = "op_describe_risk_configuration",
 +    feature = "op_describe_terms",
++    feature = "op_describe_terms_by_client",
 +    feature = "op_describe_user_import_job",
 +    feature = "op_describe_user_pool",
 +    feature = "op_describe_user_pool_client",
 +    feature = "op_describe_user_pool_domain",
 +    feature = "op_forget_device",
 +    feature = "op_forgot_password",
++    feature = "op_get_client_token",
 +    feature = "op_get_csv_header",
 +    feature = "op_get_device",
 +    feature = "op_get_group",
@@ -18898,6 +19193,7 @@ diff --git a/src/types/error/builders.rs b/src/types/error/builders.rs
 +    feature = "op_admin_add_user_to_group",
 +    feature = "op_admin_confirm_sign_up",
 +    feature = "op_admin_create_user",
++    feature = "op_admin_delete_software_token",
 +    feature = "op_admin_delete_user",
 +    feature = "op_admin_delete_user_attributes",
 +    feature = "op_admin_disable_provider_for_user",
@@ -18957,12 +19253,14 @@ diff --git a/src/types/error/builders.rs b/src/types/error/builders.rs
 +    feature = "op_describe_resource_server",
 +    feature = "op_describe_risk_configuration",
 +    feature = "op_describe_terms",
++    feature = "op_describe_terms_by_client",
 +    feature = "op_describe_user_import_job",
 +    feature = "op_describe_user_pool",
 +    feature = "op_describe_user_pool_client",
 +    feature = "op_describe_user_pool_domain",
 +    feature = "op_forget_device",
 +    feature = "op_forgot_password",
++    feature = "op_get_client_token",
 +    feature = "op_get_csv_header",
 +    feature = "op_get_device",
 +    feature = "op_get_group",
@@ -19030,6 +19328,7 @@ diff --git a/src/types/error/builders.rs b/src/types/error/builders.rs
 +    feature = "op_admin_add_user_to_group",
 +    feature = "op_admin_confirm_sign_up",
 +    feature = "op_admin_create_user",
++    feature = "op_admin_delete_software_token",
 +    feature = "op_admin_delete_user",
 +    feature = "op_admin_delete_user_attributes",
 +    feature = "op_admin_disable_provider_for_user",
@@ -19088,12 +19387,14 @@ diff --git a/src/types/error/builders.rs b/src/types/error/builders.rs
 +    feature = "op_describe_resource_server",
 +    feature = "op_describe_risk_configuration",
 +    feature = "op_describe_terms",
++    feature = "op_describe_terms_by_client",
 +    feature = "op_describe_user_import_job",
 +    feature = "op_describe_user_pool",
 +    feature = "op_describe_user_pool_client",
 +    feature = "op_describe_user_pool_domain",
 +    feature = "op_forget_device",
 +    feature = "op_forgot_password",
++    feature = "op_get_client_token",
 +    feature = "op_get_csv_header",
 +    feature = "op_get_device",
 +    feature = "op_get_group",
@@ -19158,6 +19459,7 @@ diff --git a/src/types/error/builders.rs b/src/types/error/builders.rs
 +    feature = "op_admin_add_user_to_group",
 +    feature = "op_admin_confirm_sign_up",
 +    feature = "op_admin_create_user",
++    feature = "op_admin_delete_software_token",
 +    feature = "op_admin_delete_user",
 +    feature = "op_admin_delete_user_attributes",
 +    feature = "op_admin_disable_provider_for_user",
@@ -19212,12 +19514,14 @@ diff --git a/src/types/error/builders.rs b/src/types/error/builders.rs
 +    feature = "op_describe_resource_server",
 +    feature = "op_describe_risk_configuration",
 +    feature = "op_describe_terms",
++    feature = "op_describe_terms_by_client",
 +    feature = "op_describe_user_import_job",
 +    feature = "op_describe_user_pool",
 +    feature = "op_describe_user_pool_client",
 +    feature = "op_describe_user_pool_domain",
 +    feature = "op_forget_device",
 +    feature = "op_forgot_password",
++    feature = "op_get_client_token",
 +    feature = "op_get_csv_header",
 +    feature = "op_get_device",
 +    feature = "op_get_group",
@@ -19276,6 +19580,7 @@ diff --git a/src/types/error/builders.rs b/src/types/error/builders.rs
 +    feature = "op_admin_add_user_to_group",
 +    feature = "op_admin_confirm_sign_up",
 +    feature = "op_admin_create_user",
++    feature = "op_admin_delete_software_token",
 +    feature = "op_admin_delete_user",
 +    feature = "op_admin_delete_user_attributes",
 +    feature = "op_admin_disable_provider_for_user",
@@ -19333,12 +19638,14 @@ diff --git a/src/types/error/builders.rs b/src/types/error/builders.rs
 +    feature = "op_describe_resource_server",
 +    feature = "op_describe_risk_configuration",
 +    feature = "op_describe_terms",
++    feature = "op_describe_terms_by_client",
 +    feature = "op_describe_user_import_job",
 +    feature = "op_describe_user_pool",
 +    feature = "op_describe_user_pool_client",
 +    feature = "op_describe_user_pool_domain",
 +    feature = "op_forget_device",
 +    feature = "op_forgot_password",
++    feature = "op_get_client_token",
 +    feature = "op_get_csv_header",
 +    feature = "op_get_device",
 +    feature = "op_get_group",
@@ -19403,6 +19710,7 @@ diff --git a/src/types/error/builders.rs b/src/types/error/builders.rs
 +    feature = "op_admin_add_user_to_group",
 +    feature = "op_admin_confirm_sign_up",
 +    feature = "op_admin_create_user",
++    feature = "op_admin_delete_software_token",
 +    feature = "op_admin_delete_user",
 +    feature = "op_admin_delete_user_attributes",
 +    feature = "op_admin_disable_provider_for_user",
@@ -19457,11 +19765,13 @@ diff --git a/src/types/error/builders.rs b/src/types/error/builders.rs
 +    feature = "op_describe_resource_server",
 +    feature = "op_describe_risk_configuration",
 +    feature = "op_describe_terms",
++    feature = "op_describe_terms_by_client",
 +    feature = "op_describe_user_import_job",
 +    feature = "op_describe_user_pool",
 +    feature = "op_describe_user_pool_client",
 +    feature = "op_forget_device",
 +    feature = "op_forgot_password",
++    feature = "op_get_client_token",
 +    feature = "op_get_csv_header",
 +    feature = "op_get_device",
 +    feature = "op_get_group",
@@ -19574,6 +19884,7 @@ diff --git a/src/types/error/builders.rs b/src/types/error/builders.rs
 +    feature = "op_admin_add_user_to_group",
 +    feature = "op_admin_confirm_sign_up",
 +    feature = "op_admin_create_user",
++    feature = "op_admin_delete_software_token",
 +    feature = "op_admin_delete_user",
 +    feature = "op_admin_delete_user_attributes",
 +    feature = "op_admin_disable_provider_for_user",
@@ -19771,6 +20082,34 @@ diff --git a/src/types/error/builders.rs b/src/types/error/builders.rs
  pub use crate::types::error::_username_exists_exception::UsernameExistsExceptionBuilder;
 
 +#[cfg(any(
++    feature = "op_admin_delete_software_token",
++    feature = "op_admin_initiate_auth",
++    feature = "op_admin_respond_to_auth_challenge",
++    feature = "op_admin_set_user_mfa_preference",
++    feature = "op_change_password",
++    feature = "op_confirm_device",
++    feature = "op_confirm_forgot_password",
++    feature = "op_delete_user",
++    feature = "op_delete_user_attributes",
++    feature = "op_forget_device",
++    feature = "op_get_device",
++    feature = "op_get_user",
++    feature = "op_get_user_attribute_verification_code",
++    feature = "op_get_user_auth_factors",
++    feature = "op_global_sign_out",
++    feature = "op_initiate_auth",
++    feature = "op_list_devices",
++    feature = "op_respond_to_auth_challenge",
++    feature = "op_set_user_mfa_preference",
++    feature = "op_set_user_settings",
++    feature = "op_update_device_status",
++    feature = "op_update_user_attributes",
++    feature = "op_verify_software_token",
++    feature = "op_verify_user_attribute"
++))]
+ pub use crate::types::error::_user_not_confirmed_exception::UserNotConfirmedExceptionBuilder;
+
++#[cfg(any(
 +    feature = "op_admin_disable_provider_for_user",
 +    feature = "op_admin_link_provider_for_user",
 +    feature = "op_admin_respond_to_auth_challenge",
@@ -19863,33 +20202,6 @@ diff --git a/src/types/error/builders.rs b/src/types/error/builders.rs
  pub use crate::types::error::_unsupported_operation_exception::UnsupportedOperationExceptionBuilder;
 
 +#[cfg(any(
-+    feature = "op_admin_initiate_auth",
-+    feature = "op_admin_respond_to_auth_challenge",
-+    feature = "op_admin_set_user_mfa_preference",
-+    feature = "op_change_password",
-+    feature = "op_confirm_device",
-+    feature = "op_confirm_forgot_password",
-+    feature = "op_delete_user",
-+    feature = "op_delete_user_attributes",
-+    feature = "op_forget_device",
-+    feature = "op_get_device",
-+    feature = "op_get_user",
-+    feature = "op_get_user_attribute_verification_code",
-+    feature = "op_get_user_auth_factors",
-+    feature = "op_global_sign_out",
-+    feature = "op_initiate_auth",
-+    feature = "op_list_devices",
-+    feature = "op_respond_to_auth_challenge",
-+    feature = "op_set_user_mfa_preference",
-+    feature = "op_set_user_settings",
-+    feature = "op_update_device_status",
-+    feature = "op_update_user_attributes",
-+    feature = "op_verify_software_token",
-+    feature = "op_verify_user_attribute"
-+))]
- pub use crate::types::error::_user_not_confirmed_exception::UserNotConfirmedExceptionBuilder;
-
-+#[cfg(any(
 +    feature = "op_admin_list_user_auth_events",
 +    feature = "op_admin_update_auth_event_feedback",
 +    feature = "op_describe_risk_configuration",
@@ -19968,6 +20280,7 @@ diff --git a/src/types/error/builders.rs b/src/types/error/builders.rs
 +    feature = "op_delete_web_authn_credential",
 +    feature = "op_forget_device",
 +    feature = "op_forgot_password",
++    feature = "op_get_client_token",
 +    feature = "op_get_device",
 +    feature = "op_get_tokens_from_refresh_token",
 +    feature = "op_get_user",
@@ -20094,7 +20407,7 @@ diff --git a/Cargo.toml b/Cargo.toml
 
  [dependencies.aws-runtime]
 -path = "../aws-runtime"
- version = "1.9.1"
+ version = "1.9.2"
 
  [dependencies.aws-smithy-async]
 -path = "../aws-smithy-async"
@@ -20120,7 +20433,7 @@ diff --git a/Cargo.toml b/Cargo.toml
  [dependencies.aws-smithy-runtime-api]
 -path = "../aws-smithy-runtime-api"
  features = ["client", "http-1x"]
- version = "1.15.0"
+ version = "1.16.0"
 
  [dependencies.aws-smithy-schema]
 -path = "../aws-smithy-schema"
@@ -20129,11 +20442,11 @@ diff --git a/Cargo.toml b/Cargo.toml
  [dependencies.aws-smithy-types]
 -path = "../aws-smithy-types"
  features = ["http-body-1-x"]
- version = "1.6.2"
+ version = "1.6.3"
 
  [dependencies.aws-types]
 -path = "../aws-types"
- version = "1.5.0"
+ version = "1.6.0"
 
  [dependencies.bytes]
 @@ -84,11 +73,9 @@
@@ -20141,14 +20454,14 @@ diff --git a/Cargo.toml b/Cargo.toml
  version = "0.1"
  [dev-dependencies.aws-config]
 -path = "../aws-config"
- version = "1.11.0"
+ version = "1.12.0"
 
  [dev-dependencies.aws-credential-types]
 -path = "../aws-credential-types"
  features = ["test-util"]
  version = "1.3.0"
 
-@@ -107,3 +94,132 @@
+@@ -107,3 +94,135 @@
  test-util = ["aws-credential-types/test-util", "aws-smithy-runtime/legacy-test-util", "aws-smithy-runtime/test-util"]
  gated-tests = []
  default = ["rustls", "default-https-client", "rt-tokio"]
@@ -20157,6 +20470,7 @@ diff --git a/Cargo.toml b/Cargo.toml
 +op_admin_add_user_to_group = []
 +op_admin_confirm_sign_up = []
 +op_admin_create_user = []
++op_admin_delete_software_token = []
 +op_admin_delete_user = []
 +op_admin_delete_user_attributes = []
 +op_admin_disable_provider_for_user = []
@@ -20216,12 +20530,14 @@ diff --git a/Cargo.toml b/Cargo.toml
 +op_describe_resource_server = []
 +op_describe_risk_configuration = []
 +op_describe_terms = []
++op_describe_terms_by_client = []
 +op_describe_user_import_job = []
 +op_describe_user_pool = []
 +op_describe_user_pool_client = []
 +op_describe_user_pool_domain = []
 +op_forget_device = []
 +op_forgot_password = []
++op_get_client_token = []
 +op_get_csv_header = []
 +op_get_device = []
 +op_get_group = []
@@ -20284,7 +20600,7 @@ diff --git a/Cargo.toml b/Cargo.toml
 diff --git a/src/client.rs b/src/client.rs
 --- a/src/client.rs
 +++ b/src/client.rs
-@@ -136,94 +136,139 @@
+@@ -136,96 +136,142 @@
      }
  }
 
@@ -20302,6 +20618,9 @@ diff --git a/src/client.rs b/src/client.rs
 
 +#[cfg(feature = "op_admin_create_user")]
  mod admin_create_user;
+
++#[cfg(feature = "op_admin_delete_software_token")]
+ mod admin_delete_software_token;
 
 +#[cfg(feature = "op_admin_delete_user")]
  mod admin_delete_user;
@@ -20424,7 +20743,7 @@ diff --git a/src/client.rs b/src/client.rs
  mod create_user_pool_replica;
 
  /// Operation customization and supporting types.
-@@ -253,170 +298,254 @@
+@@ -255,174 +301,260 @@
  /// ```
  pub mod customize;
 
@@ -20485,6 +20804,9 @@ diff --git a/src/client.rs b/src/client.rs
 +#[cfg(feature = "op_describe_terms")]
  mod describe_terms;
 
++#[cfg(feature = "op_describe_terms_by_client")]
+ mod describe_terms_by_client;
+
 +#[cfg(feature = "op_describe_user_import_job")]
  mod describe_user_import_job;
 
@@ -20502,6 +20824,9 @@ diff --git a/src/client.rs b/src/client.rs
 
 +#[cfg(feature = "op_forgot_password")]
  mod forgot_password;
+
++#[cfg(feature = "op_get_client_token")]
+ mod get_client_token;
 
 +#[cfg(feature = "op_get_csv_header")]
  mod get_csv_header;
@@ -20682,7 +21007,7 @@ diff --git a/src/client.rs b/src/client.rs
 diff --git a/src/error_meta.rs b/src/error_meta.rs
 --- a/src/error_meta.rs
 +++ b/src/error_meta.rs
-@@ -3,122 +3,1320 @@
+@@ -3,122 +3,1341 @@
  #[non_exhaustive]
  #[derive(::std::fmt::Debug)]
  pub enum Error {
@@ -20787,6 +21112,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
 +        feature = "op_delete_web_authn_credential",
 +        feature = "op_forget_device",
 +        feature = "op_forgot_password",
++        feature = "op_get_client_token",
 +        feature = "op_get_device",
 +        feature = "op_get_tokens_from_refresh_token",
 +        feature = "op_get_user",
@@ -20818,6 +21144,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
 +        feature = "op_admin_add_user_to_group",
 +        feature = "op_admin_confirm_sign_up",
 +        feature = "op_admin_create_user",
++        feature = "op_admin_delete_software_token",
 +        feature = "op_admin_delete_user",
 +        feature = "op_admin_delete_user_attributes",
 +        feature = "op_admin_disable_provider_for_user",
@@ -20876,12 +21203,14 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
 +        feature = "op_describe_resource_server",
 +        feature = "op_describe_risk_configuration",
 +        feature = "op_describe_terms",
++        feature = "op_describe_terms_by_client",
 +        feature = "op_describe_user_import_job",
 +        feature = "op_describe_user_pool",
 +        feature = "op_describe_user_pool_client",
 +        feature = "op_describe_user_pool_domain",
 +        feature = "op_forget_device",
 +        feature = "op_forgot_password",
++        feature = "op_get_client_token",
 +        feature = "op_get_csv_header",
 +        feature = "op_get_device",
 +        feature = "op_get_group",
@@ -20998,6 +21327,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
 +        feature = "op_admin_add_user_to_group",
 +        feature = "op_admin_confirm_sign_up",
 +        feature = "op_admin_create_user",
++        feature = "op_admin_delete_software_token",
 +        feature = "op_admin_delete_user",
 +        feature = "op_admin_delete_user_attributes",
 +        feature = "op_admin_disable_provider_for_user",
@@ -21057,12 +21387,14 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
 +        feature = "op_describe_resource_server",
 +        feature = "op_describe_risk_configuration",
 +        feature = "op_describe_terms",
++        feature = "op_describe_terms_by_client",
 +        feature = "op_describe_user_import_job",
 +        feature = "op_describe_user_pool",
 +        feature = "op_describe_user_pool_client",
 +        feature = "op_describe_user_pool_domain",
 +        feature = "op_forget_device",
 +        feature = "op_forgot_password",
++        feature = "op_get_client_token",
 +        feature = "op_get_csv_header",
 +        feature = "op_get_device",
 +        feature = "op_get_group",
@@ -21240,6 +21572,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
 +        feature = "op_admin_add_user_to_group",
 +        feature = "op_admin_confirm_sign_up",
 +        feature = "op_admin_create_user",
++        feature = "op_admin_delete_software_token",
 +        feature = "op_admin_delete_user",
 +        feature = "op_admin_delete_user_attributes",
 +        feature = "op_admin_disable_provider_for_user",
@@ -21298,12 +21631,14 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
 +        feature = "op_describe_resource_server",
 +        feature = "op_describe_risk_configuration",
 +        feature = "op_describe_terms",
++        feature = "op_describe_terms_by_client",
 +        feature = "op_describe_user_import_job",
 +        feature = "op_describe_user_pool",
 +        feature = "op_describe_user_pool_client",
 +        feature = "op_describe_user_pool_domain",
 +        feature = "op_forget_device",
 +        feature = "op_forgot_password",
++        feature = "op_get_client_token",
 +        feature = "op_get_csv_header",
 +        feature = "op_get_device",
 +        feature = "op_get_group",
@@ -21368,6 +21703,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
 +        feature = "op_admin_add_user_to_group",
 +        feature = "op_admin_confirm_sign_up",
 +        feature = "op_admin_create_user",
++        feature = "op_admin_delete_software_token",
 +        feature = "op_admin_delete_user",
 +        feature = "op_admin_delete_user_attributes",
 +        feature = "op_admin_disable_provider_for_user",
@@ -21422,12 +21758,14 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
 +        feature = "op_describe_resource_server",
 +        feature = "op_describe_risk_configuration",
 +        feature = "op_describe_terms",
++        feature = "op_describe_terms_by_client",
 +        feature = "op_describe_user_import_job",
 +        feature = "op_describe_user_pool",
 +        feature = "op_describe_user_pool_client",
 +        feature = "op_describe_user_pool_domain",
 +        feature = "op_forget_device",
 +        feature = "op_forgot_password",
++        feature = "op_get_client_token",
 +        feature = "op_get_csv_header",
 +        feature = "op_get_device",
 +        feature = "op_get_group",
@@ -21536,6 +21874,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
 +        feature = "op_admin_add_user_to_group",
 +        feature = "op_admin_confirm_sign_up",
 +        feature = "op_admin_create_user",
++        feature = "op_admin_delete_software_token",
 +        feature = "op_admin_delete_user",
 +        feature = "op_admin_delete_user_attributes",
 +        feature = "op_admin_disable_provider_for_user",
@@ -21593,12 +21932,14 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
 +        feature = "op_describe_resource_server",
 +        feature = "op_describe_risk_configuration",
 +        feature = "op_describe_terms",
++        feature = "op_describe_terms_by_client",
 +        feature = "op_describe_user_import_job",
 +        feature = "op_describe_user_pool",
 +        feature = "op_describe_user_pool_client",
 +        feature = "op_describe_user_pool_domain",
 +        feature = "op_forget_device",
 +        feature = "op_forgot_password",
++        feature = "op_get_client_token",
 +        feature = "op_get_csv_header",
 +        feature = "op_get_device",
 +        feature = "op_get_group",
@@ -21690,6 +22031,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
 +        feature = "op_admin_add_user_to_group",
 +        feature = "op_admin_confirm_sign_up",
 +        feature = "op_admin_create_user",
++        feature = "op_admin_delete_software_token",
 +        feature = "op_admin_delete_user",
 +        feature = "op_admin_delete_user_attributes",
 +        feature = "op_admin_disable_provider_for_user",
@@ -21744,11 +22086,13 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
 +        feature = "op_describe_resource_server",
 +        feature = "op_describe_risk_configuration",
 +        feature = "op_describe_terms",
++        feature = "op_describe_terms_by_client",
 +        feature = "op_describe_user_import_job",
 +        feature = "op_describe_user_pool",
 +        feature = "op_describe_user_pool_client",
 +        feature = "op_forget_device",
 +        feature = "op_forgot_password",
++        feature = "op_get_client_token",
 +        feature = "op_get_csv_header",
 +        feature = "op_get_device",
 +        feature = "op_get_group",
@@ -21875,6 +22219,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
      /// <p>This exception is thrown when the Amazon Cognito service encounters a user validation exception with the Lambda service.</p>
      UserLambdaValidationException(crate::types::error::UserLambdaValidationException),
 +    #[cfg(any(
++        feature = "op_admin_delete_software_token",
 +        feature = "op_admin_initiate_auth",
 +        feature = "op_admin_respond_to_auth_challenge",
 +        feature = "op_admin_set_user_mfa_preference",
@@ -21905,6 +22250,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
 +        feature = "op_admin_add_user_to_group",
 +        feature = "op_admin_confirm_sign_up",
 +        feature = "op_admin_create_user",
++        feature = "op_admin_delete_software_token",
 +        feature = "op_admin_delete_user",
 +        feature = "op_admin_delete_user_attributes",
 +        feature = "op_admin_disable_provider_for_user",
@@ -22003,7 +22349,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
      /// <p>This exception is thrown when the given passkey credential is associated with a different relying party ID than the user pool relying party ID.</p>
      WebAuthnRelyingPartyMismatchException(crate::types::error::WebAuthnRelyingPartyMismatchException),
      /// An unexpected error occurred (e.g., invalid JSON returned by the service or an unknown error code).
-@@ -135,64 +1333,1262 @@
+@@ -135,64 +1354,1283 @@
  impl ::std::fmt::Display for Error {
      fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
          match self {
@@ -22098,6 +22444,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
 +                feature = "op_delete_web_authn_credential",
 +                feature = "op_forget_device",
 +                feature = "op_forgot_password",
++                feature = "op_get_client_token",
 +                feature = "op_get_device",
 +                feature = "op_get_tokens_from_refresh_token",
 +                feature = "op_get_user",
@@ -22127,6 +22474,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
 +                feature = "op_admin_add_user_to_group",
 +                feature = "op_admin_confirm_sign_up",
 +                feature = "op_admin_create_user",
++                feature = "op_admin_delete_software_token",
 +                feature = "op_admin_delete_user",
 +                feature = "op_admin_delete_user_attributes",
 +                feature = "op_admin_disable_provider_for_user",
@@ -22185,12 +22533,14 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
 +                feature = "op_describe_resource_server",
 +                feature = "op_describe_risk_configuration",
 +                feature = "op_describe_terms",
++                feature = "op_describe_terms_by_client",
 +                feature = "op_describe_user_import_job",
 +                feature = "op_describe_user_pool",
 +                feature = "op_describe_user_pool_client",
 +                feature = "op_describe_user_pool_domain",
 +                feature = "op_forget_device",
 +                feature = "op_forgot_password",
++                feature = "op_get_client_token",
 +                feature = "op_get_csv_header",
 +                feature = "op_get_device",
 +                feature = "op_get_group",
@@ -22302,6 +22652,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
 +                feature = "op_admin_add_user_to_group",
 +                feature = "op_admin_confirm_sign_up",
 +                feature = "op_admin_create_user",
++                feature = "op_admin_delete_software_token",
 +                feature = "op_admin_delete_user",
 +                feature = "op_admin_delete_user_attributes",
 +                feature = "op_admin_disable_provider_for_user",
@@ -22361,12 +22712,14 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
 +                feature = "op_describe_resource_server",
 +                feature = "op_describe_risk_configuration",
 +                feature = "op_describe_terms",
++                feature = "op_describe_terms_by_client",
 +                feature = "op_describe_user_import_job",
 +                feature = "op_describe_user_pool",
 +                feature = "op_describe_user_pool_client",
 +                feature = "op_describe_user_pool_domain",
 +                feature = "op_forget_device",
 +                feature = "op_forgot_password",
++                feature = "op_get_client_token",
 +                feature = "op_get_csv_header",
 +                feature = "op_get_device",
 +                feature = "op_get_group",
@@ -22536,6 +22889,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
 +                feature = "op_admin_add_user_to_group",
 +                feature = "op_admin_confirm_sign_up",
 +                feature = "op_admin_create_user",
++                feature = "op_admin_delete_software_token",
 +                feature = "op_admin_delete_user",
 +                feature = "op_admin_delete_user_attributes",
 +                feature = "op_admin_disable_provider_for_user",
@@ -22594,12 +22948,14 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
 +                feature = "op_describe_resource_server",
 +                feature = "op_describe_risk_configuration",
 +                feature = "op_describe_terms",
++                feature = "op_describe_terms_by_client",
 +                feature = "op_describe_user_import_job",
 +                feature = "op_describe_user_pool",
 +                feature = "op_describe_user_pool_client",
 +                feature = "op_describe_user_pool_domain",
 +                feature = "op_forget_device",
 +                feature = "op_forgot_password",
++                feature = "op_get_client_token",
 +                feature = "op_get_csv_header",
 +                feature = "op_get_device",
 +                feature = "op_get_group",
@@ -22663,6 +23019,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
 +                feature = "op_admin_add_user_to_group",
 +                feature = "op_admin_confirm_sign_up",
 +                feature = "op_admin_create_user",
++                feature = "op_admin_delete_software_token",
 +                feature = "op_admin_delete_user",
 +                feature = "op_admin_delete_user_attributes",
 +                feature = "op_admin_disable_provider_for_user",
@@ -22717,12 +23074,14 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
 +                feature = "op_describe_resource_server",
 +                feature = "op_describe_risk_configuration",
 +                feature = "op_describe_terms",
++                feature = "op_describe_terms_by_client",
 +                feature = "op_describe_user_import_job",
 +                feature = "op_describe_user_pool",
 +                feature = "op_describe_user_pool_client",
 +                feature = "op_describe_user_pool_domain",
 +                feature = "op_forget_device",
 +                feature = "op_forgot_password",
++                feature = "op_get_client_token",
 +                feature = "op_get_csv_header",
 +                feature = "op_get_device",
 +                feature = "op_get_group",
@@ -22826,6 +23185,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
 +                feature = "op_admin_add_user_to_group",
 +                feature = "op_admin_confirm_sign_up",
 +                feature = "op_admin_create_user",
++                feature = "op_admin_delete_software_token",
 +                feature = "op_admin_delete_user",
 +                feature = "op_admin_delete_user_attributes",
 +                feature = "op_admin_disable_provider_for_user",
@@ -22883,12 +23243,14 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
 +                feature = "op_describe_resource_server",
 +                feature = "op_describe_risk_configuration",
 +                feature = "op_describe_terms",
++                feature = "op_describe_terms_by_client",
 +                feature = "op_describe_user_import_job",
 +                feature = "op_describe_user_pool",
 +                feature = "op_describe_user_pool_client",
 +                feature = "op_describe_user_pool_domain",
 +                feature = "op_forget_device",
 +                feature = "op_forgot_password",
++                feature = "op_get_client_token",
 +                feature = "op_get_csv_header",
 +                feature = "op_get_device",
 +                feature = "op_get_group",
@@ -22973,6 +23335,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
 +                feature = "op_admin_add_user_to_group",
 +                feature = "op_admin_confirm_sign_up",
 +                feature = "op_admin_create_user",
++                feature = "op_admin_delete_software_token",
 +                feature = "op_admin_delete_user",
 +                feature = "op_admin_delete_user_attributes",
 +                feature = "op_admin_disable_provider_for_user",
@@ -23027,11 +23390,13 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
 +                feature = "op_describe_resource_server",
 +                feature = "op_describe_risk_configuration",
 +                feature = "op_describe_terms",
++                feature = "op_describe_terms_by_client",
 +                feature = "op_describe_user_import_job",
 +                feature = "op_describe_user_pool",
 +                feature = "op_describe_user_pool_client",
 +                feature = "op_forget_device",
 +                feature = "op_forgot_password",
++                feature = "op_get_client_token",
 +                feature = "op_get_csv_header",
 +                feature = "op_get_device",
 +                feature = "op_get_group",
@@ -23149,6 +23514,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
 +            ))]
              Error::UserLambdaValidationException(inner) => inner.fmt(f),
 +            #[cfg(any(
++                feature = "op_admin_delete_software_token",
 +                feature = "op_admin_initiate_auth",
 +                feature = "op_admin_respond_to_auth_challenge",
 +                feature = "op_admin_set_user_mfa_preference",
@@ -23178,6 +23544,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
 +                feature = "op_admin_add_user_to_group",
 +                feature = "op_admin_confirm_sign_up",
 +                feature = "op_admin_create_user",
++                feature = "op_admin_delete_software_token",
 +                feature = "op_admin_delete_user",
 +                feature = "op_admin_delete_user_attributes",
 +                feature = "op_admin_disable_provider_for_user",
@@ -23266,7 +23633,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
              Error::WebAuthnRelyingPartyMismatchException(inner) => inner.fmt(f),
              Error::Unhandled(_) => {
                  if let ::std::option::Option::Some(code) =
-@@ -217,69 +2613,1268 @@
+@@ -217,69 +2655,1289 @@
  impl ::aws_smithy_types::error::metadata::ProvideErrorMetadata for Error {
      fn meta(&self) -> &::aws_smithy_types::error::metadata::ErrorMetadata {
          match self {
@@ -23361,6 +23728,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
 +                feature = "op_delete_web_authn_credential",
 +                feature = "op_forget_device",
 +                feature = "op_forgot_password",
++                feature = "op_get_client_token",
 +                feature = "op_get_device",
 +                feature = "op_get_tokens_from_refresh_token",
 +                feature = "op_get_user",
@@ -23390,6 +23758,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
 +                feature = "op_admin_add_user_to_group",
 +                feature = "op_admin_confirm_sign_up",
 +                feature = "op_admin_create_user",
++                feature = "op_admin_delete_software_token",
 +                feature = "op_admin_delete_user",
 +                feature = "op_admin_delete_user_attributes",
 +                feature = "op_admin_disable_provider_for_user",
@@ -23448,12 +23817,14 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
 +                feature = "op_describe_resource_server",
 +                feature = "op_describe_risk_configuration",
 +                feature = "op_describe_terms",
++                feature = "op_describe_terms_by_client",
 +                feature = "op_describe_user_import_job",
 +                feature = "op_describe_user_pool",
 +                feature = "op_describe_user_pool_client",
 +                feature = "op_describe_user_pool_domain",
 +                feature = "op_forget_device",
 +                feature = "op_forgot_password",
++                feature = "op_get_client_token",
 +                feature = "op_get_csv_header",
 +                feature = "op_get_device",
 +                feature = "op_get_group",
@@ -23565,6 +23936,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
 +                feature = "op_admin_add_user_to_group",
 +                feature = "op_admin_confirm_sign_up",
 +                feature = "op_admin_create_user",
++                feature = "op_admin_delete_software_token",
 +                feature = "op_admin_delete_user",
 +                feature = "op_admin_delete_user_attributes",
 +                feature = "op_admin_disable_provider_for_user",
@@ -23624,12 +23996,14 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
 +                feature = "op_describe_resource_server",
 +                feature = "op_describe_risk_configuration",
 +                feature = "op_describe_terms",
++                feature = "op_describe_terms_by_client",
 +                feature = "op_describe_user_import_job",
 +                feature = "op_describe_user_pool",
 +                feature = "op_describe_user_pool_client",
 +                feature = "op_describe_user_pool_domain",
 +                feature = "op_forget_device",
 +                feature = "op_forgot_password",
++                feature = "op_get_client_token",
 +                feature = "op_get_csv_header",
 +                feature = "op_get_device",
 +                feature = "op_get_group",
@@ -23799,6 +24173,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
 +                feature = "op_admin_add_user_to_group",
 +                feature = "op_admin_confirm_sign_up",
 +                feature = "op_admin_create_user",
++                feature = "op_admin_delete_software_token",
 +                feature = "op_admin_delete_user",
 +                feature = "op_admin_delete_user_attributes",
 +                feature = "op_admin_disable_provider_for_user",
@@ -23857,12 +24232,14 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
 +                feature = "op_describe_resource_server",
 +                feature = "op_describe_risk_configuration",
 +                feature = "op_describe_terms",
++                feature = "op_describe_terms_by_client",
 +                feature = "op_describe_user_import_job",
 +                feature = "op_describe_user_pool",
 +                feature = "op_describe_user_pool_client",
 +                feature = "op_describe_user_pool_domain",
 +                feature = "op_forget_device",
 +                feature = "op_forgot_password",
++                feature = "op_get_client_token",
 +                feature = "op_get_csv_header",
 +                feature = "op_get_device",
 +                feature = "op_get_group",
@@ -23926,6 +24303,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
 +                feature = "op_admin_add_user_to_group",
 +                feature = "op_admin_confirm_sign_up",
 +                feature = "op_admin_create_user",
++                feature = "op_admin_delete_software_token",
 +                feature = "op_admin_delete_user",
 +                feature = "op_admin_delete_user_attributes",
 +                feature = "op_admin_disable_provider_for_user",
@@ -23980,12 +24358,14 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
 +                feature = "op_describe_resource_server",
 +                feature = "op_describe_risk_configuration",
 +                feature = "op_describe_terms",
++                feature = "op_describe_terms_by_client",
 +                feature = "op_describe_user_import_job",
 +                feature = "op_describe_user_pool",
 +                feature = "op_describe_user_pool_client",
 +                feature = "op_describe_user_pool_domain",
 +                feature = "op_forget_device",
 +                feature = "op_forgot_password",
++                feature = "op_get_client_token",
 +                feature = "op_get_csv_header",
 +                feature = "op_get_device",
 +                feature = "op_get_group",
@@ -24089,6 +24469,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
 +                feature = "op_admin_add_user_to_group",
 +                feature = "op_admin_confirm_sign_up",
 +                feature = "op_admin_create_user",
++                feature = "op_admin_delete_software_token",
 +                feature = "op_admin_delete_user",
 +                feature = "op_admin_delete_user_attributes",
 +                feature = "op_admin_disable_provider_for_user",
@@ -24146,12 +24527,14 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
 +                feature = "op_describe_resource_server",
 +                feature = "op_describe_risk_configuration",
 +                feature = "op_describe_terms",
++                feature = "op_describe_terms_by_client",
 +                feature = "op_describe_user_import_job",
 +                feature = "op_describe_user_pool",
 +                feature = "op_describe_user_pool_client",
 +                feature = "op_describe_user_pool_domain",
 +                feature = "op_forget_device",
 +                feature = "op_forgot_password",
++                feature = "op_get_client_token",
 +                feature = "op_get_csv_header",
 +                feature = "op_get_device",
 +                feature = "op_get_group",
@@ -24236,6 +24619,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
 +                feature = "op_admin_add_user_to_group",
 +                feature = "op_admin_confirm_sign_up",
 +                feature = "op_admin_create_user",
++                feature = "op_admin_delete_software_token",
 +                feature = "op_admin_delete_user",
 +                feature = "op_admin_delete_user_attributes",
 +                feature = "op_admin_disable_provider_for_user",
@@ -24290,11 +24674,13 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
 +                feature = "op_describe_resource_server",
 +                feature = "op_describe_risk_configuration",
 +                feature = "op_describe_terms",
++                feature = "op_describe_terms_by_client",
 +                feature = "op_describe_user_import_job",
 +                feature = "op_describe_user_pool",
 +                feature = "op_describe_user_pool_client",
 +                feature = "op_forget_device",
 +                feature = "op_forgot_password",
++                feature = "op_get_client_token",
 +                feature = "op_get_csv_header",
 +                feature = "op_get_device",
 +                feature = "op_get_group",
@@ -24412,6 +24798,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
 +            ))]
              Self::UserLambdaValidationException(inner) => inner.meta(),
 +            #[cfg(any(
++                feature = "op_admin_delete_software_token",
 +                feature = "op_admin_initiate_auth",
 +                feature = "op_admin_respond_to_auth_challenge",
 +                feature = "op_admin_set_user_mfa_preference",
@@ -24441,6 +24828,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
 +                feature = "op_admin_add_user_to_group",
 +                feature = "op_admin_confirm_sign_up",
 +                feature = "op_admin_create_user",
++                feature = "op_admin_delete_software_token",
 +                feature = "op_admin_delete_user",
 +                feature = "op_admin_delete_user_attributes",
 +                feature = "op_admin_disable_provider_for_user",
@@ -24535,7 +24923,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl<R>
      From<
          ::aws_smithy_runtime_api::client::result::SdkError<
-@@ -305,6 +3900,7 @@
+@@ -305,6 +3963,7 @@
          }
      }
  }
@@ -24543,7 +24931,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl From<crate::operation::add_custom_attributes::AddCustomAttributesError> for Error {
      fn from(err: crate::operation::add_custom_attributes::AddCustomAttributesError) -> Self {
          match err {
-@@ -335,6 +3931,7 @@
+@@ -335,6 +3994,7 @@
          }
      }
  }
@@ -24551,7 +24939,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl<R>
      From<
          ::aws_smithy_runtime_api::client::result::SdkError<
-@@ -360,6 +3957,7 @@
+@@ -360,6 +4020,7 @@
          }
      }
  }
@@ -24559,7 +24947,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl From<crate::operation::add_user_pool_client_secret::AddUserPoolClientSecretError> for Error {
      fn from(err: crate::operation::add_user_pool_client_secret::AddUserPoolClientSecretError) -> Self {
          match err {
-@@ -387,6 +3985,7 @@
+@@ -387,6 +4048,7 @@
          }
      }
  }
@@ -24567,7 +24955,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl<R>
      From<
          ::aws_smithy_runtime_api::client::result::SdkError<
-@@ -412,6 +4011,7 @@
+@@ -412,6 +4074,7 @@
          }
      }
  }
@@ -24575,7 +24963,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl From<crate::operation::admin_add_user_to_group::AdminAddUserToGroupError> for Error {
      fn from(err: crate::operation::admin_add_user_to_group::AdminAddUserToGroupError) -> Self {
          match err {
-@@ -442,6 +4042,7 @@
+@@ -442,6 +4105,7 @@
          }
      }
  }
@@ -24583,7 +24971,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl<R>
      From<
          ::aws_smithy_runtime_api::client::result::SdkError<
-@@ -467,6 +4068,7 @@
+@@ -467,6 +4131,7 @@
          }
      }
  }
@@ -24591,7 +24979,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl From<crate::operation::admin_confirm_sign_up::AdminConfirmSignUpError> for Error {
      fn from(err: crate::operation::admin_confirm_sign_up::AdminConfirmSignUpError) -> Self {
          match err {
-@@ -512,6 +4114,7 @@
+@@ -512,6 +4177,7 @@
          }
      }
  }
@@ -24599,7 +24987,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl<R>
      From<
          ::aws_smithy_runtime_api::client::result::SdkError<
-@@ -537,6 +4140,7 @@
+@@ -537,6 +4203,7 @@
          }
      }
  }
@@ -24607,7 +24995,23 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl From<crate::operation::admin_create_user::AdminCreateUserError> for Error {
      fn from(err: crate::operation::admin_create_user::AdminCreateUserError) -> Self {
          match err {
-@@ -595,6 +4199,7 @@
+@@ -595,6 +4262,7 @@
+         }
+     }
+ }
++#[cfg(feature = "op_admin_delete_software_token")]
+ impl<R>
+     From<
+         ::aws_smithy_runtime_api::client::result::SdkError<
+@@ -620,6 +4288,7 @@
+         }
+     }
+ }
++#[cfg(feature = "op_admin_delete_software_token")]
+ impl From<crate::operation::admin_delete_software_token::AdminDeleteSoftwareTokenError> for Error {
+     fn from(err: crate::operation::admin_delete_software_token::AdminDeleteSoftwareTokenError) -> Self {
+         match err {
+@@ -651,6 +4320,7 @@
          }
      }
  }
@@ -24615,7 +25019,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl<R>
      From<
          ::aws_smithy_runtime_api::client::result::SdkError<
-@@ -620,6 +4225,7 @@
+@@ -676,6 +4346,7 @@
          }
      }
  }
@@ -24623,7 +25027,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl From<crate::operation::admin_delete_user::AdminDeleteUserError> for Error {
      fn from(err: crate::operation::admin_delete_user::AdminDeleteUserError) -> Self {
          match err {
-@@ -648,6 +4254,7 @@
+@@ -704,6 +4375,7 @@
          }
      }
  }
@@ -24631,7 +25035,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl<R>
      From<
          ::aws_smithy_runtime_api::client::result::SdkError<
-@@ -673,6 +4280,7 @@
+@@ -729,6 +4401,7 @@
          }
      }
  }
@@ -24639,7 +25043,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl From<crate::operation::admin_delete_user_attributes::AdminDeleteUserAttributesError> for Error {
      fn from(err: crate::operation::admin_delete_user_attributes::AdminDeleteUserAttributesError) -> Self {
          match err {
-@@ -701,6 +4309,7 @@
+@@ -757,6 +4430,7 @@
          }
      }
  }
@@ -24647,7 +25051,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl<R>
      From<
          ::aws_smithy_runtime_api::client::result::SdkError<
-@@ -726,6 +4335,7 @@
+@@ -782,6 +4456,7 @@
          }
      }
  }
@@ -24655,7 +25059,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl From<crate::operation::admin_disable_provider_for_user::AdminDisableProviderForUserError> for Error {
      fn from(err: crate::operation::admin_disable_provider_for_user::AdminDisableProviderForUserError) -> Self {
          match err {
-@@ -757,6 +4367,7 @@
+@@ -813,6 +4488,7 @@
          }
      }
  }
@@ -24663,7 +25067,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl<R>
      From<
          ::aws_smithy_runtime_api::client::result::SdkError<
-@@ -782,6 +4393,7 @@
+@@ -838,6 +4514,7 @@
          }
      }
  }
@@ -24671,7 +25075,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl From<crate::operation::admin_disable_user::AdminDisableUserError> for Error {
      fn from(err: crate::operation::admin_disable_user::AdminDisableUserError) -> Self {
          match err {
-@@ -810,6 +4422,7 @@
+@@ -866,6 +4543,7 @@
          }
      }
  }
@@ -24679,7 +25083,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl<R>
      From<
          ::aws_smithy_runtime_api::client::result::SdkError<
-@@ -835,6 +4448,7 @@
+@@ -891,6 +4569,7 @@
          }
      }
  }
@@ -24687,7 +25091,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl From<crate::operation::admin_enable_user::AdminEnableUserError> for Error {
      fn from(err: crate::operation::admin_enable_user::AdminEnableUserError) -> Self {
          match err {
-@@ -863,6 +4477,7 @@
+@@ -919,6 +4598,7 @@
          }
      }
  }
@@ -24695,7 +25099,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl<R>
      From<
          ::aws_smithy_runtime_api::client::result::SdkError<
-@@ -888,6 +4503,7 @@
+@@ -944,6 +4624,7 @@
          }
      }
  }
@@ -24703,7 +25107,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl From<crate::operation::admin_forget_device::AdminForgetDeviceError> for Error {
      fn from(err: crate::operation::admin_forget_device::AdminForgetDeviceError) -> Self {
          match err {
-@@ -919,6 +4535,7 @@
+@@ -975,6 +4656,7 @@
          }
      }
  }
@@ -24711,7 +25115,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl<R>
      From<::aws_smithy_runtime_api::client::result::SdkError<crate::operation::admin_get_device::AdminGetDeviceError, R>>
      for Error
-@@ -940,6 +4557,7 @@
+@@ -996,6 +4678,7 @@
          }
      }
  }
@@ -24719,7 +25123,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl From<crate::operation::admin_get_device::AdminGetDeviceError> for Error {
      fn from(err: crate::operation::admin_get_device::AdminGetDeviceError) -> Self {
          match err {
-@@ -968,6 +4586,7 @@
+@@ -1024,6 +4707,7 @@
          }
      }
  }
@@ -24727,7 +25131,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl<R> From<::aws_smithy_runtime_api::client::result::SdkError<crate::operation::admin_get_user::AdminGetUserError, R>>
      for Error
  where
-@@ -985,6 +4604,7 @@
+@@ -1041,6 +4725,7 @@
          }
      }
  }
@@ -24735,7 +25139,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl From<crate::operation::admin_get_user::AdminGetUserError> for Error {
      fn from(err: crate::operation::admin_get_user::AdminGetUserError) -> Self {
          match err {
-@@ -1013,6 +4633,7 @@
+@@ -1069,6 +4754,7 @@
          }
      }
  }
@@ -24743,7 +25147,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl<R>
      From<
          ::aws_smithy_runtime_api::client::result::SdkError<
-@@ -1038,6 +4659,7 @@
+@@ -1094,6 +4780,7 @@
          }
      }
  }
@@ -24751,7 +25155,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl From<crate::operation::admin_get_user_auth_factors::AdminGetUserAuthFactorsError> for Error {
      fn from(err: crate::operation::admin_get_user_auth_factors::AdminGetUserAuthFactorsError) -> Self {
          match err {
-@@ -1066,6 +4688,7 @@
+@@ -1122,6 +4809,7 @@
          }
      }
  }
@@ -24759,7 +25163,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl<R>
      From<
          ::aws_smithy_runtime_api::client::result::SdkError<
-@@ -1091,6 +4714,7 @@
+@@ -1147,6 +4835,7 @@
          }
      }
  }
@@ -24767,7 +25171,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl From<crate::operation::admin_initiate_auth::AdminInitiateAuthError> for Error {
      fn from(err: crate::operation::admin_initiate_auth::AdminInitiateAuthError) -> Self {
          match err {
-@@ -1152,6 +4776,7 @@
+@@ -1208,6 +4897,7 @@
          }
      }
  }
@@ -24775,7 +25179,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl<R>
      From<
          ::aws_smithy_runtime_api::client::result::SdkError<
-@@ -1177,6 +4802,7 @@
+@@ -1233,6 +4923,7 @@
          }
      }
  }
@@ -24783,7 +25187,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl From<crate::operation::admin_link_provider_for_user::AdminLinkProviderForUserError> for Error {
      fn from(err: crate::operation::admin_link_provider_for_user::AdminLinkProviderForUserError) -> Self {
          match err {
-@@ -1211,6 +4837,7 @@
+@@ -1267,6 +4958,7 @@
          }
      }
  }
@@ -24791,7 +25195,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl<R>
      From<
          ::aws_smithy_runtime_api::client::result::SdkError<
-@@ -1236,6 +4863,7 @@
+@@ -1292,6 +4984,7 @@
          }
      }
  }
@@ -24799,7 +25203,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl From<crate::operation::admin_list_devices::AdminListDevicesError> for Error {
      fn from(err: crate::operation::admin_list_devices::AdminListDevicesError) -> Self {
          match err {
-@@ -1264,6 +4892,7 @@
+@@ -1320,6 +5013,7 @@
          }
      }
  }
@@ -24807,7 +25211,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl<R>
      From<
          ::aws_smithy_runtime_api::client::result::SdkError<
-@@ -1289,6 +4918,7 @@
+@@ -1345,6 +5039,7 @@
          }
      }
  }
@@ -24815,7 +25219,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl From<crate::operation::admin_list_groups_for_user::AdminListGroupsForUserError> for Error {
      fn from(err: crate::operation::admin_list_groups_for_user::AdminListGroupsForUserError) -> Self {
          match err {
-@@ -1319,6 +4949,7 @@
+@@ -1375,6 +5070,7 @@
          }
      }
  }
@@ -24823,7 +25227,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl<R>
      From<
          ::aws_smithy_runtime_api::client::result::SdkError<
-@@ -1344,6 +4975,7 @@
+@@ -1400,6 +5096,7 @@
          }
      }
  }
@@ -24831,7 +25235,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl From<crate::operation::admin_list_user_auth_events::AdminListUserAuthEventsError> for Error {
      fn from(err: crate::operation::admin_list_user_auth_events::AdminListUserAuthEventsError) -> Self {
          match err {
-@@ -1375,6 +5007,7 @@
+@@ -1431,6 +5128,7 @@
          }
      }
  }
@@ -24839,7 +25243,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl<R>
      From<
          ::aws_smithy_runtime_api::client::result::SdkError<
-@@ -1400,6 +5033,7 @@
+@@ -1456,6 +5154,7 @@
          }
      }
  }
@@ -24847,7 +25251,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl From<crate::operation::admin_remove_user_from_group::AdminRemoveUserFromGroupError> for Error {
      fn from(err: crate::operation::admin_remove_user_from_group::AdminRemoveUserFromGroupError) -> Self {
          match err {
-@@ -1428,6 +5062,7 @@
+@@ -1484,6 +5183,7 @@
          }
      }
  }
@@ -24855,7 +25259,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl<R>
      From<
          ::aws_smithy_runtime_api::client::result::SdkError<
-@@ -1453,6 +5088,7 @@
+@@ -1509,6 +5209,7 @@
          }
      }
  }
@@ -24863,7 +25267,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl From<crate::operation::admin_reset_user_password::AdminResetUserPasswordError> for Error {
      fn from(err: crate::operation::admin_reset_user_password::AdminResetUserPasswordError) -> Self {
          match err {
-@@ -1502,6 +5138,7 @@
+@@ -1558,6 +5259,7 @@
          }
      }
  }
@@ -24871,7 +25275,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl<R>
      From<
          ::aws_smithy_runtime_api::client::result::SdkError<
-@@ -1527,6 +5164,7 @@
+@@ -1583,6 +5285,7 @@
          }
      }
  }
@@ -24879,7 +25283,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl From<crate::operation::admin_respond_to_auth_challenge::AdminRespondToAuthChallengeError> for Error {
      fn from(err: crate::operation::admin_respond_to_auth_challenge::AdminRespondToAuthChallengeError) -> Self {
          match err {
-@@ -1603,6 +5241,7 @@
+@@ -1659,6 +5362,7 @@
          }
      }
  }
@@ -24887,7 +25291,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl<R>
      From<
          ::aws_smithy_runtime_api::client::result::SdkError<
-@@ -1628,6 +5267,7 @@
+@@ -1684,6 +5388,7 @@
          }
      }
  }
@@ -24895,7 +25299,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl From<crate::operation::admin_set_user_mfa_preference::AdminSetUserMFAPreferenceError> for Error {
      fn from(err: crate::operation::admin_set_user_mfa_preference::AdminSetUserMFAPreferenceError) -> Self {
          match err {
-@@ -1659,6 +5299,7 @@
+@@ -1715,6 +5420,7 @@
          }
      }
  }
@@ -24903,7 +25307,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl<R>
      From<
          ::aws_smithy_runtime_api::client::result::SdkError<
-@@ -1684,6 +5325,7 @@
+@@ -1740,6 +5446,7 @@
          }
      }
  }
@@ -24911,7 +25315,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl From<crate::operation::admin_set_user_password::AdminSetUserPasswordError> for Error {
      fn from(err: crate::operation::admin_set_user_password::AdminSetUserPasswordError) -> Self {
          match err {
-@@ -1716,6 +5358,7 @@
+@@ -1772,6 +5479,7 @@
          }
      }
  }
@@ -24919,7 +25323,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl<R>
      From<
          ::aws_smithy_runtime_api::client::result::SdkError<
-@@ -1741,6 +5384,7 @@
+@@ -1797,6 +5505,7 @@
          }
      }
  }
@@ -24927,7 +25331,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl From<crate::operation::admin_set_user_settings::AdminSetUserSettingsError> for Error {
      fn from(err: crate::operation::admin_set_user_settings::AdminSetUserSettingsError) -> Self {
          match err {
-@@ -1768,6 +5412,7 @@
+@@ -1824,6 +5533,7 @@
          }
      }
  }
@@ -24935,7 +25339,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl<R>
      From<
          ::aws_smithy_runtime_api::client::result::SdkError<
-@@ -1793,6 +5438,7 @@
+@@ -1849,6 +5559,7 @@
          }
      }
  }
@@ -24943,7 +25347,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl From<crate::operation::admin_update_auth_event_feedback::AdminUpdateAuthEventFeedbackError> for Error {
      fn from(err: crate::operation::admin_update_auth_event_feedback::AdminUpdateAuthEventFeedbackError) -> Self {
          match err {
-@@ -1824,6 +5470,7 @@
+@@ -1880,6 +5591,7 @@
          }
      }
  }
@@ -24951,7 +25355,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl<R>
      From<
          ::aws_smithy_runtime_api::client::result::SdkError<
-@@ -1849,6 +5496,7 @@
+@@ -1905,6 +5617,7 @@
          }
      }
  }
@@ -24959,7 +25363,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl From<crate::operation::admin_update_device_status::AdminUpdateDeviceStatusError> for Error {
      fn from(err: crate::operation::admin_update_device_status::AdminUpdateDeviceStatusError) -> Self {
          match err {
-@@ -1880,6 +5528,7 @@
+@@ -1936,6 +5649,7 @@
          }
      }
  }
@@ -24967,7 +25371,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl<R>
      From<
          ::aws_smithy_runtime_api::client::result::SdkError<
-@@ -1905,6 +5554,7 @@
+@@ -1961,6 +5675,7 @@
          }
      }
  }
@@ -24975,7 +25379,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl From<crate::operation::admin_update_user_attributes::AdminUpdateUserAttributesError> for Error {
      fn from(err: crate::operation::admin_update_user_attributes::AdminUpdateUserAttributesError) -> Self {
          match err {
-@@ -1954,6 +5604,7 @@
+@@ -2010,6 +5725,7 @@
          }
      }
  }
@@ -24983,7 +25387,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl<R>
      From<
          ::aws_smithy_runtime_api::client::result::SdkError<
-@@ -1979,6 +5630,7 @@
+@@ -2035,6 +5751,7 @@
          }
      }
  }
@@ -24991,7 +25395,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl From<crate::operation::admin_user_global_sign_out::AdminUserGlobalSignOutError> for Error {
      fn from(err: crate::operation::admin_user_global_sign_out::AdminUserGlobalSignOutError) -> Self {
          match err {
-@@ -2009,6 +5661,7 @@
+@@ -2065,6 +5782,7 @@
          }
      }
  }
@@ -24999,7 +25403,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl<R>
      From<
          ::aws_smithy_runtime_api::client::result::SdkError<
-@@ -2034,6 +5687,7 @@
+@@ -2090,6 +5808,7 @@
          }
      }
  }
@@ -25007,7 +25411,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl From<crate::operation::associate_software_token::AssociateSoftwareTokenError> for Error {
      fn from(err: crate::operation::associate_software_token::AssociateSoftwareTokenError) -> Self {
          match err {
-@@ -2063,6 +5717,7 @@
+@@ -2119,6 +5838,7 @@
          }
      }
  }
@@ -25015,7 +25419,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl<R>
      From<::aws_smithy_runtime_api::client::result::SdkError<crate::operation::change_password::ChangePasswordError, R>>
      for Error
-@@ -2084,6 +5739,7 @@
+@@ -2140,6 +5860,7 @@
          }
      }
  }
@@ -25023,7 +25427,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl From<crate::operation::change_password::ChangePasswordError> for Error {
      fn from(err: crate::operation::change_password::ChangePasswordError) -> Self {
          match err {
-@@ -2130,6 +5786,7 @@
+@@ -2186,6 +5907,7 @@
          }
      }
  }
@@ -25031,7 +25435,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl<R>
      From<
          ::aws_smithy_runtime_api::client::result::SdkError<
-@@ -2155,6 +5812,7 @@
+@@ -2211,6 +5933,7 @@
          }
      }
  }
@@ -25039,7 +25443,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl From<crate::operation::complete_web_authn_registration::CompleteWebAuthnRegistrationError> for Error {
      fn from(err: crate::operation::complete_web_authn_registration::CompleteWebAuthnRegistrationError) -> Self {
          match err {
-@@ -2204,6 +5862,7 @@
+@@ -2260,6 +5983,7 @@
          }
      }
  }
@@ -25047,7 +25451,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl<R>
      From<::aws_smithy_runtime_api::client::result::SdkError<crate::operation::confirm_device::ConfirmDeviceError, R>>
      for Error
-@@ -2225,6 +5884,7 @@
+@@ -2281,6 +6005,7 @@
          }
      }
  }
@@ -25055,7 +25459,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl From<crate::operation::confirm_device::ConfirmDeviceError> for Error {
      fn from(err: crate::operation::confirm_device::ConfirmDeviceError) -> Self {
          match err {
-@@ -2277,6 +5937,7 @@
+@@ -2333,6 +6058,7 @@
          }
      }
  }
@@ -25063,7 +25467,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl<R>
      From<
          ::aws_smithy_runtime_api::client::result::SdkError<
-@@ -2302,6 +5963,7 @@
+@@ -2358,6 +6084,7 @@
          }
      }
  }
@@ -25071,7 +25475,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl From<crate::operation::confirm_forgot_password::ConfirmForgotPasswordError> for Error {
      fn from(err: crate::operation::confirm_forgot_password::ConfirmForgotPasswordError) -> Self {
          match err {
-@@ -2359,6 +6021,7 @@
+@@ -2415,6 +6142,7 @@
          }
      }
  }
@@ -25079,7 +25483,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl<R>
      From<::aws_smithy_runtime_api::client::result::SdkError<crate::operation::confirm_sign_up::ConfirmSignUpError, R>>
      for Error
-@@ -2380,6 +6043,7 @@
+@@ -2436,6 +6164,7 @@
          }
      }
  }
@@ -25087,7 +25491,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl From<crate::operation::confirm_sign_up::ConfirmSignUpError> for Error {
      fn from(err: crate::operation::confirm_sign_up::ConfirmSignUpError) -> Self {
          match err {
-@@ -2435,6 +6099,7 @@
+@@ -2491,6 +6220,7 @@
          }
      }
  }
@@ -25095,7 +25499,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl<R> From<::aws_smithy_runtime_api::client::result::SdkError<crate::operation::create_group::CreateGroupError, R>>
      for Error
  where
-@@ -2452,6 +6117,7 @@
+@@ -2508,6 +6238,7 @@
          }
      }
  }
@@ -25103,7 +25507,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl From<crate::operation::create_group::CreateGroupError> for Error {
      fn from(err: crate::operation::create_group::CreateGroupError) -> Self {
          match err {
-@@ -2483,6 +6149,7 @@
+@@ -2539,6 +6270,7 @@
          }
      }
  }
@@ -25111,7 +25515,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl<R>
      From<
          ::aws_smithy_runtime_api::client::result::SdkError<
-@@ -2508,6 +6175,7 @@
+@@ -2564,6 +6296,7 @@
          }
      }
  }
@@ -25119,7 +25523,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl From<crate::operation::create_identity_provider::CreateIdentityProviderError> for Error {
      fn from(err: crate::operation::create_identity_provider::CreateIdentityProviderError) -> Self {
          match err {
-@@ -2538,6 +6206,7 @@
+@@ -2594,6 +6327,7 @@
          }
      }
  }
@@ -25127,7 +25531,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl<R>
      From<
          ::aws_smithy_runtime_api::client::result::SdkError<
-@@ -2563,6 +6232,7 @@
+@@ -2619,6 +6353,7 @@
          }
      }
  }
@@ -25135,7 +25539,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl From<crate::operation::create_managed_login_branding::CreateManagedLoginBrandingError> for Error {
      fn from(err: crate::operation::create_managed_login_branding::CreateManagedLoginBrandingError) -> Self {
          match err {
-@@ -2597,6 +6267,7 @@
+@@ -2653,6 +6388,7 @@
          }
      }
  }
@@ -25143,7 +25547,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl<R>
      From<
          ::aws_smithy_runtime_api::client::result::SdkError<
-@@ -2622,6 +6293,7 @@
+@@ -2678,6 +6414,7 @@
          }
      }
  }
@@ -25151,7 +25555,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl From<crate::operation::create_resource_server::CreateResourceServerError> for Error {
      fn from(err: crate::operation::create_resource_server::CreateResourceServerError) -> Self {
          match err {
-@@ -2652,6 +6324,7 @@
+@@ -2708,6 +6445,7 @@
          }
      }
  }
@@ -25159,7 +25563,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl<R> From<::aws_smithy_runtime_api::client::result::SdkError<crate::operation::create_terms::CreateTermsError, R>>
      for Error
  where
-@@ -2669,6 +6342,7 @@
+@@ -2725,6 +6463,7 @@
          }
      }
  }
@@ -25167,7 +25571,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl From<crate::operation::create_terms::CreateTermsError> for Error {
      fn from(err: crate::operation::create_terms::CreateTermsError) -> Self {
          match err {
-@@ -2703,6 +6377,7 @@
+@@ -2759,6 +6498,7 @@
          }
      }
  }
@@ -25175,7 +25579,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl<R>
      From<
          ::aws_smithy_runtime_api::client::result::SdkError<
-@@ -2728,6 +6403,7 @@
+@@ -2784,6 +6524,7 @@
          }
      }
  }
@@ -25183,7 +25587,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl From<crate::operation::create_user_import_job::CreateUserImportJobError> for Error {
      fn from(err: crate::operation::create_user_import_job::CreateUserImportJobError) -> Self {
          match err {
-@@ -2761,6 +6437,7 @@
+@@ -2817,6 +6558,7 @@
          }
      }
  }
@@ -25191,7 +25595,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl<R>
      From<::aws_smithy_runtime_api::client::result::SdkError<crate::operation::create_user_pool::CreateUserPoolError, R>>
      for Error
-@@ -2782,6 +6459,7 @@
+@@ -2838,6 +6580,7 @@
          }
      }
  }
@@ -25199,7 +25603,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl From<crate::operation::create_user_pool::CreateUserPoolError> for Error {
      fn from(err: crate::operation::create_user_pool::CreateUserPoolError) -> Self {
          match err {
-@@ -2822,6 +6500,7 @@
+@@ -2878,6 +6621,7 @@
          }
      }
  }
@@ -25207,7 +25611,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl<R>
      From<
          ::aws_smithy_runtime_api::client::result::SdkError<
-@@ -2847,6 +6526,7 @@
+@@ -2903,6 +6647,7 @@
          }
      }
  }
@@ -25215,7 +25619,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl From<crate::operation::create_user_pool_client::CreateUserPoolClientError> for Error {
      fn from(err: crate::operation::create_user_pool_client::CreateUserPoolClientError) -> Self {
          match err {
-@@ -2886,6 +6566,7 @@
+@@ -2942,6 +6687,7 @@
          }
      }
  }
@@ -25223,7 +25627,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl<R>
      From<
          ::aws_smithy_runtime_api::client::result::SdkError<
-@@ -2911,6 +6592,7 @@
+@@ -2967,6 +6713,7 @@
          }
      }
  }
@@ -25231,7 +25635,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl From<crate::operation::create_user_pool_domain::CreateUserPoolDomainError> for Error {
      fn from(err: crate::operation::create_user_pool_domain::CreateUserPoolDomainError) -> Self {
          match err {
-@@ -2944,6 +6626,7 @@
+@@ -3000,6 +6747,7 @@
          }
      }
  }
@@ -25239,7 +25643,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl<R>
      From<
          ::aws_smithy_runtime_api::client::result::SdkError<
-@@ -2969,6 +6652,7 @@
+@@ -3025,6 +6773,7 @@
          }
      }
  }
@@ -25247,7 +25651,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl From<crate::operation::create_user_pool_replica::CreateUserPoolReplicaError> for Error {
      fn from(err: crate::operation::create_user_pool_replica::CreateUserPoolReplicaError) -> Self {
          match err {
-@@ -3003,6 +6687,7 @@
+@@ -3059,6 +6808,7 @@
          }
      }
  }
@@ -25255,7 +25659,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl<R> From<::aws_smithy_runtime_api::client::result::SdkError<crate::operation::delete_group::DeleteGroupError, R>>
      for Error
  where
-@@ -3020,6 +6705,7 @@
+@@ -3076,6 +6826,7 @@
          }
      }
  }
@@ -25263,7 +25667,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl From<crate::operation::delete_group::DeleteGroupError> for Error {
      fn from(err: crate::operation::delete_group::DeleteGroupError) -> Self {
          match err {
-@@ -3045,6 +6731,7 @@
+@@ -3101,6 +6852,7 @@
          }
      }
  }
@@ -25271,7 +25675,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl<R>
      From<
          ::aws_smithy_runtime_api::client::result::SdkError<
-@@ -3070,6 +6757,7 @@
+@@ -3126,6 +6878,7 @@
          }
      }
  }
@@ -25279,7 +25683,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl From<crate::operation::delete_identity_provider::DeleteIdentityProviderError> for Error {
      fn from(err: crate::operation::delete_identity_provider::DeleteIdentityProviderError) -> Self {
          match err {
-@@ -3098,6 +6786,7 @@
+@@ -3154,6 +6907,7 @@
          }
      }
  }
@@ -25287,7 +25691,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl<R>
      From<
          ::aws_smithy_runtime_api::client::result::SdkError<
-@@ -3123,6 +6812,7 @@
+@@ -3179,6 +6933,7 @@
          }
      }
  }
@@ -25295,7 +25699,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl From<crate::operation::delete_managed_login_branding::DeleteManagedLoginBrandingError> for Error {
      fn from(err: crate::operation::delete_managed_login_branding::DeleteManagedLoginBrandingError) -> Self {
          match err {
-@@ -3151,6 +6841,7 @@
+@@ -3207,6 +6962,7 @@
          }
      }
  }
@@ -25303,7 +25707,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl<R>
      From<
          ::aws_smithy_runtime_api::client::result::SdkError<
-@@ -3176,6 +6867,7 @@
+@@ -3232,6 +6988,7 @@
          }
      }
  }
@@ -25311,7 +25715,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl From<crate::operation::delete_resource_server::DeleteResourceServerError> for Error {
      fn from(err: crate::operation::delete_resource_server::DeleteResourceServerError) -> Self {
          match err {
-@@ -3203,6 +6895,7 @@
+@@ -3259,6 +7016,7 @@
          }
      }
  }
@@ -25319,7 +25723,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl<R> From<::aws_smithy_runtime_api::client::result::SdkError<crate::operation::delete_terms::DeleteTermsError, R>>
      for Error
  where
-@@ -3220,6 +6913,7 @@
+@@ -3276,6 +7034,7 @@
          }
      }
  }
@@ -25327,7 +25731,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl From<crate::operation::delete_terms::DeleteTermsError> for Error {
      fn from(err: crate::operation::delete_terms::DeleteTermsError) -> Self {
          match err {
-@@ -3248,6 +6942,7 @@
+@@ -3304,6 +7063,7 @@
          }
      }
  }
@@ -25335,7 +25739,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl<R> From<::aws_smithy_runtime_api::client::result::SdkError<crate::operation::delete_user::DeleteUserError, R>>
      for Error
  where
-@@ -3265,6 +6960,7 @@
+@@ -3321,6 +7081,7 @@
          }
      }
  }
@@ -25343,7 +25747,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl From<crate::operation::delete_user::DeleteUserError> for Error {
      fn from(err: crate::operation::delete_user::DeleteUserError) -> Self {
          match err {
-@@ -3302,6 +6998,7 @@
+@@ -3358,6 +7119,7 @@
          }
      }
  }
@@ -25351,7 +25755,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl<R>
      From<
          ::aws_smithy_runtime_api::client::result::SdkError<
-@@ -3327,6 +7024,7 @@
+@@ -3383,6 +7145,7 @@
          }
      }
  }
@@ -25359,7 +25763,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl From<crate::operation::delete_user_attributes::DeleteUserAttributesError> for Error {
      fn from(err: crate::operation::delete_user_attributes::DeleteUserAttributesError) -> Self {
          match err {
-@@ -3366,6 +7064,7 @@
+@@ -3422,6 +7185,7 @@
          }
      }
  }
@@ -25367,7 +25771,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl<R>
      From<::aws_smithy_runtime_api::client::result::SdkError<crate::operation::delete_user_pool::DeleteUserPoolError, R>>
      for Error
-@@ -3387,6 +7086,7 @@
+@@ -3443,6 +7207,7 @@
          }
      }
  }
@@ -25375,7 +25779,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl From<crate::operation::delete_user_pool::DeleteUserPoolError> for Error {
      fn from(err: crate::operation::delete_user_pool::DeleteUserPoolError) -> Self {
          match err {
-@@ -3415,6 +7115,7 @@
+@@ -3471,6 +7236,7 @@
          }
      }
  }
@@ -25383,7 +25787,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl<R>
      From<
          ::aws_smithy_runtime_api::client::result::SdkError<
-@@ -3440,6 +7141,7 @@
+@@ -3496,6 +7262,7 @@
          }
      }
  }
@@ -25391,7 +25795,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl From<crate::operation::delete_user_pool_client::DeleteUserPoolClientError> for Error {
      fn from(err: crate::operation::delete_user_pool_client::DeleteUserPoolClientError) -> Self {
          match err {
-@@ -3470,6 +7172,7 @@
+@@ -3526,6 +7293,7 @@
          }
      }
  }
@@ -25399,7 +25803,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl<R>
      From<
          ::aws_smithy_runtime_api::client::result::SdkError<
-@@ -3495,6 +7198,7 @@
+@@ -3551,6 +7319,7 @@
          }
      }
  }
@@ -25407,7 +25811,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl From<crate::operation::delete_user_pool_client_secret::DeleteUserPoolClientSecretError> for Error {
      fn from(err: crate::operation::delete_user_pool_client_secret::DeleteUserPoolClientSecretError) -> Self {
          match err {
-@@ -3517,6 +7221,7 @@
+@@ -3573,6 +7342,7 @@
          }
      }
  }
@@ -25415,7 +25819,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl<R>
      From<
          ::aws_smithy_runtime_api::client::result::SdkError<
-@@ -3542,6 +7247,7 @@
+@@ -3598,6 +7368,7 @@
          }
      }
  }
@@ -25423,7 +25827,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl From<crate::operation::delete_user_pool_domain::DeleteUserPoolDomainError> for Error {
      fn from(err: crate::operation::delete_user_pool_domain::DeleteUserPoolDomainError) -> Self {
          match err {
-@@ -3569,6 +7275,7 @@
+@@ -3625,6 +7396,7 @@
          }
      }
  }
@@ -25431,7 +25835,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl<R>
      From<
          ::aws_smithy_runtime_api::client::result::SdkError<
-@@ -3594,6 +7301,7 @@
+@@ -3650,6 +7422,7 @@
          }
      }
  }
@@ -25439,7 +25843,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl From<crate::operation::delete_user_pool_replica::DeleteUserPoolReplicaError> for Error {
      fn from(err: crate::operation::delete_user_pool_replica::DeleteUserPoolReplicaError) -> Self {
          match err {
-@@ -3621,6 +7329,7 @@
+@@ -3677,6 +7450,7 @@
          }
      }
  }
@@ -25447,7 +25851,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl<R>
      From<
          ::aws_smithy_runtime_api::client::result::SdkError<
-@@ -3646,6 +7355,7 @@
+@@ -3702,6 +7476,7 @@
          }
      }
  }
@@ -25455,7 +25859,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl From<crate::operation::delete_web_authn_credential::DeleteWebAuthnCredentialError> for Error {
      fn from(err: crate::operation::delete_web_authn_credential::DeleteWebAuthnCredentialError) -> Self {
          match err {
-@@ -3680,6 +7390,7 @@
+@@ -3736,6 +7511,7 @@
          }
      }
  }
@@ -25463,7 +25867,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl<R>
      From<
          ::aws_smithy_runtime_api::client::result::SdkError<
-@@ -3705,6 +7416,7 @@
+@@ -3761,6 +7537,7 @@
          }
      }
  }
@@ -25471,7 +25875,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl From<crate::operation::describe_identity_provider::DescribeIdentityProviderError> for Error {
      fn from(err: crate::operation::describe_identity_provider::DescribeIdentityProviderError) -> Self {
          match err {
-@@ -3729,6 +7441,7 @@
+@@ -3785,6 +7562,7 @@
          }
      }
  }
@@ -25479,7 +25883,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl<R>
      From<
          ::aws_smithy_runtime_api::client::result::SdkError<
-@@ -3754,6 +7467,7 @@
+@@ -3810,6 +7588,7 @@
          }
      }
  }
@@ -25487,7 +25891,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl From<crate::operation::describe_managed_login_branding::DescribeManagedLoginBrandingError> for Error {
      fn from(err: crate::operation::describe_managed_login_branding::DescribeManagedLoginBrandingError) -> Self {
          match err {
-@@ -3779,6 +7493,7 @@
+@@ -3835,6 +7614,7 @@
          }
      }
  }
@@ -25495,7 +25899,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl<R>
      From<
          ::aws_smithy_runtime_api::client::result::SdkError<
-@@ -3804,6 +7519,7 @@
+@@ -3860,6 +7640,7 @@
          }
      }
  }
@@ -25503,7 +25907,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl From<crate::operation::describe_managed_login_branding_by_client::DescribeManagedLoginBrandingByClientError>
      for Error
  {
-@@ -3835,6 +7551,7 @@
+@@ -3891,6 +7672,7 @@
          }
      }
  }
@@ -25511,7 +25915,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl<R>
      From<
          ::aws_smithy_runtime_api::client::result::SdkError<
-@@ -3860,6 +7577,7 @@
+@@ -3916,6 +7698,7 @@
          }
      }
  }
@@ -25519,7 +25923,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl From<crate::operation::describe_resource_server::DescribeResourceServerError> for Error {
      fn from(err: crate::operation::describe_resource_server::DescribeResourceServerError) -> Self {
          match err {
-@@ -3887,6 +7605,7 @@
+@@ -3943,6 +7726,7 @@
          }
      }
  }
@@ -25527,7 +25931,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl<R>
      From<
          ::aws_smithy_runtime_api::client::result::SdkError<
-@@ -3912,6 +7631,7 @@
+@@ -3968,6 +7752,7 @@
          }
      }
  }
@@ -25535,7 +25939,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl From<crate::operation::describe_risk_configuration::DescribeRiskConfigurationError> for Error {
      fn from(err: crate::operation::describe_risk_configuration::DescribeRiskConfigurationError) -> Self {
          match err {
-@@ -3940,6 +7660,7 @@
+@@ -3996,6 +7781,7 @@
          }
      }
  }
@@ -25543,7 +25947,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl<R>
      From<::aws_smithy_runtime_api::client::result::SdkError<crate::operation::describe_terms::DescribeTermsError, R>>
      for Error
-@@ -3961,6 +7682,7 @@
+@@ -4017,6 +7803,7 @@
          }
      }
  }
@@ -25551,7 +25955,23 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl From<crate::operation::describe_terms::DescribeTermsError> for Error {
      fn from(err: crate::operation::describe_terms::DescribeTermsError) -> Self {
          match err {
-@@ -3986,6 +7708,7 @@
+@@ -4042,6 +7829,7 @@
+         }
+     }
+ }
++#[cfg(feature = "op_describe_terms_by_client")]
+ impl<R>
+     From<
+         ::aws_smithy_runtime_api::client::result::SdkError<
+@@ -4067,6 +7855,7 @@
+         }
+     }
+ }
++#[cfg(feature = "op_describe_terms_by_client")]
+ impl From<crate::operation::describe_terms_by_client::DescribeTermsByClientError> for Error {
+     fn from(err: crate::operation::describe_terms_by_client::DescribeTermsByClientError) -> Self {
+         match err {
+@@ -4094,6 +7883,7 @@
          }
      }
  }
@@ -25559,7 +25979,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl<R>
      From<
          ::aws_smithy_runtime_api::client::result::SdkError<
-@@ -4011,6 +7734,7 @@
+@@ -4119,6 +7909,7 @@
          }
      }
  }
@@ -25567,7 +25987,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl From<crate::operation::describe_user_import_job::DescribeUserImportJobError> for Error {
      fn from(err: crate::operation::describe_user_import_job::DescribeUserImportJobError) -> Self {
          match err {
-@@ -4038,6 +7762,7 @@
+@@ -4146,6 +7937,7 @@
          }
      }
  }
@@ -25575,7 +25995,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl<R>
      From<
          ::aws_smithy_runtime_api::client::result::SdkError<
-@@ -4063,6 +7788,7 @@
+@@ -4171,6 +7963,7 @@
          }
      }
  }
@@ -25583,7 +26003,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl From<crate::operation::describe_user_pool::DescribeUserPoolError> for Error {
      fn from(err: crate::operation::describe_user_pool::DescribeUserPoolError) -> Self {
          match err {
-@@ -4091,6 +7817,7 @@
+@@ -4199,6 +7992,7 @@
          }
      }
  }
@@ -25591,7 +26011,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl<R>
      From<
          ::aws_smithy_runtime_api::client::result::SdkError<
-@@ -4116,6 +7843,7 @@
+@@ -4224,6 +8018,7 @@
          }
      }
  }
@@ -25599,7 +26019,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl From<crate::operation::describe_user_pool_client::DescribeUserPoolClientError> for Error {
      fn from(err: crate::operation::describe_user_pool_client::DescribeUserPoolClientError) -> Self {
          match err {
-@@ -4143,6 +7871,7 @@
+@@ -4251,6 +8046,7 @@
          }
      }
  }
@@ -25607,7 +26027,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl<R>
      From<
          ::aws_smithy_runtime_api::client::result::SdkError<
-@@ -4168,6 +7897,7 @@
+@@ -4276,6 +8072,7 @@
          }
      }
  }
@@ -25615,7 +26035,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl From<crate::operation::describe_user_pool_domain::DescribeUserPoolDomainError> for Error {
      fn from(err: crate::operation::describe_user_pool_domain::DescribeUserPoolDomainError) -> Self {
          match err {
-@@ -4192,6 +7922,7 @@
+@@ -4300,6 +8097,7 @@
          }
      }
  }
@@ -25623,7 +26043,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl<R> From<::aws_smithy_runtime_api::client::result::SdkError<crate::operation::forget_device::ForgetDeviceError, R>>
      for Error
  where
-@@ -4209,6 +7940,7 @@
+@@ -4317,6 +8115,7 @@
          }
      }
  }
@@ -25631,7 +26051,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl From<crate::operation::forget_device::ForgetDeviceError> for Error {
      fn from(err: crate::operation::forget_device::ForgetDeviceError) -> Self {
          match err {
-@@ -4249,6 +7981,7 @@
+@@ -4357,6 +8156,7 @@
          }
      }
  }
@@ -25639,7 +26059,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl<R>
      From<::aws_smithy_runtime_api::client::result::SdkError<crate::operation::forgot_password::ForgotPasswordError, R>>
      for Error
-@@ -4270,6 +8003,7 @@
+@@ -4378,6 +8178,7 @@
          }
      }
  }
@@ -25647,7 +26067,23 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl From<crate::operation::forgot_password::ForgotPasswordError> for Error {
      fn from(err: crate::operation::forgot_password::ForgotPasswordError) -> Self {
          match err {
-@@ -4325,6 +8059,7 @@
+@@ -4433,6 +8234,7 @@
+         }
+     }
+ }
++#[cfg(feature = "op_get_client_token")]
+ impl<R>
+     From<::aws_smithy_runtime_api::client::result::SdkError<crate::operation::get_client_token::GetClientTokenError, R>>
+     for Error
+@@ -4454,6 +8256,7 @@
+         }
+     }
+ }
++#[cfg(feature = "op_get_client_token")]
+ impl From<crate::operation::get_client_token::GetClientTokenError> for Error {
+     fn from(err: crate::operation::get_client_token::GetClientTokenError) -> Self {
+         match err {
+@@ -4482,6 +8285,7 @@
          }
      }
  }
@@ -25655,7 +26091,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl<R> From<::aws_smithy_runtime_api::client::result::SdkError<crate::operation::get_csv_header::GetCSVHeaderError, R>>
      for Error
  where
-@@ -4342,6 +8077,7 @@
+@@ -4499,6 +8303,7 @@
          }
      }
  }
@@ -25663,7 +26099,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl From<crate::operation::get_csv_header::GetCSVHeaderError> for Error {
      fn from(err: crate::operation::get_csv_header::GetCSVHeaderError) -> Self {
          match err {
-@@ -4367,6 +8103,7 @@
+@@ -4524,6 +8329,7 @@
          }
      }
  }
@@ -25671,7 +26107,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl<R> From<::aws_smithy_runtime_api::client::result::SdkError<crate::operation::get_device::GetDeviceError, R>>
      for Error
  where
-@@ -4384,6 +8121,7 @@
+@@ -4541,6 +8347,7 @@
          }
      }
  }
@@ -25679,7 +26115,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl From<crate::operation::get_device::GetDeviceError> for Error {
      fn from(err: crate::operation::get_device::GetDeviceError) -> Self {
          match err {
-@@ -4422,6 +8160,7 @@
+@@ -4579,6 +8386,7 @@
          }
      }
  }
@@ -25687,7 +26123,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl<R> From<::aws_smithy_runtime_api::client::result::SdkError<crate::operation::get_group::GetGroupError, R>>
      for Error
  where
-@@ -4439,6 +8178,7 @@
+@@ -4596,6 +8404,7 @@
          }
      }
  }
@@ -25695,7 +26131,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl From<crate::operation::get_group::GetGroupError> for Error {
      fn from(err: crate::operation::get_group::GetGroupError) -> Self {
          match err {
-@@ -4464,6 +8204,7 @@
+@@ -4621,6 +8430,7 @@
          }
      }
  }
@@ -25703,7 +26139,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl<R>
      From<
          ::aws_smithy_runtime_api::client::result::SdkError<
-@@ -4489,6 +8230,7 @@
+@@ -4646,6 +8456,7 @@
          }
      }
  }
@@ -25711,7 +26147,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl From<crate::operation::get_identity_provider_by_identifier::GetIdentityProviderByIdentifierError> for Error {
      fn from(err: crate::operation::get_identity_provider_by_identifier::GetIdentityProviderByIdentifierError) -> Self {
          match err {
-@@ -4511,6 +8253,7 @@
+@@ -4668,6 +8479,7 @@
          }
      }
  }
@@ -25719,7 +26155,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl<R>
      From<
          ::aws_smithy_runtime_api::client::result::SdkError<
-@@ -4536,6 +8279,7 @@
+@@ -4693,6 +8505,7 @@
          }
      }
  }
@@ -25727,7 +26163,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl From<crate::operation::get_log_delivery_configuration::GetLogDeliveryConfigurationError> for Error {
      fn from(err: crate::operation::get_log_delivery_configuration::GetLogDeliveryConfigurationError) -> Self {
          match err {
-@@ -4558,6 +8302,7 @@
+@@ -4715,6 +8528,7 @@
          }
      }
  }
@@ -25735,7 +26171,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl<R>
      From<
          ::aws_smithy_runtime_api::client::result::SdkError<
-@@ -4583,6 +8328,7 @@
+@@ -4740,6 +8554,7 @@
          }
      }
  }
@@ -25743,7 +26179,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl From<crate::operation::get_provisioned_limit::GetProvisionedLimitError> for Error {
      fn from(err: crate::operation::get_provisioned_limit::GetProvisionedLimitError) -> Self {
          match err {
-@@ -4607,6 +8353,7 @@
+@@ -4764,6 +8579,7 @@
          }
      }
  }
@@ -25751,7 +26187,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl<R>
      From<
          ::aws_smithy_runtime_api::client::result::SdkError<
-@@ -4632,6 +8379,7 @@
+@@ -4789,6 +8605,7 @@
          }
      }
  }
@@ -25759,7 +26195,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl From<crate::operation::get_signing_certificate::GetSigningCertificateError> for Error {
      fn from(err: crate::operation::get_signing_certificate::GetSigningCertificateError) -> Self {
          match err {
-@@ -4653,6 +8401,7 @@
+@@ -4810,6 +8627,7 @@
          }
      }
  }
@@ -25767,7 +26203,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl<R>
      From<
          ::aws_smithy_runtime_api::client::result::SdkError<
-@@ -4678,6 +8427,7 @@
+@@ -4835,6 +8653,7 @@
          }
      }
  }
@@ -25775,7 +26211,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl From<crate::operation::get_tokens_from_refresh_token::GetTokensFromRefreshTokenError> for Error {
      fn from(err: crate::operation::get_tokens_from_refresh_token::GetTokensFromRefreshTokenError) -> Self {
          match err {
-@@ -4721,6 +8471,7 @@
+@@ -4878,6 +8697,7 @@
          }
      }
  }
@@ -25783,7 +26219,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl<R>
      From<
          ::aws_smithy_runtime_api::client::result::SdkError<
-@@ -4746,6 +8497,7 @@
+@@ -4903,6 +8723,7 @@
          }
      }
  }
@@ -25791,7 +26227,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl From<crate::operation::get_ui_customization::GetUICustomizationError> for Error {
      fn from(err: crate::operation::get_ui_customization::GetUICustomizationError) -> Self {
          match err {
-@@ -4773,6 +8525,7 @@
+@@ -4930,6 +8751,7 @@
          }
      }
  }
@@ -25799,7 +26235,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl<R> From<::aws_smithy_runtime_api::client::result::SdkError<crate::operation::get_user::GetUserError, R>> for Error
  where
      R: Send + Sync + std::fmt::Debug + 'static,
-@@ -4789,6 +8542,7 @@
+@@ -4946,6 +8768,7 @@
          }
      }
  }
@@ -25807,7 +26243,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl From<crate::operation::get_user::GetUserError> for Error {
      fn from(err: crate::operation::get_user::GetUserError) -> Self {
          match err {
-@@ -4824,6 +8578,7 @@
+@@ -4981,6 +8804,7 @@
          }
      }
  }
@@ -25815,7 +26251,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl<R>
      From<
          ::aws_smithy_runtime_api::client::result::SdkError<
-@@ -4849,6 +8604,7 @@
+@@ -5006,6 +8830,7 @@
          }
      }
  }
@@ -25823,7 +26259,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl From<crate::operation::get_user_attribute_verification_code::GetUserAttributeVerificationCodeError> for Error {
      fn from(
          err: crate::operation::get_user_attribute_verification_code::GetUserAttributeVerificationCodeError,
-@@ -4876,6 +8632,7 @@
+@@ -5033,6 +8858,7 @@
          }
      }
  }
@@ -25831,7 +26267,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl<R>
      From<
          ::aws_smithy_runtime_api::client::result::SdkError<
-@@ -4901,6 +8658,7 @@
+@@ -5058,6 +8884,7 @@
          }
      }
  }
@@ -25839,7 +26275,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl From<crate::operation::get_user_auth_factors::GetUserAuthFactorsError> for Error {
      fn from(err: crate::operation::get_user_auth_factors::GetUserAuthFactorsError) -> Self {
          match err {
-@@ -4940,6 +8698,7 @@
+@@ -5097,6 +8924,7 @@
          }
      }
  }
@@ -25847,7 +26283,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl<R>
      From<
          ::aws_smithy_runtime_api::client::result::SdkError<
-@@ -4965,6 +8724,7 @@
+@@ -5122,6 +8950,7 @@
          }
      }
  }
@@ -25855,7 +26291,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl From<crate::operation::get_user_pool_mfa_config::GetUserPoolMfaConfigError> for Error {
      fn from(err: crate::operation::get_user_pool_mfa_config::GetUserPoolMfaConfigError) -> Self {
          match err {
-@@ -4989,6 +8749,7 @@
+@@ -5146,6 +8975,7 @@
          }
      }
  }
@@ -25863,7 +26299,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl<R>
      From<::aws_smithy_runtime_api::client::result::SdkError<crate::operation::global_sign_out::GlobalSignOutError, R>>
      for Error
-@@ -5010,6 +8771,7 @@
+@@ -5167,6 +8997,7 @@
          }
      }
  }
@@ -25871,7 +26307,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl From<crate::operation::global_sign_out::GlobalSignOutError> for Error {
      fn from(err: crate::operation::global_sign_out::GlobalSignOutError) -> Self {
          match err {
-@@ -5044,6 +8806,7 @@
+@@ -5201,6 +9032,7 @@
          }
      }
  }
@@ -25879,7 +26315,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl<R> From<::aws_smithy_runtime_api::client::result::SdkError<crate::operation::initiate_auth::InitiateAuthError, R>>
      for Error
  where
-@@ -5061,6 +8824,7 @@
+@@ -5218,6 +9050,7 @@
          }
      }
  }
@@ -25887,7 +26323,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl From<crate::operation::initiate_auth::InitiateAuthError> for Error {
      fn from(err: crate::operation::initiate_auth::InitiateAuthError) -> Self {
          match err {
-@@ -5122,6 +8886,7 @@
+@@ -5279,6 +9112,7 @@
          }
      }
  }
@@ -25895,7 +26331,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl<R> From<::aws_smithy_runtime_api::client::result::SdkError<crate::operation::list_devices::ListDevicesError, R>>
      for Error
  where
-@@ -5139,6 +8904,7 @@
+@@ -5296,6 +9130,7 @@
          }
      }
  }
@@ -25903,7 +26339,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl From<crate::operation::list_devices::ListDevicesError> for Error {
      fn from(err: crate::operation::list_devices::ListDevicesError) -> Self {
          match err {
-@@ -5179,6 +8945,7 @@
+@@ -5336,6 +9171,7 @@
          }
      }
  }
@@ -25911,7 +26347,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl<R> From<::aws_smithy_runtime_api::client::result::SdkError<crate::operation::list_groups::ListGroupsError, R>>
      for Error
  where
-@@ -5196,6 +8963,7 @@
+@@ -5353,6 +9189,7 @@
          }
      }
  }
@@ -25919,7 +26355,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl From<crate::operation::list_groups::ListGroupsError> for Error {
      fn from(err: crate::operation::list_groups::ListGroupsError) -> Self {
          match err {
-@@ -5221,6 +8989,7 @@
+@@ -5378,6 +9215,7 @@
          }
      }
  }
@@ -25927,7 +26363,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl<R>
      From<
          ::aws_smithy_runtime_api::client::result::SdkError<
-@@ -5246,6 +9015,7 @@
+@@ -5403,6 +9241,7 @@
          }
      }
  }
@@ -25935,7 +26371,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl From<crate::operation::list_identity_providers::ListIdentityProvidersError> for Error {
      fn from(err: crate::operation::list_identity_providers::ListIdentityProvidersError) -> Self {
          match err {
-@@ -5270,6 +9040,7 @@
+@@ -5427,6 +9266,7 @@
          }
      }
  }
@@ -25943,7 +26379,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl<R>
      From<
          ::aws_smithy_runtime_api::client::result::SdkError<
-@@ -5295,6 +9066,7 @@
+@@ -5452,6 +9292,7 @@
          }
      }
  }
@@ -25951,7 +26387,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl From<crate::operation::list_resource_servers::ListResourceServersError> for Error {
      fn from(err: crate::operation::list_resource_servers::ListResourceServersError) -> Self {
          match err {
-@@ -5322,6 +9094,7 @@
+@@ -5479,6 +9320,7 @@
          }
      }
  }
@@ -25959,7 +26395,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl<R>
      From<
          ::aws_smithy_runtime_api::client::result::SdkError<
-@@ -5347,6 +9120,7 @@
+@@ -5504,6 +9346,7 @@
          }
      }
  }
@@ -25967,7 +26403,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl From<crate::operation::list_tags_for_resource::ListTagsForResourceError> for Error {
      fn from(err: crate::operation::list_tags_for_resource::ListTagsForResourceError) -> Self {
          match err {
-@@ -5374,6 +9148,7 @@
+@@ -5531,6 +9374,7 @@
          }
      }
  }
@@ -25975,7 +26411,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl<R> From<::aws_smithy_runtime_api::client::result::SdkError<crate::operation::list_terms::ListTermsError, R>>
      for Error
  where
-@@ -5391,6 +9166,7 @@
+@@ -5548,6 +9392,7 @@
          }
      }
  }
@@ -25983,7 +26419,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl From<crate::operation::list_terms::ListTermsError> for Error {
      fn from(err: crate::operation::list_terms::ListTermsError) -> Self {
          match err {
-@@ -5416,6 +9192,7 @@
+@@ -5573,6 +9418,7 @@
          }
      }
  }
@@ -25991,7 +26427,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl<R>
      From<
          ::aws_smithy_runtime_api::client::result::SdkError<
-@@ -5441,6 +9218,7 @@
+@@ -5598,6 +9444,7 @@
          }
      }
  }
@@ -25999,7 +26435,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl From<crate::operation::list_user_import_jobs::ListUserImportJobsError> for Error {
      fn from(err: crate::operation::list_user_import_jobs::ListUserImportJobsError) -> Self {
          match err {
-@@ -5468,6 +9246,7 @@
+@@ -5625,6 +9472,7 @@
          }
      }
  }
@@ -26007,7 +26443,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl<R>
      From<
          ::aws_smithy_runtime_api::client::result::SdkError<
-@@ -5493,6 +9272,7 @@
+@@ -5650,6 +9498,7 @@
          }
      }
  }
@@ -26015,7 +26451,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl From<crate::operation::list_user_pool_clients::ListUserPoolClientsError> for Error {
      fn from(err: crate::operation::list_user_pool_clients::ListUserPoolClientsError) -> Self {
          match err {
-@@ -5520,6 +9300,7 @@
+@@ -5677,6 +9526,7 @@
          }
      }
  }
@@ -26023,7 +26459,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl<R>
      From<
          ::aws_smithy_runtime_api::client::result::SdkError<
-@@ -5545,6 +9326,7 @@
+@@ -5702,6 +9552,7 @@
          }
      }
  }
@@ -26031,7 +26467,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl From<crate::operation::list_user_pool_client_secrets::ListUserPoolClientSecretsError> for Error {
      fn from(err: crate::operation::list_user_pool_client_secrets::ListUserPoolClientSecretsError) -> Self {
          match err {
-@@ -5567,6 +9349,7 @@
+@@ -5724,6 +9575,7 @@
          }
      }
  }
@@ -26039,7 +26475,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl<R>
      From<
          ::aws_smithy_runtime_api::client::result::SdkError<
-@@ -5592,6 +9375,7 @@
+@@ -5749,6 +9601,7 @@
          }
      }
  }
@@ -26047,7 +26483,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl From<crate::operation::list_user_pool_replicas::ListUserPoolReplicasError> for Error {
      fn from(err: crate::operation::list_user_pool_replicas::ListUserPoolReplicasError) -> Self {
          match err {
-@@ -5619,6 +9403,7 @@
+@@ -5776,6 +9629,7 @@
          }
      }
  }
@@ -26055,7 +26491,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl<R>
      From<::aws_smithy_runtime_api::client::result::SdkError<crate::operation::list_user_pools::ListUserPoolsError, R>>
      for Error
-@@ -5640,6 +9425,7 @@
+@@ -5797,6 +9651,7 @@
          }
      }
  }
@@ -26063,7 +26499,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl From<crate::operation::list_user_pools::ListUserPoolsError> for Error {
      fn from(err: crate::operation::list_user_pools::ListUserPoolsError) -> Self {
          match err {
-@@ -5659,6 +9445,7 @@
+@@ -5816,6 +9671,7 @@
          }
      }
  }
@@ -26071,7 +26507,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl<R> From<::aws_smithy_runtime_api::client::result::SdkError<crate::operation::list_users::ListUsersError, R>>
      for Error
  where
-@@ -5676,6 +9463,7 @@
+@@ -5833,6 +9689,7 @@
          }
      }
  }
@@ -26079,7 +26515,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl From<crate::operation::list_users::ListUsersError> for Error {
      fn from(err: crate::operation::list_users::ListUsersError) -> Self {
          match err {
-@@ -5701,6 +9489,7 @@
+@@ -5858,6 +9715,7 @@
          }
      }
  }
@@ -26087,7 +26523,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl<R>
      From<
          ::aws_smithy_runtime_api::client::result::SdkError<
-@@ -5726,6 +9515,7 @@
+@@ -5883,6 +9741,7 @@
          }
      }
  }
@@ -26095,7 +26531,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl From<crate::operation::list_users_in_group::ListUsersInGroupError> for Error {
      fn from(err: crate::operation::list_users_in_group::ListUsersInGroupError) -> Self {
          match err {
-@@ -5751,6 +9541,7 @@
+@@ -5908,6 +9767,7 @@
          }
      }
  }
@@ -26103,7 +26539,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl<R>
      From<
          ::aws_smithy_runtime_api::client::result::SdkError<
-@@ -5776,6 +9567,7 @@
+@@ -5933,6 +9793,7 @@
          }
      }
  }
@@ -26111,7 +26547,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl From<crate::operation::list_web_authn_credentials::ListWebAuthnCredentialsError> for Error {
      fn from(err: crate::operation::list_web_authn_credentials::ListWebAuthnCredentialsError) -> Self {
          match err {
-@@ -5805,6 +9597,7 @@
+@@ -5962,6 +9823,7 @@
          }
      }
  }
@@ -26119,7 +26555,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl<R>
      From<
          ::aws_smithy_runtime_api::client::result::SdkError<
-@@ -5830,6 +9623,7 @@
+@@ -5987,6 +9849,7 @@
          }
      }
  }
@@ -26127,7 +26563,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl From<crate::operation::resend_confirmation_code::ResendConfirmationCodeError> for Error {
      fn from(err: crate::operation::resend_confirmation_code::ResendConfirmationCodeError) -> Self {
          match err {
-@@ -5883,6 +9677,7 @@
+@@ -6040,6 +9903,7 @@
          }
      }
  }
@@ -26135,7 +26571,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl<R>
      From<
          ::aws_smithy_runtime_api::client::result::SdkError<
-@@ -5908,6 +9703,7 @@
+@@ -6065,6 +9929,7 @@
          }
      }
  }
@@ -26143,7 +26579,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl From<crate::operation::respond_to_auth_challenge::RespondToAuthChallengeError> for Error {
      fn from(err: crate::operation::respond_to_auth_challenge::RespondToAuthChallengeError) -> Self {
          match err {
-@@ -5985,6 +9781,7 @@
+@@ -6142,6 +10007,7 @@
          }
      }
  }
@@ -26151,7 +26587,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl<R> From<::aws_smithy_runtime_api::client::result::SdkError<crate::operation::revoke_token::RevokeTokenError, R>>
      for Error
  where
-@@ -6002,6 +9799,7 @@
+@@ -6159,6 +10025,7 @@
          }
      }
  }
@@ -26159,7 +26595,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl From<crate::operation::revoke_token::RevokeTokenError> for Error {
      fn from(err: crate::operation::revoke_token::RevokeTokenError) -> Self {
          match err {
-@@ -6033,6 +9831,7 @@
+@@ -6190,6 +10057,7 @@
          }
      }
  }
@@ -26167,7 +26603,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl<R>
      From<
          ::aws_smithy_runtime_api::client::result::SdkError<
-@@ -6058,6 +9857,7 @@
+@@ -6215,6 +10083,7 @@
          }
      }
  }
@@ -26175,7 +26611,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl From<crate::operation::set_log_delivery_configuration::SetLogDeliveryConfigurationError> for Error {
      fn from(err: crate::operation::set_log_delivery_configuration::SetLogDeliveryConfigurationError) -> Self {
          match err {
-@@ -6083,6 +9883,7 @@
+@@ -6240,6 +10109,7 @@
          }
      }
  }
@@ -26183,7 +26619,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl<R>
      From<
          ::aws_smithy_runtime_api::client::result::SdkError<
-@@ -6108,6 +9909,7 @@
+@@ -6265,6 +10135,7 @@
          }
      }
  }
@@ -26191,7 +26627,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl From<crate::operation::set_risk_configuration::SetRiskConfigurationError> for Error {
      fn from(err: crate::operation::set_risk_configuration::SetRiskConfigurationError) -> Self {
          match err {
-@@ -6142,6 +9944,7 @@
+@@ -6299,6 +10170,7 @@
          }
      }
  }
@@ -26199,7 +26635,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl<R>
      From<
          ::aws_smithy_runtime_api::client::result::SdkError<
-@@ -6167,6 +9970,7 @@
+@@ -6324,6 +10196,7 @@
          }
      }
  }
@@ -26207,7 +26643,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl From<crate::operation::set_ui_customization::SetUICustomizationError> for Error {
      fn from(err: crate::operation::set_ui_customization::SetUICustomizationError) -> Self {
          match err {
-@@ -6194,6 +9998,7 @@
+@@ -6351,6 +10224,7 @@
          }
      }
  }
@@ -26215,7 +26651,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl<R>
      From<
          ::aws_smithy_runtime_api::client::result::SdkError<
-@@ -6219,6 +10024,7 @@
+@@ -6376,6 +10250,7 @@
          }
      }
  }
@@ -26223,7 +26659,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl From<crate::operation::set_user_mfa_preference::SetUserMFAPreferenceError> for Error {
      fn from(err: crate::operation::set_user_mfa_preference::SetUserMFAPreferenceError) -> Self {
          match err {
-@@ -6255,6 +10061,7 @@
+@@ -6412,6 +10287,7 @@
          }
      }
  }
@@ -26231,7 +26667,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl<R>
      From<
          ::aws_smithy_runtime_api::client::result::SdkError<
-@@ -6280,6 +10087,7 @@
+@@ -6437,6 +10313,7 @@
          }
      }
  }
@@ -26239,7 +26675,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl From<crate::operation::set_user_pool_mfa_config::SetUserPoolMfaConfigError> for Error {
      fn from(err: crate::operation::set_user_pool_mfa_config::SetUserPoolMfaConfigError) -> Self {
          match err {
-@@ -6317,6 +10125,7 @@
+@@ -6474,6 +10351,7 @@
          }
      }
  }
@@ -26247,7 +26683,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl<R>
      From<
          ::aws_smithy_runtime_api::client::result::SdkError<
-@@ -6342,6 +10151,7 @@
+@@ -6499,6 +10377,7 @@
          }
      }
  }
@@ -26255,7 +26691,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl From<crate::operation::set_user_settings::SetUserSettingsError> for Error {
      fn from(err: crate::operation::set_user_settings::SetUserSettingsError) -> Self {
          match err {
-@@ -6376,6 +10186,7 @@
+@@ -6533,6 +10412,7 @@
          }
      }
  }
@@ -26263,7 +26699,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl<R> From<::aws_smithy_runtime_api::client::result::SdkError<crate::operation::sign_up::SignUpError, R>> for Error
  where
      R: Send + Sync + std::fmt::Debug + 'static,
-@@ -6392,6 +10203,7 @@
+@@ -6549,6 +10429,7 @@
          }
      }
  }
@@ -26271,7 +26707,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl From<crate::operation::sign_up::SignUpError> for Error {
      fn from(err: crate::operation::sign_up::SignUpError) -> Self {
          match err {
-@@ -6448,6 +10260,7 @@
+@@ -6605,6 +10486,7 @@
          }
      }
  }
@@ -26279,7 +26715,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl<R>
      From<
          ::aws_smithy_runtime_api::client::result::SdkError<
-@@ -6473,6 +10286,7 @@
+@@ -6630,6 +10512,7 @@
          }
      }
  }
@@ -26287,7 +26723,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl From<crate::operation::start_user_import_job::StartUserImportJobError> for Error {
      fn from(err: crate::operation::start_user_import_job::StartUserImportJobError) -> Self {
          match err {
-@@ -6503,6 +10317,7 @@
+@@ -6660,6 +10543,7 @@
          }
      }
  }
@@ -26295,7 +26731,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl<R>
      From<
          ::aws_smithy_runtime_api::client::result::SdkError<
-@@ -6528,6 +10343,7 @@
+@@ -6685,6 +10569,7 @@
          }
      }
  }
@@ -26303,7 +26739,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl From<crate::operation::start_web_authn_registration::StartWebAuthnRegistrationError> for Error {
      fn from(err: crate::operation::start_web_authn_registration::StartWebAuthnRegistrationError) -> Self {
          match err {
-@@ -6565,6 +10381,7 @@
+@@ -6722,6 +10607,7 @@
          }
      }
  }
@@ -26311,7 +26747,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl<R>
      From<
          ::aws_smithy_runtime_api::client::result::SdkError<
-@@ -6590,6 +10407,7 @@
+@@ -6747,6 +10633,7 @@
          }
      }
  }
@@ -26319,7 +26755,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl From<crate::operation::stop_user_import_job::StopUserImportJobError> for Error {
      fn from(err: crate::operation::stop_user_import_job::StopUserImportJobError) -> Self {
          match err {
-@@ -6618,6 +10436,7 @@
+@@ -6775,6 +10662,7 @@
          }
      }
  }
@@ -26327,7 +26763,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl<R> From<::aws_smithy_runtime_api::client::result::SdkError<crate::operation::tag_resource::TagResourceError, R>>
      for Error
  where
-@@ -6635,6 +10454,7 @@
+@@ -6792,6 +10680,7 @@
          }
      }
  }
@@ -26335,7 +26771,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl From<crate::operation::tag_resource::TagResourceError> for Error {
      fn from(err: crate::operation::tag_resource::TagResourceError) -> Self {
          match err {
-@@ -6660,6 +10480,7 @@
+@@ -6817,6 +10706,7 @@
          }
      }
  }
@@ -26343,7 +26779,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl<R>
      From<::aws_smithy_runtime_api::client::result::SdkError<crate::operation::untag_resource::UntagResourceError, R>>
      for Error
-@@ -6681,6 +10502,7 @@
+@@ -6838,6 +10728,7 @@
          }
      }
  }
@@ -26351,7 +26787,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl From<crate::operation::untag_resource::UntagResourceError> for Error {
      fn from(err: crate::operation::untag_resource::UntagResourceError) -> Self {
          match err {
-@@ -6706,6 +10528,7 @@
+@@ -6863,6 +10754,7 @@
          }
      }
  }
@@ -26359,7 +26795,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl<R>
      From<
          ::aws_smithy_runtime_api::client::result::SdkError<
-@@ -6731,6 +10554,7 @@
+@@ -6888,6 +10780,7 @@
          }
      }
  }
@@ -26367,7 +26803,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl From<crate::operation::update_auth_event_feedback::UpdateAuthEventFeedbackError> for Error {
      fn from(err: crate::operation::update_auth_event_feedback::UpdateAuthEventFeedbackError) -> Self {
          match err {
-@@ -6762,6 +10586,7 @@
+@@ -6919,6 +10812,7 @@
          }
      }
  }
@@ -26375,7 +26811,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl<R>
      From<
          ::aws_smithy_runtime_api::client::result::SdkError<
-@@ -6787,6 +10612,7 @@
+@@ -6944,6 +10838,7 @@
          }
      }
  }
@@ -26383,7 +26819,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl From<crate::operation::update_device_status::UpdateDeviceStatusError> for Error {
      fn from(err: crate::operation::update_device_status::UpdateDeviceStatusError) -> Self {
          match err {
-@@ -6829,6 +10655,7 @@
+@@ -6986,6 +10881,7 @@
          }
      }
  }
@@ -26391,7 +26827,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl<R> From<::aws_smithy_runtime_api::client::result::SdkError<crate::operation::update_group::UpdateGroupError, R>>
      for Error
  where
-@@ -6846,6 +10673,7 @@
+@@ -7003,6 +10899,7 @@
          }
      }
  }
@@ -26399,7 +26835,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl From<crate::operation::update_group::UpdateGroupError> for Error {
      fn from(err: crate::operation::update_group::UpdateGroupError) -> Self {
          match err {
-@@ -6871,6 +10699,7 @@
+@@ -7028,6 +10925,7 @@
          }
      }
  }
@@ -26407,7 +26843,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl<R>
      From<
          ::aws_smithy_runtime_api::client::result::SdkError<
-@@ -6896,6 +10725,7 @@
+@@ -7053,6 +10951,7 @@
          }
      }
  }
@@ -26415,7 +26851,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl From<crate::operation::update_identity_provider::UpdateIdentityProviderError> for Error {
      fn from(err: crate::operation::update_identity_provider::UpdateIdentityProviderError) -> Self {
          match err {
-@@ -6924,6 +10754,7 @@
+@@ -7081,6 +10980,7 @@
          }
      }
  }
@@ -26423,7 +26859,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl<R>
      From<
          ::aws_smithy_runtime_api::client::result::SdkError<
-@@ -6949,6 +10780,7 @@
+@@ -7106,6 +11006,7 @@
          }
      }
  }
@@ -26431,7 +26867,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl From<crate::operation::update_managed_login_branding::UpdateManagedLoginBrandingError> for Error {
      fn from(err: crate::operation::update_managed_login_branding::UpdateManagedLoginBrandingError) -> Self {
          match err {
-@@ -6977,6 +10809,7 @@
+@@ -7134,6 +11035,7 @@
          }
      }
  }
@@ -26439,7 +26875,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl<R>
      From<
          ::aws_smithy_runtime_api::client::result::SdkError<
-@@ -7002,6 +10835,7 @@
+@@ -7159,6 +11061,7 @@
          }
      }
  }
@@ -26447,7 +26883,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl From<crate::operation::update_provisioned_limit::UpdateProvisionedLimitError> for Error {
      fn from(err: crate::operation::update_provisioned_limit::UpdateProvisionedLimitError) -> Self {
          match err {
-@@ -7029,6 +10863,7 @@
+@@ -7186,6 +11089,7 @@
          }
      }
  }
@@ -26455,7 +26891,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl<R>
      From<
          ::aws_smithy_runtime_api::client::result::SdkError<
-@@ -7054,6 +10889,7 @@
+@@ -7211,6 +11115,7 @@
          }
      }
  }
@@ -26463,7 +26899,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl From<crate::operation::update_resource_server::UpdateResourceServerError> for Error {
      fn from(err: crate::operation::update_resource_server::UpdateResourceServerError) -> Self {
          match err {
-@@ -7081,6 +10917,7 @@
+@@ -7238,6 +11143,7 @@
          }
      }
  }
@@ -26471,7 +26907,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl<R> From<::aws_smithy_runtime_api::client::result::SdkError<crate::operation::update_terms::UpdateTermsError, R>>
      for Error
  where
-@@ -7098,6 +10935,7 @@
+@@ -7255,6 +11161,7 @@
          }
      }
  }
@@ -26479,7 +26915,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl From<crate::operation::update_terms::UpdateTermsError> for Error {
      fn from(err: crate::operation::update_terms::UpdateTermsError) -> Self {
          match err {
-@@ -7129,6 +10967,7 @@
+@@ -7286,6 +11193,7 @@
          }
      }
  }
@@ -26487,7 +26923,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl<R>
      From<
          ::aws_smithy_runtime_api::client::result::SdkError<
-@@ -7154,6 +10993,7 @@
+@@ -7311,6 +11219,7 @@
          }
      }
  }
@@ -26495,7 +26931,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl From<crate::operation::update_user_attributes::UpdateUserAttributesError> for Error {
      fn from(err: crate::operation::update_user_attributes::UpdateUserAttributesError) -> Self {
          match err {
-@@ -7211,6 +11051,7 @@
+@@ -7368,6 +11277,7 @@
          }
      }
  }
@@ -26503,7 +26939,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl<R>
      From<::aws_smithy_runtime_api::client::result::SdkError<crate::operation::update_user_pool::UpdateUserPoolError, R>>
      for Error
-@@ -7232,6 +11073,7 @@
+@@ -7389,6 +11299,7 @@
          }
      }
  }
@@ -26511,7 +26947,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl From<crate::operation::update_user_pool::UpdateUserPoolError> for Error {
      fn from(err: crate::operation::update_user_pool::UpdateUserPoolError) -> Self {
          match err {
-@@ -7281,6 +11123,7 @@
+@@ -7438,6 +11349,7 @@
          }
      }
  }
@@ -26519,7 +26955,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl<R>
      From<
          ::aws_smithy_runtime_api::client::result::SdkError<
-@@ -7306,6 +11149,7 @@
+@@ -7463,6 +11375,7 @@
          }
      }
  }
@@ -26527,7 +26963,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl From<crate::operation::update_user_pool_client::UpdateUserPoolClientError> for Error {
      fn from(err: crate::operation::update_user_pool_client::UpdateUserPoolClientError) -> Self {
          match err {
-@@ -7345,6 +11189,7 @@
+@@ -7502,6 +11415,7 @@
          }
      }
  }
@@ -26535,7 +26971,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl<R>
      From<
          ::aws_smithy_runtime_api::client::result::SdkError<
-@@ -7370,6 +11215,7 @@
+@@ -7527,6 +11441,7 @@
          }
      }
  }
@@ -26543,7 +26979,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl From<crate::operation::update_user_pool_domain::UpdateUserPoolDomainError> for Error {
      fn from(err: crate::operation::update_user_pool_domain::UpdateUserPoolDomainError) -> Self {
          match err {
-@@ -7403,6 +11249,7 @@
+@@ -7560,6 +11475,7 @@
          }
      }
  }
@@ -26551,7 +26987,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl<R>
      From<
          ::aws_smithy_runtime_api::client::result::SdkError<
-@@ -7428,6 +11275,7 @@
+@@ -7585,6 +11501,7 @@
          }
      }
  }
@@ -26559,7 +26995,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl From<crate::operation::update_user_pool_replica::UpdateUserPoolReplicaError> for Error {
      fn from(err: crate::operation::update_user_pool_replica::UpdateUserPoolReplicaError) -> Self {
          match err {
-@@ -7455,6 +11303,7 @@
+@@ -7612,6 +11529,7 @@
          }
      }
  }
@@ -26567,7 +27003,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl<R>
      From<
          ::aws_smithy_runtime_api::client::result::SdkError<
-@@ -7480,6 +11329,7 @@
+@@ -7637,6 +11555,7 @@
          }
      }
  }
@@ -26575,7 +27011,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl From<crate::operation::verify_software_token::VerifySoftwareTokenError> for Error {
      fn from(err: crate::operation::verify_software_token::VerifySoftwareTokenError) -> Self {
          match err {
-@@ -7519,6 +11369,7 @@
+@@ -7676,6 +11595,7 @@
          }
      }
  }
@@ -26583,7 +27019,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl<R>
      From<
          ::aws_smithy_runtime_api::client::result::SdkError<
-@@ -7544,6 +11395,7 @@
+@@ -7701,6 +11621,7 @@
          }
      }
  }
@@ -26591,7 +27027,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl From<crate::operation::verify_user_attribute::VerifyUserAttributeError> for Error {
      fn from(err: crate::operation::verify_user_attribute::VerifyUserAttributeError) -> Self {
          match err {
-@@ -7598,64 +11450,1262 @@
+@@ -7755,64 +11676,1283 @@
  impl ::std::error::Error for Error {
      fn source(&self) -> std::option::Option<&(dyn ::std::error::Error + 'static)> {
          match self {
@@ -26686,6 +27122,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
 +                feature = "op_delete_web_authn_credential",
 +                feature = "op_forget_device",
 +                feature = "op_forgot_password",
++                feature = "op_get_client_token",
 +                feature = "op_get_device",
 +                feature = "op_get_tokens_from_refresh_token",
 +                feature = "op_get_user",
@@ -26715,6 +27152,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
 +                feature = "op_admin_add_user_to_group",
 +                feature = "op_admin_confirm_sign_up",
 +                feature = "op_admin_create_user",
++                feature = "op_admin_delete_software_token",
 +                feature = "op_admin_delete_user",
 +                feature = "op_admin_delete_user_attributes",
 +                feature = "op_admin_disable_provider_for_user",
@@ -26773,12 +27211,14 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
 +                feature = "op_describe_resource_server",
 +                feature = "op_describe_risk_configuration",
 +                feature = "op_describe_terms",
++                feature = "op_describe_terms_by_client",
 +                feature = "op_describe_user_import_job",
 +                feature = "op_describe_user_pool",
 +                feature = "op_describe_user_pool_client",
 +                feature = "op_describe_user_pool_domain",
 +                feature = "op_forget_device",
 +                feature = "op_forgot_password",
++                feature = "op_get_client_token",
 +                feature = "op_get_csv_header",
 +                feature = "op_get_device",
 +                feature = "op_get_group",
@@ -26890,6 +27330,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
 +                feature = "op_admin_add_user_to_group",
 +                feature = "op_admin_confirm_sign_up",
 +                feature = "op_admin_create_user",
++                feature = "op_admin_delete_software_token",
 +                feature = "op_admin_delete_user",
 +                feature = "op_admin_delete_user_attributes",
 +                feature = "op_admin_disable_provider_for_user",
@@ -26949,12 +27390,14 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
 +                feature = "op_describe_resource_server",
 +                feature = "op_describe_risk_configuration",
 +                feature = "op_describe_terms",
++                feature = "op_describe_terms_by_client",
 +                feature = "op_describe_user_import_job",
 +                feature = "op_describe_user_pool",
 +                feature = "op_describe_user_pool_client",
 +                feature = "op_describe_user_pool_domain",
 +                feature = "op_forget_device",
 +                feature = "op_forgot_password",
++                feature = "op_get_client_token",
 +                feature = "op_get_csv_header",
 +                feature = "op_get_device",
 +                feature = "op_get_group",
@@ -27124,6 +27567,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
 +                feature = "op_admin_add_user_to_group",
 +                feature = "op_admin_confirm_sign_up",
 +                feature = "op_admin_create_user",
++                feature = "op_admin_delete_software_token",
 +                feature = "op_admin_delete_user",
 +                feature = "op_admin_delete_user_attributes",
 +                feature = "op_admin_disable_provider_for_user",
@@ -27182,12 +27626,14 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
 +                feature = "op_describe_resource_server",
 +                feature = "op_describe_risk_configuration",
 +                feature = "op_describe_terms",
++                feature = "op_describe_terms_by_client",
 +                feature = "op_describe_user_import_job",
 +                feature = "op_describe_user_pool",
 +                feature = "op_describe_user_pool_client",
 +                feature = "op_describe_user_pool_domain",
 +                feature = "op_forget_device",
 +                feature = "op_forgot_password",
++                feature = "op_get_client_token",
 +                feature = "op_get_csv_header",
 +                feature = "op_get_device",
 +                feature = "op_get_group",
@@ -27251,6 +27697,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
 +                feature = "op_admin_add_user_to_group",
 +                feature = "op_admin_confirm_sign_up",
 +                feature = "op_admin_create_user",
++                feature = "op_admin_delete_software_token",
 +                feature = "op_admin_delete_user",
 +                feature = "op_admin_delete_user_attributes",
 +                feature = "op_admin_disable_provider_for_user",
@@ -27305,12 +27752,14 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
 +                feature = "op_describe_resource_server",
 +                feature = "op_describe_risk_configuration",
 +                feature = "op_describe_terms",
++                feature = "op_describe_terms_by_client",
 +                feature = "op_describe_user_import_job",
 +                feature = "op_describe_user_pool",
 +                feature = "op_describe_user_pool_client",
 +                feature = "op_describe_user_pool_domain",
 +                feature = "op_forget_device",
 +                feature = "op_forgot_password",
++                feature = "op_get_client_token",
 +                feature = "op_get_csv_header",
 +                feature = "op_get_device",
 +                feature = "op_get_group",
@@ -27414,6 +27863,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
 +                feature = "op_admin_add_user_to_group",
 +                feature = "op_admin_confirm_sign_up",
 +                feature = "op_admin_create_user",
++                feature = "op_admin_delete_software_token",
 +                feature = "op_admin_delete_user",
 +                feature = "op_admin_delete_user_attributes",
 +                feature = "op_admin_disable_provider_for_user",
@@ -27471,12 +27921,14 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
 +                feature = "op_describe_resource_server",
 +                feature = "op_describe_risk_configuration",
 +                feature = "op_describe_terms",
++                feature = "op_describe_terms_by_client",
 +                feature = "op_describe_user_import_job",
 +                feature = "op_describe_user_pool",
 +                feature = "op_describe_user_pool_client",
 +                feature = "op_describe_user_pool_domain",
 +                feature = "op_forget_device",
 +                feature = "op_forgot_password",
++                feature = "op_get_client_token",
 +                feature = "op_get_csv_header",
 +                feature = "op_get_device",
 +                feature = "op_get_group",
@@ -27561,6 +28013,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
 +                feature = "op_admin_add_user_to_group",
 +                feature = "op_admin_confirm_sign_up",
 +                feature = "op_admin_create_user",
++                feature = "op_admin_delete_software_token",
 +                feature = "op_admin_delete_user",
 +                feature = "op_admin_delete_user_attributes",
 +                feature = "op_admin_disable_provider_for_user",
@@ -27615,11 +28068,13 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
 +                feature = "op_describe_resource_server",
 +                feature = "op_describe_risk_configuration",
 +                feature = "op_describe_terms",
++                feature = "op_describe_terms_by_client",
 +                feature = "op_describe_user_import_job",
 +                feature = "op_describe_user_pool",
 +                feature = "op_describe_user_pool_client",
 +                feature = "op_forget_device",
 +                feature = "op_forgot_password",
++                feature = "op_get_client_token",
 +                feature = "op_get_csv_header",
 +                feature = "op_get_device",
 +                feature = "op_get_group",
@@ -27737,6 +28192,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
 +            ))]
              Error::UserLambdaValidationException(inner) => inner.source(),
 +            #[cfg(any(
++                feature = "op_admin_delete_software_token",
 +                feature = "op_admin_initiate_auth",
 +                feature = "op_admin_respond_to_auth_challenge",
 +                feature = "op_admin_set_user_mfa_preference",
@@ -27766,6 +28222,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
 +                feature = "op_admin_add_user_to_group",
 +                feature = "op_admin_confirm_sign_up",
 +                feature = "op_admin_create_user",
++                feature = "op_admin_delete_software_token",
 +                feature = "op_admin_delete_user",
 +                feature = "op_admin_delete_user_attributes",
 +                feature = "op_admin_disable_provider_for_user",
@@ -27854,7 +28311,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
              Error::WebAuthnRelyingPartyMismatchException(inner) => inner.source(),
              Error::Unhandled(inner) => ::std::option::Option::Some(&*inner.source),
          }
-@@ -7664,64 +12714,1262 @@
+@@ -7821,64 +12961,1283 @@
  impl ::aws_types::request_id::RequestId for Error {
      fn request_id(&self) -> Option<&str> {
          match self {
@@ -27949,6 +28406,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
 +                feature = "op_delete_web_authn_credential",
 +                feature = "op_forget_device",
 +                feature = "op_forgot_password",
++                feature = "op_get_client_token",
 +                feature = "op_get_device",
 +                feature = "op_get_tokens_from_refresh_token",
 +                feature = "op_get_user",
@@ -27978,6 +28436,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
 +                feature = "op_admin_add_user_to_group",
 +                feature = "op_admin_confirm_sign_up",
 +                feature = "op_admin_create_user",
++                feature = "op_admin_delete_software_token",
 +                feature = "op_admin_delete_user",
 +                feature = "op_admin_delete_user_attributes",
 +                feature = "op_admin_disable_provider_for_user",
@@ -28036,12 +28495,14 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
 +                feature = "op_describe_resource_server",
 +                feature = "op_describe_risk_configuration",
 +                feature = "op_describe_terms",
++                feature = "op_describe_terms_by_client",
 +                feature = "op_describe_user_import_job",
 +                feature = "op_describe_user_pool",
 +                feature = "op_describe_user_pool_client",
 +                feature = "op_describe_user_pool_domain",
 +                feature = "op_forget_device",
 +                feature = "op_forgot_password",
++                feature = "op_get_client_token",
 +                feature = "op_get_csv_header",
 +                feature = "op_get_device",
 +                feature = "op_get_group",
@@ -28153,6 +28614,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
 +                feature = "op_admin_add_user_to_group",
 +                feature = "op_admin_confirm_sign_up",
 +                feature = "op_admin_create_user",
++                feature = "op_admin_delete_software_token",
 +                feature = "op_admin_delete_user",
 +                feature = "op_admin_delete_user_attributes",
 +                feature = "op_admin_disable_provider_for_user",
@@ -28212,12 +28674,14 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
 +                feature = "op_describe_resource_server",
 +                feature = "op_describe_risk_configuration",
 +                feature = "op_describe_terms",
++                feature = "op_describe_terms_by_client",
 +                feature = "op_describe_user_import_job",
 +                feature = "op_describe_user_pool",
 +                feature = "op_describe_user_pool_client",
 +                feature = "op_describe_user_pool_domain",
 +                feature = "op_forget_device",
 +                feature = "op_forgot_password",
++                feature = "op_get_client_token",
 +                feature = "op_get_csv_header",
 +                feature = "op_get_device",
 +                feature = "op_get_group",
@@ -28387,6 +28851,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
 +                feature = "op_admin_add_user_to_group",
 +                feature = "op_admin_confirm_sign_up",
 +                feature = "op_admin_create_user",
++                feature = "op_admin_delete_software_token",
 +                feature = "op_admin_delete_user",
 +                feature = "op_admin_delete_user_attributes",
 +                feature = "op_admin_disable_provider_for_user",
@@ -28445,12 +28910,14 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
 +                feature = "op_describe_resource_server",
 +                feature = "op_describe_risk_configuration",
 +                feature = "op_describe_terms",
++                feature = "op_describe_terms_by_client",
 +                feature = "op_describe_user_import_job",
 +                feature = "op_describe_user_pool",
 +                feature = "op_describe_user_pool_client",
 +                feature = "op_describe_user_pool_domain",
 +                feature = "op_forget_device",
 +                feature = "op_forgot_password",
++                feature = "op_get_client_token",
 +                feature = "op_get_csv_header",
 +                feature = "op_get_device",
 +                feature = "op_get_group",
@@ -28514,6 +28981,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
 +                feature = "op_admin_add_user_to_group",
 +                feature = "op_admin_confirm_sign_up",
 +                feature = "op_admin_create_user",
++                feature = "op_admin_delete_software_token",
 +                feature = "op_admin_delete_user",
 +                feature = "op_admin_delete_user_attributes",
 +                feature = "op_admin_disable_provider_for_user",
@@ -28568,12 +29036,14 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
 +                feature = "op_describe_resource_server",
 +                feature = "op_describe_risk_configuration",
 +                feature = "op_describe_terms",
++                feature = "op_describe_terms_by_client",
 +                feature = "op_describe_user_import_job",
 +                feature = "op_describe_user_pool",
 +                feature = "op_describe_user_pool_client",
 +                feature = "op_describe_user_pool_domain",
 +                feature = "op_forget_device",
 +                feature = "op_forgot_password",
++                feature = "op_get_client_token",
 +                feature = "op_get_csv_header",
 +                feature = "op_get_device",
 +                feature = "op_get_group",
@@ -28677,6 +29147,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
 +                feature = "op_admin_add_user_to_group",
 +                feature = "op_admin_confirm_sign_up",
 +                feature = "op_admin_create_user",
++                feature = "op_admin_delete_software_token",
 +                feature = "op_admin_delete_user",
 +                feature = "op_admin_delete_user_attributes",
 +                feature = "op_admin_disable_provider_for_user",
@@ -28734,12 +29205,14 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
 +                feature = "op_describe_resource_server",
 +                feature = "op_describe_risk_configuration",
 +                feature = "op_describe_terms",
++                feature = "op_describe_terms_by_client",
 +                feature = "op_describe_user_import_job",
 +                feature = "op_describe_user_pool",
 +                feature = "op_describe_user_pool_client",
 +                feature = "op_describe_user_pool_domain",
 +                feature = "op_forget_device",
 +                feature = "op_forgot_password",
++                feature = "op_get_client_token",
 +                feature = "op_get_csv_header",
 +                feature = "op_get_device",
 +                feature = "op_get_group",
@@ -28824,6 +29297,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
 +                feature = "op_admin_add_user_to_group",
 +                feature = "op_admin_confirm_sign_up",
 +                feature = "op_admin_create_user",
++                feature = "op_admin_delete_software_token",
 +                feature = "op_admin_delete_user",
 +                feature = "op_admin_delete_user_attributes",
 +                feature = "op_admin_disable_provider_for_user",
@@ -28878,11 +29352,13 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
 +                feature = "op_describe_resource_server",
 +                feature = "op_describe_risk_configuration",
 +                feature = "op_describe_terms",
++                feature = "op_describe_terms_by_client",
 +                feature = "op_describe_user_import_job",
 +                feature = "op_describe_user_pool",
 +                feature = "op_describe_user_pool_client",
 +                feature = "op_forget_device",
 +                feature = "op_forgot_password",
++                feature = "op_get_client_token",
 +                feature = "op_get_csv_header",
 +                feature = "op_get_device",
 +                feature = "op_get_group",
@@ -29000,6 +29476,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
 +            ))]
              Self::UserLambdaValidationException(e) => e.request_id(),
 +            #[cfg(any(
++                feature = "op_admin_delete_software_token",
 +                feature = "op_admin_initiate_auth",
 +                feature = "op_admin_respond_to_auth_challenge",
 +                feature = "op_admin_set_user_mfa_preference",
@@ -29029,6 +29506,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
 +                feature = "op_admin_add_user_to_group",
 +                feature = "op_admin_confirm_sign_up",
 +                feature = "op_admin_create_user",
++                feature = "op_admin_delete_software_token",
 +                feature = "op_admin_delete_user",
 +                feature = "op_admin_delete_user_attributes",
 +                feature = "op_admin_disable_provider_for_user",
@@ -29265,7 +29743,7 @@ diff --git a/src/lens.rs b/src/lens.rs
 diff --git a/src/operation.rs b/src/operation.rs
 --- a/src/operation.rs
 +++ b/src/operation.rs
-@@ -1,389 +1,518 @@
+@@ -1,398 +1,530 @@
  // Code generated by software.amazon.smithy.rust.codegen.smithy-rs. DO NOT EDIT.
  pub use ::aws_types::request_id::RequestId;
 
@@ -29288,6 +29766,10 @@ diff --git a/src/operation.rs b/src/operation.rs
 +#[cfg(feature = "op_admin_create_user")]
  /// Types for the `AdminCreateUser` operation.
  pub mod admin_create_user;
+
++#[cfg(feature = "op_admin_delete_software_token")]
+ /// Types for the `AdminDeleteSoftwareToken` operation.
+ pub mod admin_delete_software_token;
 
 +#[cfg(feature = "op_admin_delete_user")]
  /// Types for the `AdminDeleteUser` operation.
@@ -29525,6 +30007,10 @@ diff --git a/src/operation.rs b/src/operation.rs
  /// Types for the `DescribeTerms` operation.
  pub mod describe_terms;
 
++#[cfg(feature = "op_describe_terms_by_client")]
+ /// Types for the `DescribeTermsByClient` operation.
+ pub mod describe_terms_by_client;
+
 +#[cfg(feature = "op_describe_user_import_job")]
  /// Types for the `DescribeUserImportJob` operation.
  pub mod describe_user_import_job;
@@ -29548,6 +30034,10 @@ diff --git a/src/operation.rs b/src/operation.rs
 +#[cfg(feature = "op_forgot_password")]
  /// Types for the `ForgotPassword` operation.
  pub mod forgot_password;
+
++#[cfg(feature = "op_get_client_token")]
+ /// Types for the `GetClientToken` operation.
+ pub mod get_client_token;
 
 +#[cfg(feature = "op_get_csv_header")]
  /// Types for the `GetCSVHeader` operation.
@@ -29787,7 +30277,7 @@ diff --git a/src/operation.rs b/src/operation.rs
 diff --git a/src/protocol_serde.rs b/src/protocol_serde.rs
 --- a/src/protocol_serde.rs
 +++ b/src/protocol_serde.rs
-@@ -1,4 +1,135 @@
+@@ -1,4 +1,138 @@
  // Code generated by software.amazon.smithy.rust.codegen.smithy-rs. DO NOT EDIT.
 +#[cfg(any(
 +    feature = "op_add_custom_attributes",
@@ -29795,6 +30285,7 @@ diff --git a/src/protocol_serde.rs b/src/protocol_serde.rs
 +    feature = "op_admin_add_user_to_group",
 +    feature = "op_admin_confirm_sign_up",
 +    feature = "op_admin_create_user",
++    feature = "op_admin_delete_software_token",
 +    feature = "op_admin_delete_user",
 +    feature = "op_admin_delete_user_attributes",
 +    feature = "op_admin_disable_provider_for_user",
@@ -29854,12 +30345,14 @@ diff --git a/src/protocol_serde.rs b/src/protocol_serde.rs
 +    feature = "op_describe_resource_server",
 +    feature = "op_describe_risk_configuration",
 +    feature = "op_describe_terms",
++    feature = "op_describe_terms_by_client",
 +    feature = "op_describe_user_import_job",
 +    feature = "op_describe_user_pool",
 +    feature = "op_describe_user_pool_client",
 +    feature = "op_describe_user_pool_domain",
 +    feature = "op_forget_device",
 +    feature = "op_forgot_password",
++    feature = "op_get_client_token",
 +    feature = "op_get_csv_header",
 +    feature = "op_get_device",
 +    feature = "op_get_group",
@@ -29923,7 +30416,7 @@ diff --git a/src/protocol_serde.rs b/src/protocol_serde.rs
  pub(crate) fn type_erase_result<O, E>(
      result: ::std::result::Result<O, E>,
  ) -> ::std::result::Result<
-@@ -17,6 +148,137 @@
+@@ -17,6 +151,140 @@
          .map_err(::std::convert::Into::into)
  }
 
@@ -29933,6 +30426,7 @@ diff --git a/src/protocol_serde.rs b/src/protocol_serde.rs
 +    feature = "op_admin_add_user_to_group",
 +    feature = "op_admin_confirm_sign_up",
 +    feature = "op_admin_create_user",
++    feature = "op_admin_delete_software_token",
 +    feature = "op_admin_delete_user",
 +    feature = "op_admin_delete_user_attributes",
 +    feature = "op_admin_disable_provider_for_user",
@@ -29992,12 +30486,14 @@ diff --git a/src/protocol_serde.rs b/src/protocol_serde.rs
 +    feature = "op_describe_resource_server",
 +    feature = "op_describe_risk_configuration",
 +    feature = "op_describe_terms",
++    feature = "op_describe_terms_by_client",
 +    feature = "op_describe_user_import_job",
 +    feature = "op_describe_user_pool",
 +    feature = "op_describe_user_pool_client",
 +    feature = "op_describe_user_pool_domain",
 +    feature = "op_forget_device",
 +    feature = "op_forgot_password",
++    feature = "op_get_client_token",
 +    feature = "op_get_csv_header",
 +    feature = "op_get_device",
 +    feature = "op_get_group",
@@ -30061,7 +30557,7 @@ diff --git a/src/protocol_serde.rs b/src/protocol_serde.rs
  pub fn parse_http_error_metadata(
      _response_status: u16,
      response_headers: &::aws_smithy_runtime_api::http::Headers,
-@@ -28,264 +290,524 @@
+@@ -28,270 +296,536 @@
      crate::json_errors::parse_error_metadata(response_body, response_headers)
  }
 
@@ -30079,6 +30575,9 @@ diff --git a/src/protocol_serde.rs b/src/protocol_serde.rs
 
 +#[cfg(feature = "op_admin_create_user")]
  pub(crate) mod shape_admin_create_user;
+
++#[cfg(feature = "op_admin_delete_software_token")]
+ pub(crate) mod shape_admin_delete_software_token;
 
 +#[cfg(feature = "op_admin_delete_user")]
  pub(crate) mod shape_admin_delete_user;
@@ -30257,6 +30756,9 @@ diff --git a/src/protocol_serde.rs b/src/protocol_serde.rs
 +#[cfg(feature = "op_describe_terms")]
  pub(crate) mod shape_describe_terms;
 
++#[cfg(feature = "op_describe_terms_by_client")]
+ pub(crate) mod shape_describe_terms_by_client;
+
 +#[cfg(feature = "op_describe_user_import_job")]
  pub(crate) mod shape_describe_user_import_job;
 
@@ -30274,6 +30776,9 @@ diff --git a/src/protocol_serde.rs b/src/protocol_serde.rs
 
 +#[cfg(feature = "op_forgot_password")]
  pub(crate) mod shape_forgot_password;
+
++#[cfg(feature = "op_get_client_token")]
+ pub(crate) mod shape_get_client_token;
 
 +#[cfg(feature = "op_get_csv_header")]
  pub(crate) mod shape_get_csv_header;
@@ -30458,6 +30963,7 @@ diff --git a/src/protocol_serde.rs b/src/protocol_serde.rs
 +    feature = "op_admin_add_user_to_group",
 +    feature = "op_admin_confirm_sign_up",
 +    feature = "op_admin_create_user",
++    feature = "op_admin_delete_software_token",
 +    feature = "op_admin_delete_user",
 +    feature = "op_admin_delete_user_attributes",
 +    feature = "op_admin_disable_provider_for_user",
@@ -30517,12 +31023,14 @@ diff --git a/src/protocol_serde.rs b/src/protocol_serde.rs
 +    feature = "op_describe_resource_server",
 +    feature = "op_describe_risk_configuration",
 +    feature = "op_describe_terms",
++    feature = "op_describe_terms_by_client",
 +    feature = "op_describe_user_import_job",
 +    feature = "op_describe_user_pool",
 +    feature = "op_describe_user_pool_client",
 +    feature = "op_describe_user_pool_domain",
 +    feature = "op_forget_device",
 +    feature = "op_forgot_password",
++    feature = "op_get_client_token",
 +    feature = "op_get_csv_header",
 +    feature = "op_get_device",
 +    feature = "op_get_group",
@@ -30586,7 +31094,7 @@ diff --git a/src/protocol_serde.rs b/src/protocol_serde.rs
  pub(crate) fn or_empty_doc(data: &[u8]) -> &[u8] {
      if data.is_empty() {
          b"{}"
-@@ -294,664 +816,2506 @@
+@@ -300,672 +834,2541 @@
      }
  }
 
@@ -30607,6 +31115,9 @@ diff --git a/src/protocol_serde.rs b/src/protocol_serde.rs
 
 +#[cfg(feature = "op_admin_create_user")]
  pub(crate) mod shape_admin_create_user_input;
+
++#[cfg(feature = "op_admin_delete_software_token")]
+ pub(crate) mod shape_admin_delete_software_token_input;
 
 +#[cfg(feature = "op_admin_delete_user_attributes")]
  pub(crate) mod shape_admin_delete_user_attributes_input;
@@ -30836,6 +31347,9 @@ diff --git a/src/protocol_serde.rs b/src/protocol_serde.rs
 +#[cfg(feature = "op_describe_risk_configuration")]
  pub(crate) mod shape_describe_risk_configuration_input;
 
++#[cfg(feature = "op_describe_terms_by_client")]
+ pub(crate) mod shape_describe_terms_by_client_input;
+
 +#[cfg(feature = "op_describe_terms")]
  pub(crate) mod shape_describe_terms_input;
 
@@ -30895,6 +31409,7 @@ diff --git a/src/protocol_serde.rs b/src/protocol_serde.rs
 +    feature = "op_delete_web_authn_credential",
 +    feature = "op_forget_device",
 +    feature = "op_forgot_password",
++    feature = "op_get_client_token",
 +    feature = "op_get_device",
 +    feature = "op_get_tokens_from_refresh_token",
 +    feature = "op_get_user",
@@ -30923,6 +31438,9 @@ diff --git a/src/protocol_serde.rs b/src/protocol_serde.rs
 
 +#[cfg(feature = "op_forgot_password")]
  pub(crate) mod shape_forgot_password_input;
+
++#[cfg(feature = "op_get_client_token")]
+ pub(crate) mod shape_get_client_token_input;
 
 +#[cfg(feature = "op_get_csv_header")]
  pub(crate) mod shape_get_csv_header_input;
@@ -30977,6 +31495,7 @@ diff --git a/src/protocol_serde.rs b/src/protocol_serde.rs
 +    feature = "op_admin_add_user_to_group",
 +    feature = "op_admin_confirm_sign_up",
 +    feature = "op_admin_create_user",
++    feature = "op_admin_delete_software_token",
 +    feature = "op_admin_delete_user",
 +    feature = "op_admin_delete_user_attributes",
 +    feature = "op_admin_disable_provider_for_user",
@@ -31035,12 +31554,14 @@ diff --git a/src/protocol_serde.rs b/src/protocol_serde.rs
 +    feature = "op_describe_resource_server",
 +    feature = "op_describe_risk_configuration",
 +    feature = "op_describe_terms",
++    feature = "op_describe_terms_by_client",
 +    feature = "op_describe_user_import_job",
 +    feature = "op_describe_user_pool",
 +    feature = "op_describe_user_pool_client",
 +    feature = "op_describe_user_pool_domain",
 +    feature = "op_forget_device",
 +    feature = "op_forgot_password",
++    feature = "op_get_client_token",
 +    feature = "op_get_csv_header",
 +    feature = "op_get_device",
 +    feature = "op_get_group",
@@ -31157,6 +31678,7 @@ diff --git a/src/protocol_serde.rs b/src/protocol_serde.rs
 +    feature = "op_admin_add_user_to_group",
 +    feature = "op_admin_confirm_sign_up",
 +    feature = "op_admin_create_user",
++    feature = "op_admin_delete_software_token",
 +    feature = "op_admin_delete_user",
 +    feature = "op_admin_delete_user_attributes",
 +    feature = "op_admin_disable_provider_for_user",
@@ -31216,12 +31738,14 @@ diff --git a/src/protocol_serde.rs b/src/protocol_serde.rs
 +    feature = "op_describe_resource_server",
 +    feature = "op_describe_risk_configuration",
 +    feature = "op_describe_terms",
++    feature = "op_describe_terms_by_client",
 +    feature = "op_describe_user_import_job",
 +    feature = "op_describe_user_pool",
 +    feature = "op_describe_user_pool_client",
 +    feature = "op_describe_user_pool_domain",
 +    feature = "op_forget_device",
 +    feature = "op_forgot_password",
++    feature = "op_get_client_token",
 +    feature = "op_get_csv_header",
 +    feature = "op_get_device",
 +    feature = "op_get_group",
@@ -31441,6 +31965,7 @@ diff --git a/src/protocol_serde.rs b/src/protocol_serde.rs
 +    feature = "op_admin_add_user_to_group",
 +    feature = "op_admin_confirm_sign_up",
 +    feature = "op_admin_create_user",
++    feature = "op_admin_delete_software_token",
 +    feature = "op_admin_delete_user",
 +    feature = "op_admin_delete_user_attributes",
 +    feature = "op_admin_disable_provider_for_user",
@@ -31499,12 +32024,14 @@ diff --git a/src/protocol_serde.rs b/src/protocol_serde.rs
 +    feature = "op_describe_resource_server",
 +    feature = "op_describe_risk_configuration",
 +    feature = "op_describe_terms",
++    feature = "op_describe_terms_by_client",
 +    feature = "op_describe_user_import_job",
 +    feature = "op_describe_user_pool",
 +    feature = "op_describe_user_pool_client",
 +    feature = "op_describe_user_pool_domain",
 +    feature = "op_forget_device",
 +    feature = "op_forgot_password",
++    feature = "op_get_client_token",
 +    feature = "op_get_csv_header",
 +    feature = "op_get_device",
 +    feature = "op_get_group",
@@ -31569,6 +32096,7 @@ diff --git a/src/protocol_serde.rs b/src/protocol_serde.rs
 +    feature = "op_admin_add_user_to_group",
 +    feature = "op_admin_confirm_sign_up",
 +    feature = "op_admin_create_user",
++    feature = "op_admin_delete_software_token",
 +    feature = "op_admin_delete_user",
 +    feature = "op_admin_delete_user_attributes",
 +    feature = "op_admin_disable_provider_for_user",
@@ -31623,12 +32151,14 @@ diff --git a/src/protocol_serde.rs b/src/protocol_serde.rs
 +    feature = "op_describe_resource_server",
 +    feature = "op_describe_risk_configuration",
 +    feature = "op_describe_terms",
++    feature = "op_describe_terms_by_client",
 +    feature = "op_describe_user_import_job",
 +    feature = "op_describe_user_pool",
 +    feature = "op_describe_user_pool_client",
 +    feature = "op_describe_user_pool_domain",
 +    feature = "op_forget_device",
 +    feature = "op_forgot_password",
++    feature = "op_get_client_token",
 +    feature = "op_get_csv_header",
 +    feature = "op_get_device",
 +    feature = "op_get_group",
@@ -31740,6 +32270,7 @@ diff --git a/src/protocol_serde.rs b/src/protocol_serde.rs
 +    feature = "op_admin_add_user_to_group",
 +    feature = "op_admin_confirm_sign_up",
 +    feature = "op_admin_create_user",
++    feature = "op_admin_delete_software_token",
 +    feature = "op_admin_delete_user",
 +    feature = "op_admin_delete_user_attributes",
 +    feature = "op_admin_disable_provider_for_user",
@@ -31797,12 +32328,14 @@ diff --git a/src/protocol_serde.rs b/src/protocol_serde.rs
 +    feature = "op_describe_resource_server",
 +    feature = "op_describe_risk_configuration",
 +    feature = "op_describe_terms",
++    feature = "op_describe_terms_by_client",
 +    feature = "op_describe_user_import_job",
 +    feature = "op_describe_user_pool",
 +    feature = "op_describe_user_pool_client",
 +    feature = "op_describe_user_pool_domain",
 +    feature = "op_forget_device",
 +    feature = "op_forgot_password",
++    feature = "op_get_client_token",
 +    feature = "op_get_csv_header",
 +    feature = "op_get_device",
 +    feature = "op_get_group",
@@ -31933,6 +32466,7 @@ diff --git a/src/protocol_serde.rs b/src/protocol_serde.rs
 +    feature = "op_admin_add_user_to_group",
 +    feature = "op_admin_confirm_sign_up",
 +    feature = "op_admin_create_user",
++    feature = "op_admin_delete_software_token",
 +    feature = "op_admin_delete_user",
 +    feature = "op_admin_delete_user_attributes",
 +    feature = "op_admin_disable_provider_for_user",
@@ -31987,11 +32521,13 @@ diff --git a/src/protocol_serde.rs b/src/protocol_serde.rs
 +    feature = "op_describe_resource_server",
 +    feature = "op_describe_risk_configuration",
 +    feature = "op_describe_terms",
++    feature = "op_describe_terms_by_client",
 +    feature = "op_describe_user_import_job",
 +    feature = "op_describe_user_pool",
 +    feature = "op_describe_user_pool_client",
 +    feature = "op_forget_device",
 +    feature = "op_forgot_password",
++    feature = "op_get_client_token",
 +    feature = "op_get_csv_header",
 +    feature = "op_get_device",
 +    feature = "op_get_group",
@@ -32160,6 +32696,7 @@ diff --git a/src/protocol_serde.rs b/src/protocol_serde.rs
  pub(crate) mod shape_user_lambda_validation_exception;
 
 +#[cfg(any(
++    feature = "op_admin_delete_software_token",
 +    feature = "op_admin_initiate_auth",
 +    feature = "op_admin_respond_to_auth_challenge",
 +    feature = "op_admin_set_user_mfa_preference",
@@ -32190,6 +32727,7 @@ diff --git a/src/protocol_serde.rs b/src/protocol_serde.rs
 +    feature = "op_admin_add_user_to_group",
 +    feature = "op_admin_confirm_sign_up",
 +    feature = "op_admin_create_user",
++    feature = "op_admin_delete_software_token",
 +    feature = "op_admin_delete_user",
 +    feature = "op_admin_delete_user_attributes",
 +    feature = "op_admin_disable_provider_for_user",
@@ -32389,6 +32927,9 @@ diff --git a/src/protocol_serde.rs b/src/protocol_serde.rs
 +    feature = "op_respond_to_auth_challenge"
 +))]
  pub(crate) mod shape_challenge_parameters_type;
+
++#[cfg(feature = "op_get_client_token")]
+ pub(crate) mod shape_client_authentication_result_type;
 
 +#[cfg(feature = "op_list_user_pool_client_secrets")]
  pub(crate) mod shape_client_secret_descriptor_list_type;
@@ -32637,6 +33178,7 @@ diff --git a/src/protocol_serde.rs b/src/protocol_serde.rs
 +#[cfg(any(
 +    feature = "op_create_terms",
 +    feature = "op_describe_terms",
++    feature = "op_describe_terms_by_client",
 +    feature = "op_update_terms"
 +))]
  pub(crate) mod shape_terms_type;
@@ -32888,6 +33430,7 @@ diff --git a/src/protocol_serde.rs b/src/protocol_serde.rs
 +#[cfg(any(
 +    feature = "op_create_terms",
 +    feature = "op_describe_terms",
++    feature = "op_describe_terms_by_client",
 +    feature = "op_update_terms"
 +))]
  pub(crate) mod shape_links_type;
@@ -33313,19 +33856,20 @@ diff --git a/src/serde_util.rs b/src/serde_util.rs
  pub(crate) fn log_delivery_configuration_type_correct_errors(
      mut builder: crate::types::builders::LogDeliveryConfigurationTypeBuilder,
  ) -> crate::types::builders::LogDeliveryConfigurationTypeBuilder {
-@@ -307,6 +337,11 @@
+@@ -307,6 +337,12 @@
      builder
  }
 
 +#[cfg(any(
 +    feature = "op_create_terms",
 +    feature = "op_describe_terms",
++    feature = "op_describe_terms_by_client",
 +    feature = "op_update_terms"
 +))]
  pub(crate) fn terms_type_correct_errors(
      mut builder: crate::types::builders::TermsTypeBuilder,
  ) -> crate::types::builders::TermsTypeBuilder {
-@@ -340,6 +375,7 @@
+@@ -340,6 +376,7 @@
      builder
  }
 
@@ -33333,7 +33877,7 @@ diff --git a/src/serde_util.rs b/src/serde_util.rs
  pub(crate) fn limit_definition_type_correct_errors(
      mut builder: crate::types::builders::LimitDefinitionTypeBuilder,
  ) -> crate::types::builders::LimitDefinitionTypeBuilder {
-@@ -352,6 +388,7 @@
+@@ -352,6 +389,7 @@
      builder
  }
 
@@ -33341,7 +33885,7 @@ diff --git a/src/serde_util.rs b/src/serde_util.rs
  pub(crate) fn account_takeover_risk_configuration_type_correct_errors(
      mut builder: crate::types::builders::AccountTakeoverRiskConfigurationTypeBuilder,
  ) -> crate::types::builders::AccountTakeoverRiskConfigurationTypeBuilder {
-@@ -364,6 +401,20 @@
+@@ -364,6 +402,20 @@
      builder
  }
 
@@ -33362,7 +33906,7 @@ diff --git a/src/serde_util.rs b/src/serde_util.rs
  pub(crate) fn attribute_type_correct_errors(
      mut builder: crate::types::builders::AttributeTypeBuilder,
  ) -> crate::types::builders::AttributeTypeBuilder {
-@@ -373,6 +424,7 @@
+@@ -373,6 +425,7 @@
      builder
  }
 
@@ -33370,7 +33914,7 @@ diff --git a/src/serde_util.rs b/src/serde_util.rs
  pub(crate) fn compromised_credentials_risk_configuration_type_correct_errors(
      mut builder: crate::types::builders::CompromisedCredentialsRiskConfigurationTypeBuilder,
  ) -> crate::types::builders::CompromisedCredentialsRiskConfigurationTypeBuilder {
-@@ -387,6 +439,11 @@
+@@ -387,6 +440,11 @@
      builder
  }
 
@@ -33382,7 +33926,7 @@ diff --git a/src/serde_util.rs b/src/serde_util.rs
  pub(crate) fn custom_domain_config_type_correct_errors(
      mut builder: crate::types::builders::CustomDomainConfigTypeBuilder,
  ) -> crate::types::builders::CustomDomainConfigTypeBuilder {
-@@ -396,6 +453,11 @@
+@@ -396,6 +454,11 @@
      builder
  }
 
@@ -33394,7 +33938,7 @@ diff --git a/src/serde_util.rs b/src/serde_util.rs
  pub(crate) fn failover_type_correct_errors(
      mut builder: crate::types::builders::FailoverTypeBuilder,
  ) -> crate::types::builders::FailoverTypeBuilder {
-@@ -408,6 +470,11 @@
+@@ -408,6 +471,11 @@
      builder
  }
 
@@ -33406,7 +33950,7 @@ diff --git a/src/serde_util.rs b/src/serde_util.rs
  pub(crate) fn refresh_token_rotation_type_correct_errors(
      mut builder: crate::types::builders::RefreshTokenRotationTypeBuilder,
  ) -> crate::types::builders::RefreshTokenRotationTypeBuilder {
-@@ -417,6 +484,7 @@
+@@ -417,6 +485,7 @@
      builder
  }
 
@@ -33414,7 +33958,7 @@ diff --git a/src/serde_util.rs b/src/serde_util.rs
  pub(crate) fn terms_description_type_correct_errors(
      mut builder: crate::types::builders::TermsDescriptionTypeBuilder,
  ) -> crate::types::builders::TermsDescriptionTypeBuilder {
-@@ -438,6 +506,11 @@
+@@ -438,6 +507,11 @@
      builder
  }
 
@@ -33426,7 +33970,7 @@ diff --git a/src/serde_util.rs b/src/serde_util.rs
  pub(crate) fn user_pool_add_ons_type_correct_errors(
      mut builder: crate::types::builders::UserPoolAddOnsTypeBuilder,
  ) -> crate::types::builders::UserPoolAddOnsTypeBuilder {
-@@ -449,6 +522,7 @@
+@@ -449,6 +523,7 @@
      builder
  }
 
@@ -33434,7 +33978,7 @@ diff --git a/src/serde_util.rs b/src/serde_util.rs
  pub(crate) fn username_configuration_type_correct_errors(
      mut builder: crate::types::builders::UsernameConfigurationTypeBuilder,
  ) -> crate::types::builders::UsernameConfigurationTypeBuilder {
-@@ -458,6 +532,7 @@
+@@ -458,6 +533,7 @@
      builder
  }
 
@@ -33442,7 +33986,7 @@ diff --git a/src/serde_util.rs b/src/serde_util.rs
  pub(crate) fn web_authn_credential_description_correct_errors(
      mut builder: crate::types::builders::WebAuthnCredentialDescriptionBuilder,
  ) -> crate::types::builders::WebAuthnCredentialDescriptionBuilder {
-@@ -479,6 +554,12 @@
+@@ -479,6 +555,12 @@
      builder
  }
 
@@ -33455,7 +33999,7 @@ diff --git a/src/serde_util.rs b/src/serde_util.rs
  pub(crate) fn asset_type_correct_errors(
      mut builder: crate::types::builders::AssetTypeBuilder,
  ) -> crate::types::builders::AssetTypeBuilder {
-@@ -494,6 +575,7 @@
+@@ -494,6 +576,7 @@
      builder
  }
 
@@ -33463,7 +34007,7 @@ diff --git a/src/serde_util.rs b/src/serde_util.rs
  pub(crate) fn compromised_credentials_actions_type_correct_errors(
      mut builder: crate::types::builders::CompromisedCredentialsActionsTypeBuilder,
  ) -> crate::types::builders::CompromisedCredentialsActionsTypeBuilder {
-@@ -505,6 +587,12 @@
+@@ -505,6 +588,12 @@
      builder
  }
 
@@ -33476,7 +34020,7 @@ diff --git a/src/serde_util.rs b/src/serde_util.rs
  pub(crate) fn custom_email_lambda_version_config_type_correct_errors(
      mut builder: crate::types::builders::CustomEmailLambdaVersionConfigTypeBuilder,
  ) -> crate::types::builders::CustomEmailLambdaVersionConfigTypeBuilder {
-@@ -519,6 +607,12 @@
+@@ -519,6 +608,12 @@
      builder
  }
 
@@ -33489,7 +34033,7 @@ diff --git a/src/serde_util.rs b/src/serde_util.rs
  pub(crate) fn custom_sms_lambda_version_config_type_correct_errors(
      mut builder: crate::types::builders::CustomSmsLambdaVersionConfigTypeBuilder,
  ) -> crate::types::builders::CustomSmsLambdaVersionConfigTypeBuilder {
-@@ -533,6 +627,13 @@
+@@ -533,6 +628,13 @@
      builder
  }
 
@@ -33503,7 +34047,7 @@ diff --git a/src/serde_util.rs b/src/serde_util.rs
  pub(crate) fn eums_sms_configuration_type_correct_errors(
      mut builder: crate::types::builders::EumsSmsConfigurationTypeBuilder,
  ) -> crate::types::builders::EumsSmsConfigurationTypeBuilder {
-@@ -542,6 +643,7 @@
+@@ -542,6 +644,7 @@
      builder
  }
 
@@ -33511,7 +34055,7 @@ diff --git a/src/serde_util.rs b/src/serde_util.rs
  pub(crate) fn event_feedback_type_correct_errors(
      mut builder: crate::types::builders::EventFeedbackTypeBuilder,
  ) -> crate::types::builders::EventFeedbackTypeBuilder {
-@@ -554,6 +656,12 @@
+@@ -554,6 +657,12 @@
      builder
  }
 
@@ -33524,7 +34068,7 @@ diff --git a/src/serde_util.rs b/src/serde_util.rs
  pub(crate) fn inbound_federation_lambda_type_correct_errors(
      mut builder: crate::types::builders::InboundFederationLambdaTypeBuilder,
  ) -> crate::types::builders::InboundFederationLambdaTypeBuilder {
-@@ -568,6 +676,10 @@
+@@ -568,6 +677,10 @@
      builder
  }
 
@@ -33535,7 +34079,7 @@ diff --git a/src/serde_util.rs b/src/serde_util.rs
  pub(crate) fn log_configuration_type_correct_errors(
      mut builder: crate::types::builders::LogConfigurationTypeBuilder,
  ) -> crate::types::builders::LogConfigurationTypeBuilder {
-@@ -580,6 +692,7 @@
+@@ -580,6 +693,7 @@
      builder
  }
 
@@ -33543,7 +34087,7 @@ diff --git a/src/serde_util.rs b/src/serde_util.rs
  pub(crate) fn notify_configuration_type_correct_errors(
      mut builder: crate::types::builders::NotifyConfigurationTypeBuilder,
  ) -> crate::types::builders::NotifyConfigurationTypeBuilder {
-@@ -589,6 +702,12 @@
+@@ -589,6 +703,12 @@
      builder
  }
 
@@ -33556,7 +34100,7 @@ diff --git a/src/serde_util.rs b/src/serde_util.rs
  pub(crate) fn pre_token_generation_version_config_type_correct_errors(
      mut builder: crate::types::builders::PreTokenGenerationVersionConfigTypeBuilder,
  ) -> crate::types::builders::PreTokenGenerationVersionConfigTypeBuilder {
-@@ -603,6 +722,12 @@
+@@ -603,6 +723,12 @@
      builder
  }
 
@@ -33569,7 +34113,7 @@ diff --git a/src/serde_util.rs b/src/serde_util.rs
  pub(crate) fn resource_server_scope_type_correct_errors(
      mut builder: crate::types::builders::ResourceServerScopeTypeBuilder,
  ) -> crate::types::builders::ResourceServerScopeTypeBuilder {
-@@ -615,6 +740,7 @@
+@@ -615,6 +741,7 @@
      builder
  }
 
@@ -33577,7 +34121,7 @@ diff --git a/src/serde_util.rs b/src/serde_util.rs
  pub(crate) fn account_takeover_action_type_correct_errors(
      mut builder: crate::types::builders::AccountTakeoverActionTypeBuilder,
  ) -> crate::types::builders::AccountTakeoverActionTypeBuilder {
-@@ -629,6 +755,7 @@
+@@ -629,6 +756,7 @@
      builder
  }
 
@@ -33585,7 +34129,7 @@ diff --git a/src/serde_util.rs b/src/serde_util.rs
  pub(crate) fn notify_email_type_correct_errors(
      mut builder: crate::types::builders::NotifyEmailTypeBuilder,
  ) -> crate::types::builders::NotifyEmailTypeBuilder {
-@@ -638,6 +765,11 @@
+@@ -638,6 +766,11 @@
      builder
  }
 
@@ -33600,7 +34144,7 @@ diff --git a/src/serde_util.rs b/src/serde_util.rs
 diff --git a/src/types.rs b/src/types.rs
 --- a/src/types.rs
 +++ b/src/types.rs
-@@ -1,614 +1,1838 @@
+@@ -1,618 +1,1850 @@
  // Code generated by software.amazon.smithy.rust.codegen.smithy-rs. DO NOT EDIT.
 +#[cfg(any(
 +    feature = "op_add_user_pool_client_secret",
@@ -33757,6 +34301,7 @@ diff --git a/src/types.rs b/src/types.rs
 +#[cfg(any(
 +    feature = "op_create_terms",
 +    feature = "op_describe_terms",
++    feature = "op_describe_terms_by_client",
 +    feature = "op_update_terms"
 +))]
  pub use crate::types::_terms_source_type::TermsSourceType;
@@ -33764,6 +34309,7 @@ diff --git a/src/types.rs b/src/types.rs
 +#[cfg(any(
 +    feature = "op_create_terms",
 +    feature = "op_describe_terms",
++    feature = "op_describe_terms_by_client",
 +    feature = "op_list_terms",
 +    feature = "op_update_terms"
 +))]
@@ -33772,6 +34318,7 @@ diff --git a/src/types.rs b/src/types.rs
 +#[cfg(any(
 +    feature = "op_create_terms",
 +    feature = "op_describe_terms",
++    feature = "op_describe_terms_by_client",
 +    feature = "op_update_terms"
 +))]
  pub use crate::types::_terms_type::TermsType;
@@ -33981,6 +34528,9 @@ diff --git a/src/types.rs b/src/types.rs
 +    feature = "op_update_user_attributes"
 +))]
  pub use crate::types::_code_delivery_details_type::CodeDeliveryDetailsType;
+
++#[cfg(feature = "op_get_client_token")]
+ pub use crate::types::_client_authentication_result_type::ClientAuthenticationResultType;
 
 +#[cfg(any(
 +    feature = "op_get_log_delivery_configuration",
@@ -34678,6 +35228,9 @@ diff --git a/src/types.rs b/src/types.rs
 +#[cfg(feature = "op_admin_list_user_auth_events")]
  mod _challenge_response_type;
 
++#[cfg(feature = "op_get_client_token")]
+ mod _client_authentication_result_type;
+
 +#[cfg(any(
 +    feature = "op_add_user_pool_client_secret",
 +    feature = "op_list_user_pool_client_secrets"
@@ -35256,6 +35809,7 @@ diff --git a/src/types.rs b/src/types.rs
 +#[cfg(any(
 +    feature = "op_create_terms",
 +    feature = "op_describe_terms",
++    feature = "op_describe_terms_by_client",
 +    feature = "op_list_terms",
 +    feature = "op_update_terms"
 +))]
@@ -35264,6 +35818,7 @@ diff --git a/src/types.rs b/src/types.rs
 +#[cfg(any(
 +    feature = "op_create_terms",
 +    feature = "op_describe_terms",
++    feature = "op_describe_terms_by_client",
 +    feature = "op_update_terms"
 +))]
  mod _terms_source_type;
@@ -35271,6 +35826,7 @@ diff --git a/src/types.rs b/src/types.rs
 +#[cfg(any(
 +    feature = "op_create_terms",
 +    feature = "op_describe_terms",
++    feature = "op_describe_terms_by_client",
 +    feature = "op_update_terms"
 +))]
  mod _terms_type;
@@ -35442,7 +35998,7 @@ diff --git a/src/types.rs b/src/types.rs
 diff --git a/src/types/builders.rs b/src/types/builders.rs
 --- a/src/types/builders.rs
 +++ b/src/types/builders.rs
-@@ -1,186 +1,549 @@
+@@ -1,188 +1,553 @@
  // Code generated by software.amazon.smithy.rust.codegen.smithy-rs. DO NOT EDIT.
 +#[cfg(any(
 +    feature = "op_add_user_pool_client_secret",
@@ -35558,6 +36114,7 @@ diff --git a/src/types/builders.rs b/src/types/builders.rs
 +#[cfg(any(
 +    feature = "op_create_terms",
 +    feature = "op_describe_terms",
++    feature = "op_describe_terms_by_client",
 +    feature = "op_update_terms"
 +))]
  pub use crate::types::_terms_type::TermsTypeBuilder;
@@ -35728,6 +36285,9 @@ diff --git a/src/types/builders.rs b/src/types/builders.rs
 +    feature = "op_update_user_attributes"
 +))]
  pub use crate::types::_code_delivery_details_type::CodeDeliveryDetailsTypeBuilder;
+
++#[cfg(feature = "op_get_client_token")]
+ pub use crate::types::_client_authentication_result_type::ClientAuthenticationResultTypeBuilder;
 
 +#[cfg(any(
 +    feature = "op_get_log_delivery_configuration",
@@ -35995,13 +36555,14 @@ diff --git a/src/types/builders.rs b/src/types/builders.rs
 diff --git a/src/types/error.rs b/src/types/error.rs
 --- a/src/types/error.rs
 +++ b/src/types/error.rs
-@@ -1,238 +1,2634 @@
+@@ -1,238 +1,2676 @@
  // Code generated by software.amazon.smithy.rust.codegen.smithy-rs. DO NOT EDIT.
 +#[cfg(any(
 +    feature = "op_add_custom_attributes",
 +    feature = "op_admin_add_user_to_group",
 +    feature = "op_admin_confirm_sign_up",
 +    feature = "op_admin_create_user",
++    feature = "op_admin_delete_software_token",
 +    feature = "op_admin_delete_user",
 +    feature = "op_admin_delete_user_attributes",
 +    feature = "op_admin_disable_provider_for_user",
@@ -36060,12 +36621,14 @@ diff --git a/src/types/error.rs b/src/types/error.rs
 +    feature = "op_describe_resource_server",
 +    feature = "op_describe_risk_configuration",
 +    feature = "op_describe_terms",
++    feature = "op_describe_terms_by_client",
 +    feature = "op_describe_user_import_job",
 +    feature = "op_describe_user_pool",
 +    feature = "op_describe_user_pool_client",
 +    feature = "op_describe_user_pool_domain",
 +    feature = "op_forget_device",
 +    feature = "op_forgot_password",
++    feature = "op_get_client_token",
 +    feature = "op_get_csv_header",
 +    feature = "op_get_device",
 +    feature = "op_get_group",
@@ -36133,6 +36696,7 @@ diff --git a/src/types/error.rs b/src/types/error.rs
 +    feature = "op_admin_add_user_to_group",
 +    feature = "op_admin_confirm_sign_up",
 +    feature = "op_admin_create_user",
++    feature = "op_admin_delete_software_token",
 +    feature = "op_admin_delete_user",
 +    feature = "op_admin_delete_user_attributes",
 +    feature = "op_admin_disable_provider_for_user",
@@ -36192,12 +36756,14 @@ diff --git a/src/types/error.rs b/src/types/error.rs
 +    feature = "op_describe_resource_server",
 +    feature = "op_describe_risk_configuration",
 +    feature = "op_describe_terms",
++    feature = "op_describe_terms_by_client",
 +    feature = "op_describe_user_import_job",
 +    feature = "op_describe_user_pool",
 +    feature = "op_describe_user_pool_client",
 +    feature = "op_describe_user_pool_domain",
 +    feature = "op_forget_device",
 +    feature = "op_forgot_password",
++    feature = "op_get_client_token",
 +    feature = "op_get_csv_header",
 +    feature = "op_get_device",
 +    feature = "op_get_group",
@@ -36265,6 +36831,7 @@ diff --git a/src/types/error.rs b/src/types/error.rs
 +    feature = "op_admin_add_user_to_group",
 +    feature = "op_admin_confirm_sign_up",
 +    feature = "op_admin_create_user",
++    feature = "op_admin_delete_software_token",
 +    feature = "op_admin_delete_user",
 +    feature = "op_admin_delete_user_attributes",
 +    feature = "op_admin_disable_provider_for_user",
@@ -36323,12 +36890,14 @@ diff --git a/src/types/error.rs b/src/types/error.rs
 +    feature = "op_describe_resource_server",
 +    feature = "op_describe_risk_configuration",
 +    feature = "op_describe_terms",
++    feature = "op_describe_terms_by_client",
 +    feature = "op_describe_user_import_job",
 +    feature = "op_describe_user_pool",
 +    feature = "op_describe_user_pool_client",
 +    feature = "op_describe_user_pool_domain",
 +    feature = "op_forget_device",
 +    feature = "op_forgot_password",
++    feature = "op_get_client_token",
 +    feature = "op_get_csv_header",
 +    feature = "op_get_device",
 +    feature = "op_get_group",
@@ -36393,6 +36962,7 @@ diff --git a/src/types/error.rs b/src/types/error.rs
 +    feature = "op_admin_add_user_to_group",
 +    feature = "op_admin_confirm_sign_up",
 +    feature = "op_admin_create_user",
++    feature = "op_admin_delete_software_token",
 +    feature = "op_admin_delete_user",
 +    feature = "op_admin_delete_user_attributes",
 +    feature = "op_admin_disable_provider_for_user",
@@ -36447,12 +37017,14 @@ diff --git a/src/types/error.rs b/src/types/error.rs
 +    feature = "op_describe_resource_server",
 +    feature = "op_describe_risk_configuration",
 +    feature = "op_describe_terms",
++    feature = "op_describe_terms_by_client",
 +    feature = "op_describe_user_import_job",
 +    feature = "op_describe_user_pool",
 +    feature = "op_describe_user_pool_client",
 +    feature = "op_describe_user_pool_domain",
 +    feature = "op_forget_device",
 +    feature = "op_forgot_password",
++    feature = "op_get_client_token",
 +    feature = "op_get_csv_header",
 +    feature = "op_get_device",
 +    feature = "op_get_group",
@@ -36511,6 +37083,7 @@ diff --git a/src/types/error.rs b/src/types/error.rs
 +    feature = "op_admin_add_user_to_group",
 +    feature = "op_admin_confirm_sign_up",
 +    feature = "op_admin_create_user",
++    feature = "op_admin_delete_software_token",
 +    feature = "op_admin_delete_user",
 +    feature = "op_admin_delete_user_attributes",
 +    feature = "op_admin_disable_provider_for_user",
@@ -36568,12 +37141,14 @@ diff --git a/src/types/error.rs b/src/types/error.rs
 +    feature = "op_describe_resource_server",
 +    feature = "op_describe_risk_configuration",
 +    feature = "op_describe_terms",
++    feature = "op_describe_terms_by_client",
 +    feature = "op_describe_user_import_job",
 +    feature = "op_describe_user_pool",
 +    feature = "op_describe_user_pool_client",
 +    feature = "op_describe_user_pool_domain",
 +    feature = "op_forget_device",
 +    feature = "op_forgot_password",
++    feature = "op_get_client_token",
 +    feature = "op_get_csv_header",
 +    feature = "op_get_device",
 +    feature = "op_get_group",
@@ -36638,6 +37213,7 @@ diff --git a/src/types/error.rs b/src/types/error.rs
 +    feature = "op_admin_add_user_to_group",
 +    feature = "op_admin_confirm_sign_up",
 +    feature = "op_admin_create_user",
++    feature = "op_admin_delete_software_token",
 +    feature = "op_admin_delete_user",
 +    feature = "op_admin_delete_user_attributes",
 +    feature = "op_admin_disable_provider_for_user",
@@ -36692,11 +37268,13 @@ diff --git a/src/types/error.rs b/src/types/error.rs
 +    feature = "op_describe_resource_server",
 +    feature = "op_describe_risk_configuration",
 +    feature = "op_describe_terms",
++    feature = "op_describe_terms_by_client",
 +    feature = "op_describe_user_import_job",
 +    feature = "op_describe_user_pool",
 +    feature = "op_describe_user_pool_client",
 +    feature = "op_forget_device",
 +    feature = "op_forgot_password",
++    feature = "op_get_client_token",
 +    feature = "op_get_csv_header",
 +    feature = "op_get_device",
 +    feature = "op_get_group",
@@ -36809,6 +37387,7 @@ diff --git a/src/types/error.rs b/src/types/error.rs
 +    feature = "op_admin_add_user_to_group",
 +    feature = "op_admin_confirm_sign_up",
 +    feature = "op_admin_create_user",
++    feature = "op_admin_delete_software_token",
 +    feature = "op_admin_delete_user",
 +    feature = "op_admin_delete_user_attributes",
 +    feature = "op_admin_disable_provider_for_user",
@@ -37006,6 +37585,34 @@ diff --git a/src/types/error.rs b/src/types/error.rs
  pub use crate::types::error::_username_exists_exception::UsernameExistsException;
 
 +#[cfg(any(
++    feature = "op_admin_delete_software_token",
++    feature = "op_admin_initiate_auth",
++    feature = "op_admin_respond_to_auth_challenge",
++    feature = "op_admin_set_user_mfa_preference",
++    feature = "op_change_password",
++    feature = "op_confirm_device",
++    feature = "op_confirm_forgot_password",
++    feature = "op_delete_user",
++    feature = "op_delete_user_attributes",
++    feature = "op_forget_device",
++    feature = "op_get_device",
++    feature = "op_get_user",
++    feature = "op_get_user_attribute_verification_code",
++    feature = "op_get_user_auth_factors",
++    feature = "op_global_sign_out",
++    feature = "op_initiate_auth",
++    feature = "op_list_devices",
++    feature = "op_respond_to_auth_challenge",
++    feature = "op_set_user_mfa_preference",
++    feature = "op_set_user_settings",
++    feature = "op_update_device_status",
++    feature = "op_update_user_attributes",
++    feature = "op_verify_software_token",
++    feature = "op_verify_user_attribute"
++))]
+ pub use crate::types::error::_user_not_confirmed_exception::UserNotConfirmedException;
+
++#[cfg(any(
 +    feature = "op_admin_disable_provider_for_user",
 +    feature = "op_admin_link_provider_for_user",
 +    feature = "op_admin_respond_to_auth_challenge",
@@ -37098,33 +37705,6 @@ diff --git a/src/types/error.rs b/src/types/error.rs
  pub use crate::types::error::_unsupported_operation_exception::UnsupportedOperationException;
 
 +#[cfg(any(
-+    feature = "op_admin_initiate_auth",
-+    feature = "op_admin_respond_to_auth_challenge",
-+    feature = "op_admin_set_user_mfa_preference",
-+    feature = "op_change_password",
-+    feature = "op_confirm_device",
-+    feature = "op_confirm_forgot_password",
-+    feature = "op_delete_user",
-+    feature = "op_delete_user_attributes",
-+    feature = "op_forget_device",
-+    feature = "op_get_device",
-+    feature = "op_get_user",
-+    feature = "op_get_user_attribute_verification_code",
-+    feature = "op_get_user_auth_factors",
-+    feature = "op_global_sign_out",
-+    feature = "op_initiate_auth",
-+    feature = "op_list_devices",
-+    feature = "op_respond_to_auth_challenge",
-+    feature = "op_set_user_mfa_preference",
-+    feature = "op_set_user_settings",
-+    feature = "op_update_device_status",
-+    feature = "op_update_user_attributes",
-+    feature = "op_verify_software_token",
-+    feature = "op_verify_user_attribute"
-+))]
- pub use crate::types::error::_user_not_confirmed_exception::UserNotConfirmedException;
-
-+#[cfg(any(
 +    feature = "op_admin_list_user_auth_events",
 +    feature = "op_admin_update_auth_event_feedback",
 +    feature = "op_describe_risk_configuration",
@@ -37203,6 +37783,7 @@ diff --git a/src/types/error.rs b/src/types/error.rs
 +    feature = "op_delete_web_authn_credential",
 +    feature = "op_forget_device",
 +    feature = "op_forgot_password",
++    feature = "op_get_client_token",
 +    feature = "op_get_device",
 +    feature = "op_get_tokens_from_refresh_token",
 +    feature = "op_get_user",
@@ -37414,6 +37995,7 @@ diff --git a/src/types/error.rs b/src/types/error.rs
 +    feature = "op_delete_web_authn_credential",
 +    feature = "op_forget_device",
 +    feature = "op_forgot_password",
++    feature = "op_get_client_token",
 +    feature = "op_get_device",
 +    feature = "op_get_tokens_from_refresh_token",
 +    feature = "op_get_user",
@@ -37445,6 +38027,7 @@ diff --git a/src/types/error.rs b/src/types/error.rs
 +    feature = "op_admin_add_user_to_group",
 +    feature = "op_admin_confirm_sign_up",
 +    feature = "op_admin_create_user",
++    feature = "op_admin_delete_software_token",
 +    feature = "op_admin_delete_user",
 +    feature = "op_admin_delete_user_attributes",
 +    feature = "op_admin_disable_provider_for_user",
@@ -37503,12 +38086,14 @@ diff --git a/src/types/error.rs b/src/types/error.rs
 +    feature = "op_describe_resource_server",
 +    feature = "op_describe_risk_configuration",
 +    feature = "op_describe_terms",
++    feature = "op_describe_terms_by_client",
 +    feature = "op_describe_user_import_job",
 +    feature = "op_describe_user_pool",
 +    feature = "op_describe_user_pool_client",
 +    feature = "op_describe_user_pool_domain",
 +    feature = "op_forget_device",
 +    feature = "op_forgot_password",
++    feature = "op_get_client_token",
 +    feature = "op_get_csv_header",
 +    feature = "op_get_device",
 +    feature = "op_get_group",
@@ -37625,6 +38210,7 @@ diff --git a/src/types/error.rs b/src/types/error.rs
 +    feature = "op_admin_add_user_to_group",
 +    feature = "op_admin_confirm_sign_up",
 +    feature = "op_admin_create_user",
++    feature = "op_admin_delete_software_token",
 +    feature = "op_admin_delete_user",
 +    feature = "op_admin_delete_user_attributes",
 +    feature = "op_admin_disable_provider_for_user",
@@ -37684,12 +38270,14 @@ diff --git a/src/types/error.rs b/src/types/error.rs
 +    feature = "op_describe_resource_server",
 +    feature = "op_describe_risk_configuration",
 +    feature = "op_describe_terms",
++    feature = "op_describe_terms_by_client",
 +    feature = "op_describe_user_import_job",
 +    feature = "op_describe_user_pool",
 +    feature = "op_describe_user_pool_client",
 +    feature = "op_describe_user_pool_domain",
 +    feature = "op_forget_device",
 +    feature = "op_forgot_password",
++    feature = "op_get_client_token",
 +    feature = "op_get_csv_header",
 +    feature = "op_get_device",
 +    feature = "op_get_group",
@@ -37867,6 +38455,7 @@ diff --git a/src/types/error.rs b/src/types/error.rs
 +    feature = "op_admin_add_user_to_group",
 +    feature = "op_admin_confirm_sign_up",
 +    feature = "op_admin_create_user",
++    feature = "op_admin_delete_software_token",
 +    feature = "op_admin_delete_user",
 +    feature = "op_admin_delete_user_attributes",
 +    feature = "op_admin_disable_provider_for_user",
@@ -37925,12 +38514,14 @@ diff --git a/src/types/error.rs b/src/types/error.rs
 +    feature = "op_describe_resource_server",
 +    feature = "op_describe_risk_configuration",
 +    feature = "op_describe_terms",
++    feature = "op_describe_terms_by_client",
 +    feature = "op_describe_user_import_job",
 +    feature = "op_describe_user_pool",
 +    feature = "op_describe_user_pool_client",
 +    feature = "op_describe_user_pool_domain",
 +    feature = "op_forget_device",
 +    feature = "op_forgot_password",
++    feature = "op_get_client_token",
 +    feature = "op_get_csv_header",
 +    feature = "op_get_device",
 +    feature = "op_get_group",
@@ -37995,6 +38586,7 @@ diff --git a/src/types/error.rs b/src/types/error.rs
 +    feature = "op_admin_add_user_to_group",
 +    feature = "op_admin_confirm_sign_up",
 +    feature = "op_admin_create_user",
++    feature = "op_admin_delete_software_token",
 +    feature = "op_admin_delete_user",
 +    feature = "op_admin_delete_user_attributes",
 +    feature = "op_admin_disable_provider_for_user",
@@ -38049,12 +38641,14 @@ diff --git a/src/types/error.rs b/src/types/error.rs
 +    feature = "op_describe_resource_server",
 +    feature = "op_describe_risk_configuration",
 +    feature = "op_describe_terms",
++    feature = "op_describe_terms_by_client",
 +    feature = "op_describe_user_import_job",
 +    feature = "op_describe_user_pool",
 +    feature = "op_describe_user_pool_client",
 +    feature = "op_describe_user_pool_domain",
 +    feature = "op_forget_device",
 +    feature = "op_forgot_password",
++    feature = "op_get_client_token",
 +    feature = "op_get_csv_header",
 +    feature = "op_get_device",
 +    feature = "op_get_group",
@@ -38163,6 +38757,7 @@ diff --git a/src/types/error.rs b/src/types/error.rs
 +    feature = "op_admin_add_user_to_group",
 +    feature = "op_admin_confirm_sign_up",
 +    feature = "op_admin_create_user",
++    feature = "op_admin_delete_software_token",
 +    feature = "op_admin_delete_user",
 +    feature = "op_admin_delete_user_attributes",
 +    feature = "op_admin_disable_provider_for_user",
@@ -38220,12 +38815,14 @@ diff --git a/src/types/error.rs b/src/types/error.rs
 +    feature = "op_describe_resource_server",
 +    feature = "op_describe_risk_configuration",
 +    feature = "op_describe_terms",
++    feature = "op_describe_terms_by_client",
 +    feature = "op_describe_user_import_job",
 +    feature = "op_describe_user_pool",
 +    feature = "op_describe_user_pool_client",
 +    feature = "op_describe_user_pool_domain",
 +    feature = "op_forget_device",
 +    feature = "op_forgot_password",
++    feature = "op_get_client_token",
 +    feature = "op_get_csv_header",
 +    feature = "op_get_device",
 +    feature = "op_get_group",
@@ -38317,6 +38914,7 @@ diff --git a/src/types/error.rs b/src/types/error.rs
 +    feature = "op_admin_add_user_to_group",
 +    feature = "op_admin_confirm_sign_up",
 +    feature = "op_admin_create_user",
++    feature = "op_admin_delete_software_token",
 +    feature = "op_admin_delete_user",
 +    feature = "op_admin_delete_user_attributes",
 +    feature = "op_admin_disable_provider_for_user",
@@ -38371,11 +38969,13 @@ diff --git a/src/types/error.rs b/src/types/error.rs
 +    feature = "op_describe_resource_server",
 +    feature = "op_describe_risk_configuration",
 +    feature = "op_describe_terms",
++    feature = "op_describe_terms_by_client",
 +    feature = "op_describe_user_import_job",
 +    feature = "op_describe_user_pool",
 +    feature = "op_describe_user_pool_client",
 +    feature = "op_forget_device",
 +    feature = "op_forgot_password",
++    feature = "op_get_client_token",
 +    feature = "op_get_csv_header",
 +    feature = "op_get_device",
 +    feature = "op_get_group",
@@ -38502,6 +39102,7 @@ diff --git a/src/types/error.rs b/src/types/error.rs
  mod _user_lambda_validation_exception;
 
 +#[cfg(any(
++    feature = "op_admin_delete_software_token",
 +    feature = "op_admin_initiate_auth",
 +    feature = "op_admin_respond_to_auth_challenge",
 +    feature = "op_admin_set_user_mfa_preference",
@@ -38532,6 +39133,7 @@ diff --git a/src/types/error.rs b/src/types/error.rs
 +    feature = "op_admin_add_user_to_group",
 +    feature = "op_admin_confirm_sign_up",
 +    feature = "op_admin_create_user",
++    feature = "op_admin_delete_software_token",
 +    feature = "op_admin_delete_user",
 +    feature = "op_admin_delete_user_attributes",
 +    feature = "op_admin_disable_provider_for_user",
@@ -38633,13 +39235,14 @@ diff --git a/src/types/error.rs b/src/types/error.rs
 diff --git a/src/types/error/builders.rs b/src/types/error/builders.rs
 --- a/src/types/error/builders.rs
 +++ b/src/types/error/builders.rs
-@@ -1,118 +1,1316 @@
+@@ -1,118 +1,1337 @@
  // Code generated by software.amazon.smithy.rust.codegen.smithy-rs. DO NOT EDIT.
 +#[cfg(any(
 +    feature = "op_add_custom_attributes",
 +    feature = "op_admin_add_user_to_group",
 +    feature = "op_admin_confirm_sign_up",
 +    feature = "op_admin_create_user",
++    feature = "op_admin_delete_software_token",
 +    feature = "op_admin_delete_user",
 +    feature = "op_admin_delete_user_attributes",
 +    feature = "op_admin_disable_provider_for_user",
@@ -38698,12 +39301,14 @@ diff --git a/src/types/error/builders.rs b/src/types/error/builders.rs
 +    feature = "op_describe_resource_server",
 +    feature = "op_describe_risk_configuration",
 +    feature = "op_describe_terms",
++    feature = "op_describe_terms_by_client",
 +    feature = "op_describe_user_import_job",
 +    feature = "op_describe_user_pool",
 +    feature = "op_describe_user_pool_client",
 +    feature = "op_describe_user_pool_domain",
 +    feature = "op_forget_device",
 +    feature = "op_forgot_password",
++    feature = "op_get_client_token",
 +    feature = "op_get_csv_header",
 +    feature = "op_get_device",
 +    feature = "op_get_group",
@@ -38771,6 +39376,7 @@ diff --git a/src/types/error/builders.rs b/src/types/error/builders.rs
 +    feature = "op_admin_add_user_to_group",
 +    feature = "op_admin_confirm_sign_up",
 +    feature = "op_admin_create_user",
++    feature = "op_admin_delete_software_token",
 +    feature = "op_admin_delete_user",
 +    feature = "op_admin_delete_user_attributes",
 +    feature = "op_admin_disable_provider_for_user",
@@ -38830,12 +39436,14 @@ diff --git a/src/types/error/builders.rs b/src/types/error/builders.rs
 +    feature = "op_describe_resource_server",
 +    feature = "op_describe_risk_configuration",
 +    feature = "op_describe_terms",
++    feature = "op_describe_terms_by_client",
 +    feature = "op_describe_user_import_job",
 +    feature = "op_describe_user_pool",
 +    feature = "op_describe_user_pool_client",
 +    feature = "op_describe_user_pool_domain",
 +    feature = "op_forget_device",
 +    feature = "op_forgot_password",
++    feature = "op_get_client_token",
 +    feature = "op_get_csv_header",
 +    feature = "op_get_device",
 +    feature = "op_get_group",
@@ -38903,6 +39511,7 @@ diff --git a/src/types/error/builders.rs b/src/types/error/builders.rs
 +    feature = "op_admin_add_user_to_group",
 +    feature = "op_admin_confirm_sign_up",
 +    feature = "op_admin_create_user",
++    feature = "op_admin_delete_software_token",
 +    feature = "op_admin_delete_user",
 +    feature = "op_admin_delete_user_attributes",
 +    feature = "op_admin_disable_provider_for_user",
@@ -38961,12 +39570,14 @@ diff --git a/src/types/error/builders.rs b/src/types/error/builders.rs
 +    feature = "op_describe_resource_server",
 +    feature = "op_describe_risk_configuration",
 +    feature = "op_describe_terms",
++    feature = "op_describe_terms_by_client",
 +    feature = "op_describe_user_import_job",
 +    feature = "op_describe_user_pool",
 +    feature = "op_describe_user_pool_client",
 +    feature = "op_describe_user_pool_domain",
 +    feature = "op_forget_device",
 +    feature = "op_forgot_password",
++    feature = "op_get_client_token",
 +    feature = "op_get_csv_header",
 +    feature = "op_get_device",
 +    feature = "op_get_group",
@@ -39031,6 +39642,7 @@ diff --git a/src/types/error/builders.rs b/src/types/error/builders.rs
 +    feature = "op_admin_add_user_to_group",
 +    feature = "op_admin_confirm_sign_up",
 +    feature = "op_admin_create_user",
++    feature = "op_admin_delete_software_token",
 +    feature = "op_admin_delete_user",
 +    feature = "op_admin_delete_user_attributes",
 +    feature = "op_admin_disable_provider_for_user",
@@ -39085,12 +39697,14 @@ diff --git a/src/types/error/builders.rs b/src/types/error/builders.rs
 +    feature = "op_describe_resource_server",
 +    feature = "op_describe_risk_configuration",
 +    feature = "op_describe_terms",
++    feature = "op_describe_terms_by_client",
 +    feature = "op_describe_user_import_job",
 +    feature = "op_describe_user_pool",
 +    feature = "op_describe_user_pool_client",
 +    feature = "op_describe_user_pool_domain",
 +    feature = "op_forget_device",
 +    feature = "op_forgot_password",
++    feature = "op_get_client_token",
 +    feature = "op_get_csv_header",
 +    feature = "op_get_device",
 +    feature = "op_get_group",
@@ -39149,6 +39763,7 @@ diff --git a/src/types/error/builders.rs b/src/types/error/builders.rs
 +    feature = "op_admin_add_user_to_group",
 +    feature = "op_admin_confirm_sign_up",
 +    feature = "op_admin_create_user",
++    feature = "op_admin_delete_software_token",
 +    feature = "op_admin_delete_user",
 +    feature = "op_admin_delete_user_attributes",
 +    feature = "op_admin_disable_provider_for_user",
@@ -39206,12 +39821,14 @@ diff --git a/src/types/error/builders.rs b/src/types/error/builders.rs
 +    feature = "op_describe_resource_server",
 +    feature = "op_describe_risk_configuration",
 +    feature = "op_describe_terms",
++    feature = "op_describe_terms_by_client",
 +    feature = "op_describe_user_import_job",
 +    feature = "op_describe_user_pool",
 +    feature = "op_describe_user_pool_client",
 +    feature = "op_describe_user_pool_domain",
 +    feature = "op_forget_device",
 +    feature = "op_forgot_password",
++    feature = "op_get_client_token",
 +    feature = "op_get_csv_header",
 +    feature = "op_get_device",
 +    feature = "op_get_group",
@@ -39276,6 +39893,7 @@ diff --git a/src/types/error/builders.rs b/src/types/error/builders.rs
 +    feature = "op_admin_add_user_to_group",
 +    feature = "op_admin_confirm_sign_up",
 +    feature = "op_admin_create_user",
++    feature = "op_admin_delete_software_token",
 +    feature = "op_admin_delete_user",
 +    feature = "op_admin_delete_user_attributes",
 +    feature = "op_admin_disable_provider_for_user",
@@ -39330,11 +39948,13 @@ diff --git a/src/types/error/builders.rs b/src/types/error/builders.rs
 +    feature = "op_describe_resource_server",
 +    feature = "op_describe_risk_configuration",
 +    feature = "op_describe_terms",
++    feature = "op_describe_terms_by_client",
 +    feature = "op_describe_user_import_job",
 +    feature = "op_describe_user_pool",
 +    feature = "op_describe_user_pool_client",
 +    feature = "op_forget_device",
 +    feature = "op_forgot_password",
++    feature = "op_get_client_token",
 +    feature = "op_get_csv_header",
 +    feature = "op_get_device",
 +    feature = "op_get_group",
@@ -39447,6 +40067,7 @@ diff --git a/src/types/error/builders.rs b/src/types/error/builders.rs
 +    feature = "op_admin_add_user_to_group",
 +    feature = "op_admin_confirm_sign_up",
 +    feature = "op_admin_create_user",
++    feature = "op_admin_delete_software_token",
 +    feature = "op_admin_delete_user",
 +    feature = "op_admin_delete_user_attributes",
 +    feature = "op_admin_disable_provider_for_user",
@@ -39644,6 +40265,34 @@ diff --git a/src/types/error/builders.rs b/src/types/error/builders.rs
  pub use crate::types::error::_username_exists_exception::UsernameExistsExceptionBuilder;
 
 +#[cfg(any(
++    feature = "op_admin_delete_software_token",
++    feature = "op_admin_initiate_auth",
++    feature = "op_admin_respond_to_auth_challenge",
++    feature = "op_admin_set_user_mfa_preference",
++    feature = "op_change_password",
++    feature = "op_confirm_device",
++    feature = "op_confirm_forgot_password",
++    feature = "op_delete_user",
++    feature = "op_delete_user_attributes",
++    feature = "op_forget_device",
++    feature = "op_get_device",
++    feature = "op_get_user",
++    feature = "op_get_user_attribute_verification_code",
++    feature = "op_get_user_auth_factors",
++    feature = "op_global_sign_out",
++    feature = "op_initiate_auth",
++    feature = "op_list_devices",
++    feature = "op_respond_to_auth_challenge",
++    feature = "op_set_user_mfa_preference",
++    feature = "op_set_user_settings",
++    feature = "op_update_device_status",
++    feature = "op_update_user_attributes",
++    feature = "op_verify_software_token",
++    feature = "op_verify_user_attribute"
++))]
+ pub use crate::types::error::_user_not_confirmed_exception::UserNotConfirmedExceptionBuilder;
+
++#[cfg(any(
 +    feature = "op_admin_disable_provider_for_user",
 +    feature = "op_admin_link_provider_for_user",
 +    feature = "op_admin_respond_to_auth_challenge",
@@ -39736,33 +40385,6 @@ diff --git a/src/types/error/builders.rs b/src/types/error/builders.rs
  pub use crate::types::error::_unsupported_operation_exception::UnsupportedOperationExceptionBuilder;
 
 +#[cfg(any(
-+    feature = "op_admin_initiate_auth",
-+    feature = "op_admin_respond_to_auth_challenge",
-+    feature = "op_admin_set_user_mfa_preference",
-+    feature = "op_change_password",
-+    feature = "op_confirm_device",
-+    feature = "op_confirm_forgot_password",
-+    feature = "op_delete_user",
-+    feature = "op_delete_user_attributes",
-+    feature = "op_forget_device",
-+    feature = "op_get_device",
-+    feature = "op_get_user",
-+    feature = "op_get_user_attribute_verification_code",
-+    feature = "op_get_user_auth_factors",
-+    feature = "op_global_sign_out",
-+    feature = "op_initiate_auth",
-+    feature = "op_list_devices",
-+    feature = "op_respond_to_auth_challenge",
-+    feature = "op_set_user_mfa_preference",
-+    feature = "op_set_user_settings",
-+    feature = "op_update_device_status",
-+    feature = "op_update_user_attributes",
-+    feature = "op_verify_software_token",
-+    feature = "op_verify_user_attribute"
-+))]
- pub use crate::types::error::_user_not_confirmed_exception::UserNotConfirmedExceptionBuilder;
-
-+#[cfg(any(
 +    feature = "op_admin_list_user_auth_events",
 +    feature = "op_admin_update_auth_event_feedback",
 +    feature = "op_describe_risk_configuration",
@@ -39841,6 +40463,7 @@ diff --git a/src/types/error/builders.rs b/src/types/error/builders.rs
 +    feature = "op_delete_web_authn_credential",
 +    feature = "op_forget_device",
 +    feature = "op_forgot_password",
++    feature = "op_get_client_token",
 +    feature = "op_get_device",
 +    feature = "op_get_tokens_from_refresh_token",
 +    feature = "op_get_user",

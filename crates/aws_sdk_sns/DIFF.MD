@@ -1,7 +1,7 @@
 # AWS SDK modularizer diff
 
 - repository: `https://github.com/awslabs/aws-sdk-rust`
-- revision: `3c6d526c9d4775f41a8ef1ed2ef574d1b14481db`
+- revision: `26155f26ed36d90263a2c9058a67b08543c96f85`
 - service: `sdk/sns`
 - model: `aws-models/sns.json`
 - package: `aws-sdk-sns`
@@ -84,7 +84,7 @@ diff --git a/Cargo.toml b/Cargo.toml
 
  [dependencies.aws-runtime]
 -path = "../aws-runtime"
- version = "1.9.1"
+ version = "1.9.2"
 
  [dependencies.aws-smithy-async]
 -path = "../aws-smithy-async"
@@ -114,7 +114,7 @@ diff --git a/Cargo.toml b/Cargo.toml
  [dependencies.aws-smithy-runtime-api]
 -path = "../aws-smithy-runtime-api"
  features = ["client", "http-1x"]
- version = "1.15.0"
+ version = "1.16.0"
 
  [dependencies.aws-smithy-schema]
 -path = "../aws-smithy-schema"
@@ -123,7 +123,7 @@ diff --git a/Cargo.toml b/Cargo.toml
  [dependencies.aws-smithy-types]
 -path = "../aws-smithy-types"
  features = ["http-body-1-x"]
- version = "1.6.2"
+ version = "1.6.3"
 
  [dependencies.aws-smithy-xml]
 -path = "../aws-smithy-xml"
@@ -131,7 +131,7 @@ diff --git a/Cargo.toml b/Cargo.toml
 
  [dependencies.aws-types]
 -path = "../aws-types"
- version = "1.5.0"
+ version = "1.6.0"
 
  [dependencies.fastrand]
 @@ -89,11 +76,9 @@
@@ -139,7 +139,7 @@ diff --git a/Cargo.toml b/Cargo.toml
  version = "0.1"
  [dev-dependencies.aws-config]
 -path = "../aws-config"
- version = "1.11.0"
+ version = "1.12.0"
 
  [dev-dependencies.aws-credential-types]
 -path = "../aws-credential-types"
@@ -4749,7 +4749,7 @@ diff --git a/Cargo.toml b/Cargo.toml
 
  [dependencies.aws-runtime]
 -path = "../aws-runtime"
- version = "1.9.1"
+ version = "1.9.2"
 
  [dependencies.aws-smithy-async]
 -path = "../aws-smithy-async"
@@ -4779,7 +4779,7 @@ diff --git a/Cargo.toml b/Cargo.toml
  [dependencies.aws-smithy-runtime-api]
 -path = "../aws-smithy-runtime-api"
  features = ["client", "http-1x"]
- version = "1.15.0"
+ version = "1.16.0"
 
  [dependencies.aws-smithy-schema]
 -path = "../aws-smithy-schema"
@@ -4788,7 +4788,7 @@ diff --git a/Cargo.toml b/Cargo.toml
  [dependencies.aws-smithy-types]
 -path = "../aws-smithy-types"
  features = ["http-body-1-x"]
- version = "1.6.2"
+ version = "1.6.3"
 
  [dependencies.aws-smithy-xml]
 -path = "../aws-smithy-xml"
@@ -4796,7 +4796,7 @@ diff --git a/Cargo.toml b/Cargo.toml
 
  [dependencies.aws-types]
 -path = "../aws-types"
- version = "1.5.0"
+ version = "1.6.0"
 
  [dependencies.fastrand]
 @@ -89,11 +76,9 @@
@@ -4804,7 +4804,7 @@ diff --git a/Cargo.toml b/Cargo.toml
  version = "0.1"
  [dev-dependencies.aws-config]
 -path = "../aws-config"
- version = "1.11.0"
+ version = "1.12.0"
 
  [dev-dependencies.aws-credential-types]
 -path = "../aws-credential-types"

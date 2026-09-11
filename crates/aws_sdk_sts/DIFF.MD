@@ -1,7 +1,7 @@
 # AWS SDK modularizer diff
 
 - repository: `https://github.com/awslabs/aws-sdk-rust`
-- revision: `3c6d526c9d4775f41a8ef1ed2ef574d1b14481db`
+- revision: `26155f26ed36d90263a2c9058a67b08543c96f85`
 - service: `sdk/sts`
 - model: `aws-models/sts.json`
 - package: `aws-sdk-sts`
@@ -52,7 +52,7 @@ diff --git a/Cargo.toml b/Cargo.toml
 
  [dependencies.aws-runtime]
 -path = "../aws-runtime"
- version = "1.9.1"
+ version = "1.9.2"
 
  [dependencies.aws-smithy-async]
 -path = "../aws-smithy-async"
@@ -82,7 +82,7 @@ diff --git a/Cargo.toml b/Cargo.toml
  [dependencies.aws-smithy-runtime-api]
 -path = "../aws-smithy-runtime-api"
  features = ["client", "http-1x"]
- version = "1.15.0"
+ version = "1.16.0"
 
  [dependencies.aws-smithy-schema]
 -path = "../aws-smithy-schema"
@@ -91,7 +91,7 @@ diff --git a/Cargo.toml b/Cargo.toml
  [dependencies.aws-smithy-types]
 -path = "../aws-smithy-types"
  features = ["http-body-1-x"]
- version = "1.6.2"
+ version = "1.6.3"
 
  [dependencies.aws-smithy-xml]
 -path = "../aws-smithy-xml"
@@ -99,7 +99,7 @@ diff --git a/Cargo.toml b/Cargo.toml
 
  [dependencies.aws-types]
 -path = "../aws-types"
- version = "1.5.0"
+ version = "1.6.0"
 
  [dependencies.fastrand]
 @@ -89,41 +76,33 @@
@@ -113,7 +113,7 @@ diff --git a/Cargo.toml b/Cargo.toml
  [dev-dependencies.aws-runtime]
 -path = "../aws-runtime"
  features = ["test-util"]
- version = "1.9.1"
+ version = "1.9.2"
 
  [dev-dependencies.aws-smithy-async]
 -path = "../aws-smithy-async"
@@ -137,12 +137,12 @@ diff --git a/Cargo.toml b/Cargo.toml
  [dev-dependencies.aws-smithy-runtime-api]
 -path = "../aws-smithy-runtime-api"
  features = ["test-util"]
- version = "1.15.0"
+ version = "1.16.0"
 
  [dev-dependencies.aws-smithy-types]
 -path = "../aws-smithy-types"
  features = ["http-body-1-x", "test-util"]
- version = "1.6.2"
+ version = "1.6.3"
 
 @@ -155,6 +134,17 @@
  test-util = ["aws-credential-types/test-util", "aws-smithy-runtime/legacy-test-util", "aws-smithy-runtime/test-util"]
@@ -1345,7 +1345,7 @@ diff --git a/Cargo.toml b/Cargo.toml
 
  [dependencies.aws-runtime]
 -path = "../aws-runtime"
- version = "1.9.1"
+ version = "1.9.2"
 
  [dependencies.aws-smithy-async]
 -path = "../aws-smithy-async"
@@ -1375,7 +1375,7 @@ diff --git a/Cargo.toml b/Cargo.toml
  [dependencies.aws-smithy-runtime-api]
 -path = "../aws-smithy-runtime-api"
  features = ["client", "http-1x"]
- version = "1.15.0"
+ version = "1.16.0"
 
  [dependencies.aws-smithy-schema]
 -path = "../aws-smithy-schema"
@@ -1384,7 +1384,7 @@ diff --git a/Cargo.toml b/Cargo.toml
  [dependencies.aws-smithy-types]
 -path = "../aws-smithy-types"
  features = ["http-body-1-x"]
- version = "1.6.2"
+ version = "1.6.3"
 
  [dependencies.aws-smithy-xml]
 -path = "../aws-smithy-xml"
@@ -1392,7 +1392,7 @@ diff --git a/Cargo.toml b/Cargo.toml
 
  [dependencies.aws-types]
 -path = "../aws-types"
- version = "1.5.0"
+ version = "1.6.0"
 
  [dependencies.fastrand]
 @@ -89,41 +76,33 @@
@@ -1406,7 +1406,7 @@ diff --git a/Cargo.toml b/Cargo.toml
  [dev-dependencies.aws-runtime]
 -path = "../aws-runtime"
  features = ["test-util"]
- version = "1.9.1"
+ version = "1.9.2"
 
  [dev-dependencies.aws-smithy-async]
 -path = "../aws-smithy-async"
@@ -1430,12 +1430,12 @@ diff --git a/Cargo.toml b/Cargo.toml
  [dev-dependencies.aws-smithy-runtime-api]
 -path = "../aws-smithy-runtime-api"
  features = ["test-util"]
- version = "1.15.0"
+ version = "1.16.0"
 
  [dev-dependencies.aws-smithy-types]
 -path = "../aws-smithy-types"
  features = ["http-body-1-x", "test-util"]
- version = "1.6.2"
+ version = "1.6.3"
 
 @@ -155,6 +134,17 @@
  test-util = ["aws-credential-types/test-util", "aws-smithy-runtime/legacy-test-util", "aws-smithy-runtime/test-util"]

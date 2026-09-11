@@ -273,6 +273,18 @@ pub struct CreateMultipartUploadInput {
     /// <p>This functionality is not supported for directory buckets.</p>
     /// </note>
     pub object_lock_legal_hold_status: ::std::option::Option<crate::types::ObjectLockLegalHoldStatus>,
+    /// <p>Specifies the event hold status to apply to the uploaded object. Set to <code>ON</code> to enable or <code>OFF</code> to disable.</p><note>
+    /// <p>This functionality is not supported for directory buckets.</p>
+    /// </note>
+    pub object_lock_event_hold: ::std::option::Option<crate::types::ObjectLockEventHold>,
+    /// <p>Specifies the event hold duration in days to apply to the uploaded object.</p><note>
+    /// <p>This functionality is not supported for directory buckets.</p>
+    /// </note>
+    pub object_lock_event_hold_duration_days: ::std::option::Option<i32>,
+    /// <p>Specifies the event hold duration in years to apply to the uploaded object.</p><note>
+    /// <p>This functionality is not supported for directory buckets.</p>
+    /// </note>
+    pub object_lock_event_hold_duration_years: ::std::option::Option<i32>,
     /// <p>The account ID of the expected bucket owner. If the account ID that you provide does not match the actual owner of the bucket, the request fails with the HTTP status code <code>403 Forbidden</code> (access denied).</p>
     pub expected_bucket_owner: ::std::option::Option<::std::string::String>,
     /// <p>Indicates the algorithm that you want Amazon S3 to use to create the checksum for the object. For more information, see <a href="https://docs.aws.amazon.com/AmazonS3/latest/userguide/checking-object-integrity.html">Checking object integrity</a> in the <i>Amazon S3 User Guide</i>.</p>
@@ -609,6 +621,24 @@ impl CreateMultipartUploadInput {
     pub fn object_lock_legal_hold_status(&self) -> ::std::option::Option<&crate::types::ObjectLockLegalHoldStatus> {
         self.object_lock_legal_hold_status.as_ref()
     }
+    /// <p>Specifies the event hold status to apply to the uploaded object. Set to <code>ON</code> to enable or <code>OFF</code> to disable.</p><note>
+    /// <p>This functionality is not supported for directory buckets.</p>
+    /// </note>
+    pub fn object_lock_event_hold(&self) -> ::std::option::Option<&crate::types::ObjectLockEventHold> {
+        self.object_lock_event_hold.as_ref()
+    }
+    /// <p>Specifies the event hold duration in days to apply to the uploaded object.</p><note>
+    /// <p>This functionality is not supported for directory buckets.</p>
+    /// </note>
+    pub fn object_lock_event_hold_duration_days(&self) -> ::std::option::Option<i32> {
+        self.object_lock_event_hold_duration_days
+    }
+    /// <p>Specifies the event hold duration in years to apply to the uploaded object.</p><note>
+    /// <p>This functionality is not supported for directory buckets.</p>
+    /// </note>
+    pub fn object_lock_event_hold_duration_years(&self) -> ::std::option::Option<i32> {
+        self.object_lock_event_hold_duration_years
+    }
     /// <p>The account ID of the expected bucket owner. If the account ID that you provide does not match the actual owner of the bucket, the request fails with the HTTP status code <code>403 Forbidden</code> (access denied).</p>
     pub fn expected_bucket_owner(&self) -> ::std::option::Option<&str> {
         self.expected_bucket_owner.as_deref()
@@ -653,6 +683,15 @@ impl ::std::fmt::Debug for CreateMultipartUploadInput {
         formatter.field("object_lock_mode", &self.object_lock_mode);
         formatter.field("object_lock_retain_until_date", &self.object_lock_retain_until_date);
         formatter.field("object_lock_legal_hold_status", &self.object_lock_legal_hold_status);
+        formatter.field("object_lock_event_hold", &self.object_lock_event_hold);
+        formatter.field(
+            "object_lock_event_hold_duration_days",
+            &self.object_lock_event_hold_duration_days,
+        );
+        formatter.field(
+            "object_lock_event_hold_duration_years",
+            &self.object_lock_event_hold_duration_years,
+        );
         formatter.field("expected_bucket_owner", &self.expected_bucket_owner);
         formatter.field("checksum_algorithm", &self.checksum_algorithm);
         formatter.field("checksum_type", &self.checksum_type);
@@ -699,6 +738,9 @@ pub struct CreateMultipartUploadInputBuilder {
     pub(crate) object_lock_mode: ::std::option::Option<crate::types::ObjectLockMode>,
     pub(crate) object_lock_retain_until_date: ::std::option::Option<::aws_smithy_types::DateTime>,
     pub(crate) object_lock_legal_hold_status: ::std::option::Option<crate::types::ObjectLockLegalHoldStatus>,
+    pub(crate) object_lock_event_hold: ::std::option::Option<crate::types::ObjectLockEventHold>,
+    pub(crate) object_lock_event_hold_duration_days: ::std::option::Option<i32>,
+    pub(crate) object_lock_event_hold_duration_years: ::std::option::Option<i32>,
     pub(crate) expected_bucket_owner: ::std::option::Option<::std::string::String>,
     pub(crate) checksum_algorithm: ::std::option::Option<crate::types::ChecksumAlgorithm>,
     pub(crate) checksum_type: ::std::option::Option<crate::types::ChecksumType>,
@@ -1764,6 +1806,69 @@ impl CreateMultipartUploadInputBuilder {
     pub fn get_object_lock_legal_hold_status(&self) -> &::std::option::Option<crate::types::ObjectLockLegalHoldStatus> {
         &self.object_lock_legal_hold_status
     }
+    /// <p>Specifies the event hold status to apply to the uploaded object. Set to <code>ON</code> to enable or <code>OFF</code> to disable.</p><note>
+    /// <p>This functionality is not supported for directory buckets.</p>
+    /// </note>
+    pub fn object_lock_event_hold(mut self, input: crate::types::ObjectLockEventHold) -> Self {
+        self.object_lock_event_hold = ::std::option::Option::Some(input);
+        self
+    }
+    /// <p>Specifies the event hold status to apply to the uploaded object. Set to <code>ON</code> to enable or <code>OFF</code> to disable.</p><note>
+    /// <p>This functionality is not supported for directory buckets.</p>
+    /// </note>
+    pub fn set_object_lock_event_hold(
+        mut self,
+        input: ::std::option::Option<crate::types::ObjectLockEventHold>,
+    ) -> Self {
+        self.object_lock_event_hold = input;
+        self
+    }
+    /// <p>Specifies the event hold status to apply to the uploaded object. Set to <code>ON</code> to enable or <code>OFF</code> to disable.</p><note>
+    /// <p>This functionality is not supported for directory buckets.</p>
+    /// </note>
+    pub fn get_object_lock_event_hold(&self) -> &::std::option::Option<crate::types::ObjectLockEventHold> {
+        &self.object_lock_event_hold
+    }
+    /// <p>Specifies the event hold duration in days to apply to the uploaded object.</p><note>
+    /// <p>This functionality is not supported for directory buckets.</p>
+    /// </note>
+    pub fn object_lock_event_hold_duration_days(mut self, input: i32) -> Self {
+        self.object_lock_event_hold_duration_days = ::std::option::Option::Some(input);
+        self
+    }
+    /// <p>Specifies the event hold duration in days to apply to the uploaded object.</p><note>
+    /// <p>This functionality is not supported for directory buckets.</p>
+    /// </note>
+    pub fn set_object_lock_event_hold_duration_days(mut self, input: ::std::option::Option<i32>) -> Self {
+        self.object_lock_event_hold_duration_days = input;
+        self
+    }
+    /// <p>Specifies the event hold duration in days to apply to the uploaded object.</p><note>
+    /// <p>This functionality is not supported for directory buckets.</p>
+    /// </note>
+    pub fn get_object_lock_event_hold_duration_days(&self) -> &::std::option::Option<i32> {
+        &self.object_lock_event_hold_duration_days
+    }
+    /// <p>Specifies the event hold duration in years to apply to the uploaded object.</p><note>
+    /// <p>This functionality is not supported for directory buckets.</p>
+    /// </note>
+    pub fn object_lock_event_hold_duration_years(mut self, input: i32) -> Self {
+        self.object_lock_event_hold_duration_years = ::std::option::Option::Some(input);
+        self
+    }
+    /// <p>Specifies the event hold duration in years to apply to the uploaded object.</p><note>
+    /// <p>This functionality is not supported for directory buckets.</p>
+    /// </note>
+    pub fn set_object_lock_event_hold_duration_years(mut self, input: ::std::option::Option<i32>) -> Self {
+        self.object_lock_event_hold_duration_years = input;
+        self
+    }
+    /// <p>Specifies the event hold duration in years to apply to the uploaded object.</p><note>
+    /// <p>This functionality is not supported for directory buckets.</p>
+    /// </note>
+    pub fn get_object_lock_event_hold_duration_years(&self) -> &::std::option::Option<i32> {
+        &self.object_lock_event_hold_duration_years
+    }
     /// <p>The account ID of the expected bucket owner. If the account ID that you provide does not match the actual owner of the bucket, the request fails with the HTTP status code <code>403 Forbidden</code> (access denied).</p>
     pub fn expected_bucket_owner(mut self, input: impl ::std::convert::Into<::std::string::String>) -> Self {
         self.expected_bucket_owner = ::std::option::Option::Some(input.into());
@@ -1842,6 +1947,9 @@ impl CreateMultipartUploadInputBuilder {
             object_lock_mode: self.object_lock_mode,
             object_lock_retain_until_date: self.object_lock_retain_until_date,
             object_lock_legal_hold_status: self.object_lock_legal_hold_status,
+            object_lock_event_hold: self.object_lock_event_hold,
+            object_lock_event_hold_duration_days: self.object_lock_event_hold_duration_days,
+            object_lock_event_hold_duration_years: self.object_lock_event_hold_duration_years,
             expected_bucket_owner: self.expected_bucket_owner,
             checksum_algorithm: self.checksum_algorithm,
             checksum_type: self.checksum_type,
@@ -1879,6 +1987,15 @@ impl ::std::fmt::Debug for CreateMultipartUploadInputBuilder {
         formatter.field("object_lock_mode", &self.object_lock_mode);
         formatter.field("object_lock_retain_until_date", &self.object_lock_retain_until_date);
         formatter.field("object_lock_legal_hold_status", &self.object_lock_legal_hold_status);
+        formatter.field("object_lock_event_hold", &self.object_lock_event_hold);
+        formatter.field(
+            "object_lock_event_hold_duration_days",
+            &self.object_lock_event_hold_duration_days,
+        );
+        formatter.field(
+            "object_lock_event_hold_duration_years",
+            &self.object_lock_event_hold_duration_years,
+        );
         formatter.field("expected_bucket_owner", &self.expected_bucket_owner);
         formatter.field("checksum_algorithm", &self.checksum_algorithm);
         formatter.field("checksum_type", &self.checksum_type);

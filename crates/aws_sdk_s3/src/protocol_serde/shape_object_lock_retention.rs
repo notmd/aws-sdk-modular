@@ -17,6 +17,14 @@ pub fn ser_object_lock_retention(
                 .as_ref(),
         );
     }
+    if let Some(var_3) = &input.event_hold {
+        let mut inner_writer = scope.start_el("EventHold").finish();
+        inner_writer.data(var_3.as_str());
+    }
+    if let Some(var_4) = &input.event_hold_duration {
+        let inner_writer = scope.start_el("EventHoldDuration");
+        crate::protocol_serde::shape_event_hold_duration::ser_event_hold_duration(var_4, inner_writer)?
+    }
     scope.finish();
     Ok(())
 }
@@ -36,7 +44,7 @@ pub fn de_object_lock_retention(
     while let Some(mut tag) = decoder.next_tag() {
         match tag.start_el() {
             s if s.matches("Mode") /* Mode com.amazonaws.s3#ObjectLockRetention$Mode */ =>  {
-                let var_3 =
+                let var_5 =
                     Some(
                         Result::<crate::types::ObjectLockRetentionMode, ::aws_smithy_xml::decode::XmlDecodeError>::Ok(
                             crate::types::ObjectLockRetentionMode::from(
@@ -46,11 +54,11 @@ pub fn de_object_lock_retention(
                         ?
                     )
                 ;
-                builder = builder.set_mode(var_3);
+                builder = builder.set_mode(var_5);
             }
             ,
             s if s.matches("RetainUntilDate") /* RetainUntilDate com.amazonaws.s3#ObjectLockRetention$RetainUntilDate */ =>  {
-                let var_4 =
+                let var_6 =
                     Some(
                         ::aws_smithy_types::DateTime::from_str(
                             ::aws_smithy_xml::decode::try_data(&mut tag)?.as_ref()
@@ -60,7 +68,31 @@ pub fn de_object_lock_retention(
                         ?
                     )
                 ;
-                builder = builder.set_retain_until_date(var_4);
+                builder = builder.set_retain_until_date(var_6);
+            }
+            ,
+            s if s.matches("EventHold") /* EventHold com.amazonaws.s3#ObjectLockRetention$EventHold */ =>  {
+                let var_7 =
+                    Some(
+                        Result::<crate::types::ObjectLockEventHold, ::aws_smithy_xml::decode::XmlDecodeError>::Ok(
+                            crate::types::ObjectLockEventHold::from(
+                                ::aws_smithy_xml::decode::try_data(&mut tag)?.as_ref()
+                            )
+                        )
+                        ?
+                    )
+                ;
+                builder = builder.set_event_hold(var_7);
+            }
+            ,
+            s if s.matches("EventHoldDuration") /* EventHoldDuration com.amazonaws.s3#ObjectLockRetention$EventHoldDuration */ =>  {
+                let var_8 =
+                    Some(
+                        crate::protocol_serde::shape_event_hold_duration::de_event_hold_duration(&mut tag, depth + 1)
+                        ?
+                    )
+                ;
+                builder = builder.set_event_hold_duration(var_8);
             }
             ,
             _ => {}

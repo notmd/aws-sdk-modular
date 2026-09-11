@@ -30,7 +30,7 @@ pub struct GetObjectOutput {
     pub content_length: ::std::option::Option<i64>,
     /// <p>An entity tag (ETag) is an opaque identifier assigned by a web server to a specific version of a resource found at a URL.</p>
     pub e_tag: ::std::option::Option<::std::string::String>,
-    /// <p>The Base64 encoded, 32-bit <code>CRC32</code> checksum of the object. This checksum is only present if the object was uploaded with the object. For more information, see <a href="https://docs.aws.amazon.com/AmazonS3/latest/userguide/checking-object-integrity.html"> Checking object integrity</a> in the <i>Amazon S3 User Guide</i>.</p>
+    /// <p>The Base64 encoded, 32-bit <code>CRC32</code> checksum of the object. This checksum is only present if the checksum was uploaded with the object. For more information, see <a href="https://docs.aws.amazon.com/AmazonS3/latest/userguide/checking-object-integrity.html"> Checking object integrity</a> in the <i>Amazon S3 User Guide</i>.</p>
     pub checksum_crc32: ::std::option::Option<::std::string::String>,
     /// <p>The Base64 encoded, 32-bit <code>CRC32C</code> checksum of the object. This checksum is only present if the checksum was uploaded with the object. For more information, see <a href="https://docs.aws.amazon.com/AmazonS3/latest/userguide/checking-object-integrity.html"> Checking object integrity</a> in the <i>Amazon S3 User Guide</i>.</p>
     pub checksum_crc32_c: ::std::option::Option<::std::string::String>,
@@ -125,6 +125,18 @@ pub struct GetObjectOutput {
     /// <p>This functionality is not supported for directory buckets.</p>
     /// </note>
     pub object_lock_legal_hold_status: ::std::option::Option<crate::types::ObjectLockLegalHoldStatus>,
+    /// <p>The event hold status for this object. This header is only returned if the requester has the <code>s3:GetObjectRetention</code> permission.</p><note>
+    /// <p>This functionality is not supported for directory buckets.</p>
+    /// </note>
+    pub object_lock_event_hold: ::std::option::Option<crate::types::ObjectLockEventHold>,
+    /// <p>The event hold duration in days for this object. Only returned when the event hold is enabled.</p><note>
+    /// <p>This functionality is not supported for directory buckets.</p>
+    /// </note>
+    pub object_lock_event_hold_duration_days: ::std::option::Option<i32>,
+    /// <p>The event hold duration in years for this object. Only returned when the event hold is enabled.</p><note>
+    /// <p>This functionality is not supported for directory buckets.</p>
+    /// </note>
+    pub object_lock_event_hold_duration_years: ::std::option::Option<i32>,
     /// <p>The date and time at which the object is no longer cacheable.</p>
     #[deprecated(note = "Please use `expires_string` which contains the raw, unparsed value of this field.")]
     pub expires: ::std::option::Option<::aws_smithy_types::DateTime>,
@@ -178,7 +190,7 @@ impl GetObjectOutput {
     pub fn e_tag(&self) -> ::std::option::Option<&str> {
         self.e_tag.as_deref()
     }
-    /// <p>The Base64 encoded, 32-bit <code>CRC32</code> checksum of the object. This checksum is only present if the object was uploaded with the object. For more information, see <a href="https://docs.aws.amazon.com/AmazonS3/latest/userguide/checking-object-integrity.html"> Checking object integrity</a> in the <i>Amazon S3 User Guide</i>.</p>
+    /// <p>The Base64 encoded, 32-bit <code>CRC32</code> checksum of the object. This checksum is only present if the checksum was uploaded with the object. For more information, see <a href="https://docs.aws.amazon.com/AmazonS3/latest/userguide/checking-object-integrity.html"> Checking object integrity</a> in the <i>Amazon S3 User Guide</i>.</p>
     pub fn checksum_crc32(&self) -> ::std::option::Option<&str> {
         self.checksum_crc32.as_deref()
     }
@@ -343,6 +355,24 @@ impl GetObjectOutput {
     pub fn object_lock_legal_hold_status(&self) -> ::std::option::Option<&crate::types::ObjectLockLegalHoldStatus> {
         self.object_lock_legal_hold_status.as_ref()
     }
+    /// <p>The event hold status for this object. This header is only returned if the requester has the <code>s3:GetObjectRetention</code> permission.</p><note>
+    /// <p>This functionality is not supported for directory buckets.</p>
+    /// </note>
+    pub fn object_lock_event_hold(&self) -> ::std::option::Option<&crate::types::ObjectLockEventHold> {
+        self.object_lock_event_hold.as_ref()
+    }
+    /// <p>The event hold duration in days for this object. Only returned when the event hold is enabled.</p><note>
+    /// <p>This functionality is not supported for directory buckets.</p>
+    /// </note>
+    pub fn object_lock_event_hold_duration_days(&self) -> ::std::option::Option<i32> {
+        self.object_lock_event_hold_duration_days
+    }
+    /// <p>The event hold duration in years for this object. Only returned when the event hold is enabled.</p><note>
+    /// <p>This functionality is not supported for directory buckets.</p>
+    /// </note>
+    pub fn object_lock_event_hold_duration_years(&self) -> ::std::option::Option<i32> {
+        self.object_lock_event_hold_duration_years
+    }
     /// <p>The date and time at which the object is no longer cacheable.</p>
     #[deprecated(note = "Please use `expires_string` which contains the raw, unparsed value of this field.")]
     pub fn expires(&self) -> ::std::option::Option<&::aws_smithy_types::DateTime> {
@@ -398,6 +428,15 @@ impl ::std::fmt::Debug for GetObjectOutput {
         formatter.field("object_lock_mode", &self.object_lock_mode);
         formatter.field("object_lock_retain_until_date", &self.object_lock_retain_until_date);
         formatter.field("object_lock_legal_hold_status", &self.object_lock_legal_hold_status);
+        formatter.field("object_lock_event_hold", &self.object_lock_event_hold);
+        formatter.field(
+            "object_lock_event_hold_duration_days",
+            &self.object_lock_event_hold_duration_days,
+        );
+        formatter.field(
+            "object_lock_event_hold_duration_years",
+            &self.object_lock_event_hold_duration_years,
+        );
         formatter.field("expires", &self.expires);
         formatter.field("expires_string", &self.expires_string);
         formatter.field("_extended_request_id", &self._extended_request_id);
@@ -469,6 +508,9 @@ pub struct GetObjectOutputBuilder {
     pub(crate) object_lock_mode: ::std::option::Option<crate::types::ObjectLockMode>,
     pub(crate) object_lock_retain_until_date: ::std::option::Option<::aws_smithy_types::DateTime>,
     pub(crate) object_lock_legal_hold_status: ::std::option::Option<crate::types::ObjectLockLegalHoldStatus>,
+    pub(crate) object_lock_event_hold: ::std::option::Option<crate::types::ObjectLockEventHold>,
+    pub(crate) object_lock_event_hold_duration_days: ::std::option::Option<i32>,
+    pub(crate) object_lock_event_hold_duration_years: ::std::option::Option<i32>,
     pub(crate) expires: ::std::option::Option<::aws_smithy_types::DateTime>,
     pub(crate) expires_string: ::std::option::Option<::std::string::String>,
     _extended_request_id: Option<String>,
@@ -623,17 +665,17 @@ impl GetObjectOutputBuilder {
     pub fn get_e_tag(&self) -> &::std::option::Option<::std::string::String> {
         &self.e_tag
     }
-    /// <p>The Base64 encoded, 32-bit <code>CRC32</code> checksum of the object. This checksum is only present if the object was uploaded with the object. For more information, see <a href="https://docs.aws.amazon.com/AmazonS3/latest/userguide/checking-object-integrity.html"> Checking object integrity</a> in the <i>Amazon S3 User Guide</i>.</p>
+    /// <p>The Base64 encoded, 32-bit <code>CRC32</code> checksum of the object. This checksum is only present if the checksum was uploaded with the object. For more information, see <a href="https://docs.aws.amazon.com/AmazonS3/latest/userguide/checking-object-integrity.html"> Checking object integrity</a> in the <i>Amazon S3 User Guide</i>.</p>
     pub fn checksum_crc32(mut self, input: impl ::std::convert::Into<::std::string::String>) -> Self {
         self.checksum_crc32 = ::std::option::Option::Some(input.into());
         self
     }
-    /// <p>The Base64 encoded, 32-bit <code>CRC32</code> checksum of the object. This checksum is only present if the object was uploaded with the object. For more information, see <a href="https://docs.aws.amazon.com/AmazonS3/latest/userguide/checking-object-integrity.html"> Checking object integrity</a> in the <i>Amazon S3 User Guide</i>.</p>
+    /// <p>The Base64 encoded, 32-bit <code>CRC32</code> checksum of the object. This checksum is only present if the checksum was uploaded with the object. For more information, see <a href="https://docs.aws.amazon.com/AmazonS3/latest/userguide/checking-object-integrity.html"> Checking object integrity</a> in the <i>Amazon S3 User Guide</i>.</p>
     pub fn set_checksum_crc32(mut self, input: ::std::option::Option<::std::string::String>) -> Self {
         self.checksum_crc32 = input;
         self
     }
-    /// <p>The Base64 encoded, 32-bit <code>CRC32</code> checksum of the object. This checksum is only present if the object was uploaded with the object. For more information, see <a href="https://docs.aws.amazon.com/AmazonS3/latest/userguide/checking-object-integrity.html"> Checking object integrity</a> in the <i>Amazon S3 User Guide</i>.</p>
+    /// <p>The Base64 encoded, 32-bit <code>CRC32</code> checksum of the object. This checksum is only present if the checksum was uploaded with the object. For more information, see <a href="https://docs.aws.amazon.com/AmazonS3/latest/userguide/checking-object-integrity.html"> Checking object integrity</a> in the <i>Amazon S3 User Guide</i>.</p>
     pub fn get_checksum_crc32(&self) -> &::std::option::Option<::std::string::String> {
         &self.checksum_crc32
     }
@@ -1204,6 +1246,69 @@ impl GetObjectOutputBuilder {
     pub fn get_object_lock_legal_hold_status(&self) -> &::std::option::Option<crate::types::ObjectLockLegalHoldStatus> {
         &self.object_lock_legal_hold_status
     }
+    /// <p>The event hold status for this object. This header is only returned if the requester has the <code>s3:GetObjectRetention</code> permission.</p><note>
+    /// <p>This functionality is not supported for directory buckets.</p>
+    /// </note>
+    pub fn object_lock_event_hold(mut self, input: crate::types::ObjectLockEventHold) -> Self {
+        self.object_lock_event_hold = ::std::option::Option::Some(input);
+        self
+    }
+    /// <p>The event hold status for this object. This header is only returned if the requester has the <code>s3:GetObjectRetention</code> permission.</p><note>
+    /// <p>This functionality is not supported for directory buckets.</p>
+    /// </note>
+    pub fn set_object_lock_event_hold(
+        mut self,
+        input: ::std::option::Option<crate::types::ObjectLockEventHold>,
+    ) -> Self {
+        self.object_lock_event_hold = input;
+        self
+    }
+    /// <p>The event hold status for this object. This header is only returned if the requester has the <code>s3:GetObjectRetention</code> permission.</p><note>
+    /// <p>This functionality is not supported for directory buckets.</p>
+    /// </note>
+    pub fn get_object_lock_event_hold(&self) -> &::std::option::Option<crate::types::ObjectLockEventHold> {
+        &self.object_lock_event_hold
+    }
+    /// <p>The event hold duration in days for this object. Only returned when the event hold is enabled.</p><note>
+    /// <p>This functionality is not supported for directory buckets.</p>
+    /// </note>
+    pub fn object_lock_event_hold_duration_days(mut self, input: i32) -> Self {
+        self.object_lock_event_hold_duration_days = ::std::option::Option::Some(input);
+        self
+    }
+    /// <p>The event hold duration in days for this object. Only returned when the event hold is enabled.</p><note>
+    /// <p>This functionality is not supported for directory buckets.</p>
+    /// </note>
+    pub fn set_object_lock_event_hold_duration_days(mut self, input: ::std::option::Option<i32>) -> Self {
+        self.object_lock_event_hold_duration_days = input;
+        self
+    }
+    /// <p>The event hold duration in days for this object. Only returned when the event hold is enabled.</p><note>
+    /// <p>This functionality is not supported for directory buckets.</p>
+    /// </note>
+    pub fn get_object_lock_event_hold_duration_days(&self) -> &::std::option::Option<i32> {
+        &self.object_lock_event_hold_duration_days
+    }
+    /// <p>The event hold duration in years for this object. Only returned when the event hold is enabled.</p><note>
+    /// <p>This functionality is not supported for directory buckets.</p>
+    /// </note>
+    pub fn object_lock_event_hold_duration_years(mut self, input: i32) -> Self {
+        self.object_lock_event_hold_duration_years = ::std::option::Option::Some(input);
+        self
+    }
+    /// <p>The event hold duration in years for this object. Only returned when the event hold is enabled.</p><note>
+    /// <p>This functionality is not supported for directory buckets.</p>
+    /// </note>
+    pub fn set_object_lock_event_hold_duration_years(mut self, input: ::std::option::Option<i32>) -> Self {
+        self.object_lock_event_hold_duration_years = input;
+        self
+    }
+    /// <p>The event hold duration in years for this object. Only returned when the event hold is enabled.</p><note>
+    /// <p>This functionality is not supported for directory buckets.</p>
+    /// </note>
+    pub fn get_object_lock_event_hold_duration_years(&self) -> &::std::option::Option<i32> {
+        &self.object_lock_event_hold_duration_years
+    }
     /// <p>The date and time at which the object is no longer cacheable.</p>
     #[deprecated(note = "Please use `expires_string` which contains the raw, unparsed value of this field.")]
     pub fn expires(mut self, input: ::aws_smithy_types::DateTime) -> Self {
@@ -1298,6 +1403,9 @@ impl GetObjectOutputBuilder {
             object_lock_mode: self.object_lock_mode,
             object_lock_retain_until_date: self.object_lock_retain_until_date,
             object_lock_legal_hold_status: self.object_lock_legal_hold_status,
+            object_lock_event_hold: self.object_lock_event_hold,
+            object_lock_event_hold_duration_days: self.object_lock_event_hold_duration_days,
+            object_lock_event_hold_duration_years: self.object_lock_event_hold_duration_years,
             expires: self.expires,
             expires_string: self.expires_string,
             _extended_request_id: self._extended_request_id,
@@ -1350,6 +1458,15 @@ impl ::std::fmt::Debug for GetObjectOutputBuilder {
         formatter.field("object_lock_mode", &self.object_lock_mode);
         formatter.field("object_lock_retain_until_date", &self.object_lock_retain_until_date);
         formatter.field("object_lock_legal_hold_status", &self.object_lock_legal_hold_status);
+        formatter.field("object_lock_event_hold", &self.object_lock_event_hold);
+        formatter.field(
+            "object_lock_event_hold_duration_days",
+            &self.object_lock_event_hold_duration_days,
+        );
+        formatter.field(
+            "object_lock_event_hold_duration_years",
+            &self.object_lock_event_hold_duration_years,
+        );
         formatter.field("expires", &self.expires);
         formatter.field("expires_string", &self.expires_string);
         formatter.field("_extended_request_id", &self._extended_request_id);

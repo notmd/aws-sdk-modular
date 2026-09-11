@@ -33,6 +33,7 @@
 ///     Event::S3ObjectRestoreCompleted => { /* ... */ },
 ///     Event::S3ObjectRestoreDelete => { /* ... */ },
 ///     Event::S3ObjectRestorePost => { /* ... */ },
+///     Event::S3ObjectRetentionPut => { /* ... */ },
 ///     Event::S3ObjectTagging => { /* ... */ },
 ///     Event::S3ObjectTaggingDelete => { /* ... */ },
 ///     Event::S3ObjectTaggingPut => { /* ... */ },
@@ -119,6 +120,8 @@ pub enum Event {
     #[allow(missing_docs)] // documentation missing in model
     S3ObjectRestorePost,
     #[allow(missing_docs)] // documentation missing in model
+    S3ObjectRetentionPut,
+    #[allow(missing_docs)] // documentation missing in model
     S3ObjectTagging,
     #[allow(missing_docs)] // documentation missing in model
     S3ObjectTaggingDelete,
@@ -166,6 +169,7 @@ impl ::std::convert::From<&str> for Event {
             "s3:ObjectRestore:Completed" => Event::S3ObjectRestoreCompleted,
             "s3:ObjectRestore:Delete" => Event::S3ObjectRestoreDelete,
             "s3:ObjectRestore:Post" => Event::S3ObjectRestorePost,
+            "s3:ObjectRetention:Put" => Event::S3ObjectRetentionPut,
             "s3:ObjectTagging:*" => Event::S3ObjectTagging,
             "s3:ObjectTagging:Delete" => Event::S3ObjectTaggingDelete,
             "s3:ObjectTagging:Put" => Event::S3ObjectTaggingPut,
@@ -213,6 +217,7 @@ impl Event {
             Event::S3ObjectRestoreCompleted => "s3:ObjectRestore:Completed",
             Event::S3ObjectRestoreDelete => "s3:ObjectRestore:Delete",
             Event::S3ObjectRestorePost => "s3:ObjectRestore:Post",
+            Event::S3ObjectRetentionPut => "s3:ObjectRetention:Put",
             Event::S3ObjectTagging => "s3:ObjectTagging:*",
             Event::S3ObjectTaggingDelete => "s3:ObjectTagging:Delete",
             Event::S3ObjectTaggingPut => "s3:ObjectTagging:Put",
@@ -249,6 +254,7 @@ impl Event {
             "s3:ObjectRestore:Completed",
             "s3:ObjectRestore:Delete",
             "s3:ObjectRestore:Post",
+            "s3:ObjectRetention:Put",
             "s3:ObjectTagging:*",
             "s3:ObjectTagging:Delete",
             "s3:ObjectTagging:Put",
@@ -302,6 +308,7 @@ impl ::std::fmt::Display for Event {
             Event::S3ObjectRestoreCompleted => write!(f, "s3:ObjectRestore:Completed"),
             Event::S3ObjectRestoreDelete => write!(f, "s3:ObjectRestore:Delete"),
             Event::S3ObjectRestorePost => write!(f, "s3:ObjectRestore:Post"),
+            Event::S3ObjectRetentionPut => write!(f, "s3:ObjectRetention:Put"),
             Event::S3ObjectTagging => write!(f, "s3:ObjectTagging:*"),
             Event::S3ObjectTaggingDelete => write!(f, "s3:ObjectTagging:Delete"),
             Event::S3ObjectTaggingPut => write!(f, "s3:ObjectTagging:Put"),

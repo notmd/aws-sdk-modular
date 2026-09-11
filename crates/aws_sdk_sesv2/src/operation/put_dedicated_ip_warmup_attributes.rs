@@ -170,6 +170,9 @@ impl ::aws_smithy_runtime_api::client::runtime_plugin::RuntimePlugin for PutDedi
         )
         .with_retry_classifier(::aws_runtime::retries::classifiers::AwsErrorCodeClassifier::<
             crate::operation::put_dedicated_ip_warmup_attributes::PutDedicatedIpWarmupAttributesError,
+        >::new())
+        .with_retry_classifier(::aws_runtime::service_clock_skew::ServiceClockSkewClassifier::<
+            crate::operation::put_dedicated_ip_warmup_attributes::PutDedicatedIpWarmupAttributesError,
         >::new());
 
         ::std::borrow::Cow::Owned(rcb)

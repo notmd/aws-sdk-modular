@@ -169,6 +169,9 @@ impl ::aws_smithy_runtime_api::client::runtime_plugin::RuntimePlugin for GetSSHP
         )
         .with_retry_classifier(::aws_runtime::retries::classifiers::AwsErrorCodeClassifier::<
             crate::operation::get_ssh_public_key::GetSSHPublicKeyError,
+        >::new())
+        .with_retry_classifier(::aws_runtime::service_clock_skew::ServiceClockSkewClassifier::<
+            crate::operation::get_ssh_public_key::GetSSHPublicKeyError,
         >::new());
 
         ::std::borrow::Cow::Owned(rcb)

@@ -1,7 +1,7 @@
 # AWS SDK modularizer diff
 
 - repository: `https://github.com/awslabs/aws-sdk-rust`
-- revision: `3c6d526c9d4775f41a8ef1ed2ef574d1b14481db`
+- revision: `26155f26ed36d90263a2c9058a67b08543c96f85`
 - service: `sdk/sesv2`
 - model: `aws-models/sesv2.json`
 - package: `aws-sdk-sesv2`
@@ -10,6 +10,7 @@
 
 ## Operations
 
+- `op_associate_email_identity_certificate`: `AssociateEmailIdentityCertificate`
 - `op_batch_get_metric_data`: `BatchGetMetricData`
 - `op_cancel_export_job`: `CancelExportJob`
 - `op_create_configuration_set`: `CreateConfigurationSet`
@@ -40,6 +41,7 @@
 - `op_delete_suppressed_destination`: `DeleteSuppressedDestination`
 - `op_delete_tenant`: `DeleteTenant`
 - `op_delete_tenant_resource_association`: `DeleteTenantResourceAssociation`
+- `op_disassociate_email_identity_certificate`: `DisassociateEmailIdentityCertificate`
 - `op_get_account`: `GetAccount`
 - `op_get_blacklist_reports`: `GetBlacklistReports`
 - `op_get_configuration_set`: `GetConfigurationSet`
@@ -73,6 +75,7 @@
 - `op_list_deliverability_test_reports`: `ListDeliverabilityTestReports`
 - `op_list_domain_deliverability_campaigns`: `ListDomainDeliverabilityCampaigns`
 - `op_list_email_identities`: `ListEmailIdentities`
+- `op_list_email_identity_certificates`: `ListEmailIdentityCertificates`
 - `op_list_email_templates`: `ListEmailTemplates`
 - `op_list_export_jobs`: `ListExportJobs`
 - `op_list_import_jobs`: `ListImportJobs`
@@ -114,6 +117,7 @@
 - `op_tag_resource`: `TagResource`
 - `op_test_render_email_template`: `TestRenderEmailTemplate`
 - `op_untag_resource`: `UntagResource`
+- `op_update_configuration_set`: `UpdateConfigurationSet`
 - `op_update_configuration_set_event_destination`: `UpdateConfigurationSetEventDestination`
 - `op_update_contact`: `UpdateContact`
 - `op_update_contact_list`: `UpdateContactList`
@@ -154,7 +158,7 @@ diff --git a/Cargo.toml b/Cargo.toml
 
  [dependencies.aws-runtime]
 -path = "../aws-runtime"
- version = "1.9.1"
+ version = "1.9.2"
 
  [dependencies.aws-smithy-async]
 -path = "../aws-smithy-async"
@@ -180,7 +184,7 @@ diff --git a/Cargo.toml b/Cargo.toml
  [dependencies.aws-smithy-runtime-api]
 -path = "../aws-smithy-runtime-api"
  features = ["client", "http-1x"]
- version = "1.15.0"
+ version = "1.16.0"
 
  [dependencies.aws-smithy-schema]
 -path = "../aws-smithy-schema"
@@ -189,11 +193,11 @@ diff --git a/Cargo.toml b/Cargo.toml
  [dependencies.aws-smithy-types]
 -path = "../aws-smithy-types"
  features = ["http-body-1-x"]
- version = "1.6.2"
+ version = "1.6.3"
 
  [dependencies.aws-types]
 -path = "../aws-types"
- version = "1.5.0"
+ version = "1.6.0"
 
  [dependencies.bytes]
 @@ -84,11 +73,9 @@
@@ -201,17 +205,18 @@ diff --git a/Cargo.toml b/Cargo.toml
  version = "0.1"
  [dev-dependencies.aws-config]
 -path = "../aws-config"
- version = "1.11.0"
+ version = "1.12.0"
 
  [dev-dependencies.aws-credential-types]
 -path = "../aws-credential-types"
  features = ["test-util"]
  version = "1.3.0"
 
-@@ -108,3 +95,115 @@
+@@ -108,3 +95,119 @@
  test-util = ["aws-credential-types/test-util", "aws-smithy-runtime/legacy-test-util", "aws-smithy-runtime/test-util"]
  gated-tests = []
  default = ["sigv4a", "rustls", "default-https-client", "rt-tokio"]
++op_associate_email_identity_certificate = []
 +op_batch_get_metric_data = []
 +op_cancel_export_job = []
 +op_create_configuration_set = []
@@ -242,6 +247,7 @@ diff --git a/Cargo.toml b/Cargo.toml
 +op_delete_suppressed_destination = []
 +op_delete_tenant = []
 +op_delete_tenant_resource_association = []
++op_disassociate_email_identity_certificate = []
 +op_get_account = []
 +op_get_blacklist_reports = []
 +op_get_configuration_set = []
@@ -275,6 +281,7 @@ diff --git a/Cargo.toml b/Cargo.toml
 +op_list_deliverability_test_reports = []
 +op_list_domain_deliverability_campaigns = []
 +op_list_email_identities = []
++op_list_email_identity_certificates = []
 +op_list_email_templates = []
 +op_list_export_jobs = []
 +op_list_import_jobs = []
@@ -316,6 +323,7 @@ diff --git a/Cargo.toml b/Cargo.toml
 +op_tag_resource = []
 +op_test_render_email_template = []
 +op_untag_resource = []
++op_update_configuration_set = []
 +op_update_configuration_set_event_destination = []
 +op_update_contact = []
 +op_update_contact_list = []
@@ -332,9 +340,12 @@ diff --git a/Cargo.toml b/Cargo.toml
 diff --git a/src/client.rs b/src/client.rs
 --- a/src/client.rs
 +++ b/src/client.rs
-@@ -136,38 +136,55 @@
+@@ -136,40 +136,58 @@
      }
  }
+
++#[cfg(feature = "op_associate_email_identity_certificate")]
+ mod associate_email_identity_certificate;
 
 +#[cfg(feature = "op_batch_get_metric_data")]
  mod batch_get_metric_data;
@@ -388,7 +399,7 @@ diff --git a/src/client.rs b/src/client.rs
  mod create_tenant_resource_association;
 
  /// Operation customization and supporting types.
-@@ -197,192 +214,287 @@
+@@ -199,198 +217,296 @@
  /// ```
  pub mod customize;
 
@@ -430,6 +441,9 @@ diff --git a/src/client.rs b/src/client.rs
 
 +#[cfg(feature = "op_delete_tenant_resource_association")]
  mod delete_tenant_resource_association;
+
++#[cfg(feature = "op_disassociate_email_identity_certificate")]
+ mod disassociate_email_identity_certificate;
 
 +#[cfg(feature = "op_get_account")]
  mod get_account;
@@ -529,6 +543,9 @@ diff --git a/src/client.rs b/src/client.rs
 
 +#[cfg(feature = "op_list_email_identities")]
  mod list_email_identities;
+
++#[cfg(feature = "op_list_email_identity_certificates")]
+ mod list_email_identity_certificates;
 
 +#[cfg(feature = "op_list_email_templates")]
  mod list_email_templates;
@@ -653,6 +670,9 @@ diff --git a/src/client.rs b/src/client.rs
 +#[cfg(feature = "op_untag_resource")]
  mod untag_resource;
 
++#[cfg(feature = "op_update_configuration_set")]
+ mod update_configuration_set;
+
 +#[cfg(feature = "op_update_configuration_set_event_destination")]
  mod update_configuration_set_event_destination;
 
@@ -684,7 +704,7 @@ diff --git a/src/client.rs b/src/client.rs
 diff --git a/src/error_meta.rs b/src/error_meta.rs
 --- a/src/error_meta.rs
 +++ b/src/error_meta.rs
-@@ -3,30 +3,426 @@
+@@ -3,30 +3,439 @@
  #[non_exhaustive]
  #[derive(::std::fmt::Debug)]
  pub enum Error {
@@ -696,6 +716,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
      /// <p>The message can't be sent because the account's ability to send email has been permanently restricted.</p>
      AccountSuspendedException(crate::types::error::AccountSuspendedException),
 +    #[cfg(any(
++        feature = "op_associate_email_identity_certificate",
 +        feature = "op_create_configuration_set",
 +        feature = "op_create_configuration_set_event_destination",
 +        feature = "op_create_contact",
@@ -713,6 +734,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
      /// <p>The resource specified in your request already exists.</p>
      AlreadyExistsException(crate::types::error::AlreadyExistsException),
 +    #[cfg(any(
++        feature = "op_associate_email_identity_certificate",
 +        feature = "op_batch_get_metric_data",
 +        feature = "op_cancel_export_job",
 +        feature = "op_create_configuration_set",
@@ -743,6 +765,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
 +        feature = "op_delete_suppressed_destination",
 +        feature = "op_delete_tenant",
 +        feature = "op_delete_tenant_resource_association",
++        feature = "op_disassociate_email_identity_certificate",
 +        feature = "op_get_account",
 +        feature = "op_get_blacklist_reports",
 +        feature = "op_get_configuration_set",
@@ -776,6 +799,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
 +        feature = "op_list_deliverability_test_reports",
 +        feature = "op_list_domain_deliverability_campaigns",
 +        feature = "op_list_email_identities",
++        feature = "op_list_email_identity_certificates",
 +        feature = "op_list_email_templates",
 +        feature = "op_list_export_jobs",
 +        feature = "op_list_import_jobs",
@@ -817,6 +841,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
 +        feature = "op_tag_resource",
 +        feature = "op_test_render_email_template",
 +        feature = "op_untag_resource",
++        feature = "op_update_configuration_set",
 +        feature = "op_update_configuration_set_event_destination",
 +        feature = "op_update_contact",
 +        feature = "op_update_contact_list",
@@ -899,6 +924,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
      /// <p>The message can't be sent because it contains invalid content.</p>
      MessageRejected(crate::types::error::MessageRejected),
 +    #[cfg(any(
++        feature = "op_associate_email_identity_certificate",
 +        feature = "op_batch_get_metric_data",
 +        feature = "op_cancel_export_job",
 +        feature = "op_create_configuration_set",
@@ -923,6 +949,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
 +        feature = "op_delete_suppressed_destination",
 +        feature = "op_delete_tenant",
 +        feature = "op_delete_tenant_resource_association",
++        feature = "op_disassociate_email_identity_certificate",
 +        feature = "op_get_blacklist_reports",
 +        feature = "op_get_configuration_set",
 +        feature = "op_get_configuration_set_event_destinations",
@@ -948,6 +975,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
 +        feature = "op_list_contacts",
 +        feature = "op_list_deliverability_test_reports",
 +        feature = "op_list_domain_deliverability_campaigns",
++        feature = "op_list_email_identity_certificates",
 +        feature = "op_list_recommendations",
 +        feature = "op_list_resource_tenants",
 +        feature = "op_list_suppressed_destinations",
@@ -977,6 +1005,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
 +        feature = "op_tag_resource",
 +        feature = "op_test_render_email_template",
 +        feature = "op_untag_resource",
++        feature = "op_update_configuration_set",
 +        feature = "op_update_configuration_set_event_destination",
 +        feature = "op_update_contact",
 +        feature = "op_update_contact_list",
@@ -995,6 +1024,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
      /// <p>The message can't be sent because the account's ability to send email is currently paused.</p>
      SendingPausedException(crate::types::error::SendingPausedException),
 +    #[cfg(any(
++        feature = "op_associate_email_identity_certificate",
 +        feature = "op_batch_get_metric_data",
 +        feature = "op_cancel_export_job",
 +        feature = "op_create_configuration_set",
@@ -1025,6 +1055,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
 +        feature = "op_delete_suppressed_destination",
 +        feature = "op_delete_tenant",
 +        feature = "op_delete_tenant_resource_association",
++        feature = "op_disassociate_email_identity_certificate",
 +        feature = "op_get_account",
 +        feature = "op_get_blacklist_reports",
 +        feature = "op_get_configuration_set",
@@ -1058,6 +1089,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
 +        feature = "op_list_deliverability_test_reports",
 +        feature = "op_list_domain_deliverability_campaigns",
 +        feature = "op_list_email_identities",
++        feature = "op_list_email_identity_certificates",
 +        feature = "op_list_email_templates",
 +        feature = "op_list_export_jobs",
 +        feature = "op_list_import_jobs",
@@ -1099,6 +1131,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
 +        feature = "op_tag_resource",
 +        feature = "op_test_render_email_template",
 +        feature = "op_untag_resource",
++        feature = "op_update_configuration_set",
 +        feature = "op_update_configuration_set_event_destination",
 +        feature = "op_update_contact",
 +        feature = "op_update_contact_list",
@@ -1111,7 +1144,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
      /// <p>Too many requests have been made to the operation.</p>
      TooManyRequestsException(crate::types::error::TooManyRequestsException),
      /// An unexpected error occurred (e.g., invalid JSON returned by the service or an unknown error code).
-@@ -43,18 +439,414 @@
+@@ -43,18 +452,427 @@
  impl ::std::fmt::Display for Error {
      fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
          match self {
@@ -1122,6 +1155,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
 +            ))]
              Error::AccountSuspendedException(inner) => inner.fmt(f),
 +            #[cfg(any(
++                feature = "op_associate_email_identity_certificate",
 +                feature = "op_create_configuration_set",
 +                feature = "op_create_configuration_set_event_destination",
 +                feature = "op_create_contact",
@@ -1138,6 +1172,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
 +            ))]
              Error::AlreadyExistsException(inner) => inner.fmt(f),
 +            #[cfg(any(
++                feature = "op_associate_email_identity_certificate",
 +                feature = "op_batch_get_metric_data",
 +                feature = "op_cancel_export_job",
 +                feature = "op_create_configuration_set",
@@ -1168,6 +1203,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
 +                feature = "op_delete_suppressed_destination",
 +                feature = "op_delete_tenant",
 +                feature = "op_delete_tenant_resource_association",
++                feature = "op_disassociate_email_identity_certificate",
 +                feature = "op_get_account",
 +                feature = "op_get_blacklist_reports",
 +                feature = "op_get_configuration_set",
@@ -1201,6 +1237,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
 +                feature = "op_list_deliverability_test_reports",
 +                feature = "op_list_domain_deliverability_campaigns",
 +                feature = "op_list_email_identities",
++                feature = "op_list_email_identity_certificates",
 +                feature = "op_list_email_templates",
 +                feature = "op_list_export_jobs",
 +                feature = "op_list_import_jobs",
@@ -1242,6 +1279,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
 +                feature = "op_tag_resource",
 +                feature = "op_test_render_email_template",
 +                feature = "op_untag_resource",
++                feature = "op_update_configuration_set",
 +                feature = "op_update_configuration_set_event_destination",
 +                feature = "op_update_contact",
 +                feature = "op_update_contact_list",
@@ -1316,6 +1354,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
 +            ))]
              Error::MessageRejected(inner) => inner.fmt(f),
 +            #[cfg(any(
++                feature = "op_associate_email_identity_certificate",
 +                feature = "op_batch_get_metric_data",
 +                feature = "op_cancel_export_job",
 +                feature = "op_create_configuration_set",
@@ -1340,6 +1379,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
 +                feature = "op_delete_suppressed_destination",
 +                feature = "op_delete_tenant",
 +                feature = "op_delete_tenant_resource_association",
++                feature = "op_disassociate_email_identity_certificate",
 +                feature = "op_get_blacklist_reports",
 +                feature = "op_get_configuration_set",
 +                feature = "op_get_configuration_set_event_destinations",
@@ -1365,6 +1405,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
 +                feature = "op_list_contacts",
 +                feature = "op_list_deliverability_test_reports",
 +                feature = "op_list_domain_deliverability_campaigns",
++                feature = "op_list_email_identity_certificates",
 +                feature = "op_list_recommendations",
 +                feature = "op_list_resource_tenants",
 +                feature = "op_list_suppressed_destinations",
@@ -1394,6 +1435,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
 +                feature = "op_tag_resource",
 +                feature = "op_test_render_email_template",
 +                feature = "op_untag_resource",
++                feature = "op_update_configuration_set",
 +                feature = "op_update_configuration_set_event_destination",
 +                feature = "op_update_contact",
 +                feature = "op_update_contact_list",
@@ -1410,6 +1452,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
 +            ))]
              Error::SendingPausedException(inner) => inner.fmt(f),
 +            #[cfg(any(
++                feature = "op_associate_email_identity_certificate",
 +                feature = "op_batch_get_metric_data",
 +                feature = "op_cancel_export_job",
 +                feature = "op_create_configuration_set",
@@ -1440,6 +1483,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
 +                feature = "op_delete_suppressed_destination",
 +                feature = "op_delete_tenant",
 +                feature = "op_delete_tenant_resource_association",
++                feature = "op_disassociate_email_identity_certificate",
 +                feature = "op_get_account",
 +                feature = "op_get_blacklist_reports",
 +                feature = "op_get_configuration_set",
@@ -1473,6 +1517,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
 +                feature = "op_list_deliverability_test_reports",
 +                feature = "op_list_domain_deliverability_campaigns",
 +                feature = "op_list_email_identities",
++                feature = "op_list_email_identity_certificates",
 +                feature = "op_list_email_templates",
 +                feature = "op_list_export_jobs",
 +                feature = "op_list_import_jobs",
@@ -1514,6 +1559,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
 +                feature = "op_tag_resource",
 +                feature = "op_test_render_email_template",
 +                feature = "op_untag_resource",
++                feature = "op_update_configuration_set",
 +                feature = "op_update_configuration_set_event_destination",
 +                feature = "op_update_contact",
 +                feature = "op_update_contact_list",
@@ -1526,7 +1572,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
              Error::TooManyRequestsException(inner) => inner.fmt(f),
              Error::Unhandled(_) => {
                  if let ::std::option::Option::Some(code) =
-@@ -79,23 +871,420 @@
+@@ -79,23 +897,433 @@
  impl ::aws_smithy_types::error::metadata::ProvideErrorMetadata for Error {
      fn meta(&self) -> &::aws_smithy_types::error::metadata::ErrorMetadata {
          match self {
@@ -1537,6 +1583,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
 +            ))]
              Self::AccountSuspendedException(inner) => inner.meta(),
 +            #[cfg(any(
++                feature = "op_associate_email_identity_certificate",
 +                feature = "op_create_configuration_set",
 +                feature = "op_create_configuration_set_event_destination",
 +                feature = "op_create_contact",
@@ -1553,6 +1600,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
 +            ))]
              Self::AlreadyExistsException(inner) => inner.meta(),
 +            #[cfg(any(
++                feature = "op_associate_email_identity_certificate",
 +                feature = "op_batch_get_metric_data",
 +                feature = "op_cancel_export_job",
 +                feature = "op_create_configuration_set",
@@ -1583,6 +1631,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
 +                feature = "op_delete_suppressed_destination",
 +                feature = "op_delete_tenant",
 +                feature = "op_delete_tenant_resource_association",
++                feature = "op_disassociate_email_identity_certificate",
 +                feature = "op_get_account",
 +                feature = "op_get_blacklist_reports",
 +                feature = "op_get_configuration_set",
@@ -1616,6 +1665,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
 +                feature = "op_list_deliverability_test_reports",
 +                feature = "op_list_domain_deliverability_campaigns",
 +                feature = "op_list_email_identities",
++                feature = "op_list_email_identity_certificates",
 +                feature = "op_list_email_templates",
 +                feature = "op_list_export_jobs",
 +                feature = "op_list_import_jobs",
@@ -1657,6 +1707,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
 +                feature = "op_tag_resource",
 +                feature = "op_test_render_email_template",
 +                feature = "op_untag_resource",
++                feature = "op_update_configuration_set",
 +                feature = "op_update_configuration_set_event_destination",
 +                feature = "op_update_contact",
 +                feature = "op_update_contact_list",
@@ -1731,6 +1782,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
 +            ))]
              Self::MessageRejected(inner) => inner.meta(),
 +            #[cfg(any(
++                feature = "op_associate_email_identity_certificate",
 +                feature = "op_batch_get_metric_data",
 +                feature = "op_cancel_export_job",
 +                feature = "op_create_configuration_set",
@@ -1755,6 +1807,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
 +                feature = "op_delete_suppressed_destination",
 +                feature = "op_delete_tenant",
 +                feature = "op_delete_tenant_resource_association",
++                feature = "op_disassociate_email_identity_certificate",
 +                feature = "op_get_blacklist_reports",
 +                feature = "op_get_configuration_set",
 +                feature = "op_get_configuration_set_event_destinations",
@@ -1780,6 +1833,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
 +                feature = "op_list_contacts",
 +                feature = "op_list_deliverability_test_reports",
 +                feature = "op_list_domain_deliverability_campaigns",
++                feature = "op_list_email_identity_certificates",
 +                feature = "op_list_recommendations",
 +                feature = "op_list_resource_tenants",
 +                feature = "op_list_suppressed_destinations",
@@ -1809,6 +1863,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
 +                feature = "op_tag_resource",
 +                feature = "op_test_render_email_template",
 +                feature = "op_untag_resource",
++                feature = "op_update_configuration_set",
 +                feature = "op_update_configuration_set_event_destination",
 +                feature = "op_update_contact",
 +                feature = "op_update_contact_list",
@@ -1825,6 +1880,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
 +            ))]
              Self::SendingPausedException(inner) => inner.meta(),
 +            #[cfg(any(
++                feature = "op_associate_email_identity_certificate",
 +                feature = "op_batch_get_metric_data",
 +                feature = "op_cancel_export_job",
 +                feature = "op_create_configuration_set",
@@ -1855,6 +1911,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
 +                feature = "op_delete_suppressed_destination",
 +                feature = "op_delete_tenant",
 +                feature = "op_delete_tenant_resource_association",
++                feature = "op_disassociate_email_identity_certificate",
 +                feature = "op_get_account",
 +                feature = "op_get_blacklist_reports",
 +                feature = "op_get_configuration_set",
@@ -1888,6 +1945,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
 +                feature = "op_list_deliverability_test_reports",
 +                feature = "op_list_domain_deliverability_campaigns",
 +                feature = "op_list_email_identities",
++                feature = "op_list_email_identity_certificates",
 +                feature = "op_list_email_templates",
 +                feature = "op_list_export_jobs",
 +                feature = "op_list_import_jobs",
@@ -1929,6 +1987,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
 +                feature = "op_tag_resource",
 +                feature = "op_test_render_email_template",
 +                feature = "op_untag_resource",
++                feature = "op_update_configuration_set",
 +                feature = "op_update_configuration_set_event_destination",
 +                feature = "op_update_contact",
 +                feature = "op_update_contact_list",
@@ -1943,11 +2002,27 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
          }
      }
  }
++#[cfg(feature = "op_associate_email_identity_certificate")]
+ impl<R>
+     From<
+         ::aws_smithy_runtime_api::client::result::SdkError<
+@@ -121,6 +1349,7 @@
+         }
+     }
+ }
++#[cfg(feature = "op_associate_email_identity_certificate")]
+ impl From<crate::operation::associate_email_identity_certificate::AssociateEmailIdentityCertificateError> for Error {
+     fn from(
+         err: crate::operation::associate_email_identity_certificate::AssociateEmailIdentityCertificateError,
+@@ -144,6 +1373,7 @@
+         }
+     }
+ }
 +#[cfg(feature = "op_batch_get_metric_data")]
  impl<R>
      From<
          ::aws_smithy_runtime_api::client::result::SdkError<
-@@ -121,6 +1310,7 @@
+@@ -169,6 +1399,7 @@
          }
      }
  }
@@ -1955,7 +2030,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl From<crate::operation::batch_get_metric_data::BatchGetMetricDataError> for Error {
      fn from(err: crate::operation::batch_get_metric_data::BatchGetMetricDataError) -> Self {
          match err {
-@@ -142,6 +1332,7 @@
+@@ -190,6 +1421,7 @@
          }
      }
  }
@@ -1963,7 +2038,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl<R>
      From<
          ::aws_smithy_runtime_api::client::result::SdkError<
-@@ -167,6 +1358,7 @@
+@@ -215,6 +1447,7 @@
          }
      }
  }
@@ -1971,7 +2046,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl From<crate::operation::cancel_export_job::CancelExportJobError> for Error {
      fn from(err: crate::operation::cancel_export_job::CancelExportJobError) -> Self {
          match err {
-@@ -183,6 +1375,7 @@
+@@ -231,6 +1464,7 @@
          }
      }
  }
@@ -1979,7 +2054,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl<R>
      From<
          ::aws_smithy_runtime_api::client::result::SdkError<
-@@ -208,6 +1401,7 @@
+@@ -256,6 +1490,7 @@
          }
      }
  }
@@ -1987,7 +2062,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl From<crate::operation::create_configuration_set::CreateConfigurationSetError> for Error {
      fn from(err: crate::operation::create_configuration_set::CreateConfigurationSetError) -> Self {
          match err {
-@@ -229,6 +1423,7 @@
+@@ -277,6 +1512,7 @@
          }
      }
  }
@@ -1995,7 +2070,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl<R>
      From<
          ::aws_smithy_runtime_api::client::result::SdkError<
-@@ -254,6 +1449,7 @@
+@@ -302,6 +1538,7 @@
          }
      }
  }
@@ -2003,7 +2078,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl From<crate::operation::create_configuration_set_event_destination::CreateConfigurationSetEventDestinationError>
      for Error
  {
-@@ -282,6 +1478,7 @@
+@@ -330,6 +1567,7 @@
          }
      }
  }
@@ -2011,7 +2086,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl<R>
      From<::aws_smithy_runtime_api::client::result::SdkError<crate::operation::create_contact::CreateContactError, R>>
      for Error
-@@ -303,6 +1500,7 @@
+@@ -351,6 +1589,7 @@
          }
      }
  }
@@ -2019,7 +2094,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl From<crate::operation::create_contact::CreateContactError> for Error {
      fn from(err: crate::operation::create_contact::CreateContactError) -> Self {
          match err {
-@@ -322,6 +1520,7 @@
+@@ -370,6 +1609,7 @@
          }
      }
  }
@@ -2027,7 +2102,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl<R>
      From<
          ::aws_smithy_runtime_api::client::result::SdkError<
-@@ -347,6 +1546,7 @@
+@@ -395,6 +1635,7 @@
          }
      }
  }
@@ -2035,7 +2110,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl From<crate::operation::create_contact_list::CreateContactListError> for Error {
      fn from(err: crate::operation::create_contact_list::CreateContactListError) -> Self {
          match err {
-@@ -366,6 +1566,7 @@
+@@ -414,6 +1655,7 @@
          }
      }
  }
@@ -2043,7 +2118,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl<R>
      From<
          ::aws_smithy_runtime_api::client::result::SdkError<
-@@ -391,6 +1592,7 @@
+@@ -439,6 +1681,7 @@
          }
      }
  }
@@ -2051,7 +2126,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl From<crate::operation::create_custom_verification_email_template::CreateCustomVerificationEmailTemplateError>
      for Error
  {
-@@ -419,6 +1621,7 @@
+@@ -467,6 +1710,7 @@
          }
      }
  }
@@ -2059,7 +2134,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl<R>
      From<
          ::aws_smithy_runtime_api::client::result::SdkError<
-@@ -444,6 +1647,7 @@
+@@ -492,6 +1736,7 @@
          }
      }
  }
@@ -2067,7 +2142,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl From<crate::operation::create_dedicated_ip_pool::CreateDedicatedIpPoolError> for Error {
      fn from(err: crate::operation::create_dedicated_ip_pool::CreateDedicatedIpPoolError) -> Self {
          match err {
-@@ -468,6 +1672,7 @@
+@@ -516,6 +1761,7 @@
          }
      }
  }
@@ -2075,7 +2150,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl<R>
      From<
          ::aws_smithy_runtime_api::client::result::SdkError<
-@@ -493,6 +1698,7 @@
+@@ -541,6 +1787,7 @@
          }
      }
  }
@@ -2083,7 +2158,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl From<crate::operation::create_deliverability_test_report::CreateDeliverabilityTestReportError> for Error {
      fn from(err: crate::operation::create_deliverability_test_report::CreateDeliverabilityTestReportError) -> Self {
          match err {
-@@ -527,6 +1733,7 @@
+@@ -575,6 +1822,7 @@
          }
      }
  }
@@ -2091,7 +2166,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl<R>
      From<
          ::aws_smithy_runtime_api::client::result::SdkError<
-@@ -552,6 +1759,7 @@
+@@ -600,6 +1848,7 @@
          }
      }
  }
@@ -2099,7 +2174,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl From<crate::operation::create_email_identity::CreateEmailIdentityError> for Error {
      fn from(err: crate::operation::create_email_identity::CreateEmailIdentityError) -> Self {
          match err {
-@@ -579,6 +1787,7 @@
+@@ -627,6 +1876,7 @@
          }
      }
  }
@@ -2107,7 +2182,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl<R>
      From<
          ::aws_smithy_runtime_api::client::result::SdkError<
-@@ -604,6 +1813,7 @@
+@@ -652,6 +1902,7 @@
          }
      }
  }
@@ -2115,7 +2190,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl From<crate::operation::create_email_identity_policy::CreateEmailIdentityPolicyError> for Error {
      fn from(err: crate::operation::create_email_identity_policy::CreateEmailIdentityPolicyError) -> Self {
          match err {
-@@ -626,6 +1836,7 @@
+@@ -674,6 +1925,7 @@
          }
      }
  }
@@ -2123,7 +2198,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl<R>
      From<
          ::aws_smithy_runtime_api::client::result::SdkError<
-@@ -651,6 +1862,7 @@
+@@ -699,6 +1951,7 @@
          }
      }
  }
@@ -2131,7 +2206,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl From<crate::operation::create_email_template::CreateEmailTemplateError> for Error {
      fn from(err: crate::operation::create_email_template::CreateEmailTemplateError) -> Self {
          match err {
-@@ -672,6 +1884,7 @@
+@@ -720,6 +1973,7 @@
          }
      }
  }
@@ -2139,7 +2214,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl<R>
      From<
          ::aws_smithy_runtime_api::client::result::SdkError<
-@@ -697,6 +1910,7 @@
+@@ -745,6 +1999,7 @@
          }
      }
  }
@@ -2147,7 +2222,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl From<crate::operation::create_export_job::CreateExportJobError> for Error {
      fn from(err: crate::operation::create_export_job::CreateExportJobError) -> Self {
          match err {
-@@ -716,6 +1930,7 @@
+@@ -764,6 +2019,7 @@
          }
      }
  }
@@ -2155,7 +2230,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl<R>
      From<
          ::aws_smithy_runtime_api::client::result::SdkError<
-@@ -741,6 +1956,7 @@
+@@ -789,6 +2045,7 @@
          }
      }
  }
@@ -2163,7 +2238,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl From<crate::operation::create_import_job::CreateImportJobError> for Error {
      fn from(err: crate::operation::create_import_job::CreateImportJobError) -> Self {
          match err {
-@@ -757,6 +1973,7 @@
+@@ -805,6 +2062,7 @@
          }
      }
  }
@@ -2171,7 +2246,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl<R>
      From<
          ::aws_smithy_runtime_api::client::result::SdkError<
-@@ -782,6 +1999,7 @@
+@@ -830,6 +2088,7 @@
          }
      }
  }
@@ -2179,7 +2254,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl From<crate::operation::create_multi_region_endpoint::CreateMultiRegionEndpointError> for Error {
      fn from(err: crate::operation::create_multi_region_endpoint::CreateMultiRegionEndpointError) -> Self {
          match err {
-@@ -801,6 +2019,7 @@
+@@ -849,6 +2108,7 @@
          }
      }
  }
@@ -2187,7 +2262,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl<R> From<::aws_smithy_runtime_api::client::result::SdkError<crate::operation::create_tenant::CreateTenantError, R>>
      for Error
  where
-@@ -818,6 +2037,7 @@
+@@ -866,6 +2126,7 @@
          }
      }
  }
@@ -2195,7 +2270,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl From<crate::operation::create_tenant::CreateTenantError> for Error {
      fn from(err: crate::operation::create_tenant::CreateTenantError) -> Self {
          match err {
-@@ -837,6 +2057,7 @@
+@@ -885,6 +2146,7 @@
          }
      }
  }
@@ -2203,7 +2278,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl<R>
      From<
          ::aws_smithy_runtime_api::client::result::SdkError<
-@@ -862,6 +2083,7 @@
+@@ -910,6 +2172,7 @@
          }
      }
  }
@@ -2211,7 +2286,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl From<crate::operation::create_tenant_resource_association::CreateTenantResourceAssociationError> for Error {
      fn from(err: crate::operation::create_tenant_resource_association::CreateTenantResourceAssociationError) -> Self {
          match err {
-@@ -881,6 +2103,7 @@
+@@ -929,6 +2192,7 @@
          }
      }
  }
@@ -2219,7 +2294,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl<R>
      From<
          ::aws_smithy_runtime_api::client::result::SdkError<
-@@ -906,6 +2129,7 @@
+@@ -954,6 +2218,7 @@
          }
      }
  }
@@ -2227,7 +2302,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl From<crate::operation::delete_configuration_set::DeleteConfigurationSetError> for Error {
      fn from(err: crate::operation::delete_configuration_set::DeleteConfigurationSetError) -> Self {
          match err {
-@@ -921,6 +2145,7 @@
+@@ -969,6 +2234,7 @@
          }
      }
  }
@@ -2235,7 +2310,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl<R>
      From<
          ::aws_smithy_runtime_api::client::result::SdkError<
-@@ -946,6 +2171,7 @@
+@@ -994,6 +2260,7 @@
          }
      }
  }
@@ -2243,7 +2318,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl From<crate::operation::delete_configuration_set_event_destination::DeleteConfigurationSetEventDestinationError>
      for Error
  {
-@@ -968,6 +2194,7 @@
+@@ -1016,6 +2283,7 @@
          }
      }
  }
@@ -2251,7 +2326,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl<R>
      From<::aws_smithy_runtime_api::client::result::SdkError<crate::operation::delete_contact::DeleteContactError, R>>
      for Error
-@@ -989,6 +2216,7 @@
+@@ -1037,6 +2305,7 @@
          }
      }
  }
@@ -2259,7 +2334,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl From<crate::operation::delete_contact::DeleteContactError> for Error {
      fn from(err: crate::operation::delete_contact::DeleteContactError) -> Self {
          match err {
-@@ -1005,6 +2233,7 @@
+@@ -1053,6 +2322,7 @@
          }
      }
  }
@@ -2267,7 +2342,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl<R>
      From<
          ::aws_smithy_runtime_api::client::result::SdkError<
-@@ -1030,6 +2259,7 @@
+@@ -1078,6 +2348,7 @@
          }
      }
  }
@@ -2275,7 +2350,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl From<crate::operation::delete_contact_list::DeleteContactListError> for Error {
      fn from(err: crate::operation::delete_contact_list::DeleteContactListError) -> Self {
          match err {
-@@ -1049,6 +2279,7 @@
+@@ -1097,6 +2368,7 @@
          }
      }
  }
@@ -2283,7 +2358,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl<R>
      From<
          ::aws_smithy_runtime_api::client::result::SdkError<
-@@ -1074,6 +2305,7 @@
+@@ -1122,6 +2394,7 @@
          }
      }
  }
@@ -2291,7 +2366,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl From<crate::operation::delete_custom_verification_email_template::DeleteCustomVerificationEmailTemplateError>
      for Error
  {
-@@ -1096,6 +2328,7 @@
+@@ -1144,6 +2417,7 @@
          }
      }
  }
@@ -2299,7 +2374,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl<R>
      From<
          ::aws_smithy_runtime_api::client::result::SdkError<
-@@ -1121,6 +2354,7 @@
+@@ -1169,6 +2443,7 @@
          }
      }
  }
@@ -2307,7 +2382,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl From<crate::operation::delete_dedicated_ip_pool::DeleteDedicatedIpPoolError> for Error {
      fn from(err: crate::operation::delete_dedicated_ip_pool::DeleteDedicatedIpPoolError) -> Self {
          match err {
-@@ -1142,6 +2376,7 @@
+@@ -1190,6 +2465,7 @@
          }
      }
  }
@@ -2315,7 +2390,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl<R>
      From<
          ::aws_smithy_runtime_api::client::result::SdkError<
-@@ -1167,6 +2402,7 @@
+@@ -1215,6 +2491,7 @@
          }
      }
  }
@@ -2323,7 +2398,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl From<crate::operation::delete_email_identity::DeleteEmailIdentityError> for Error {
      fn from(err: crate::operation::delete_email_identity::DeleteEmailIdentityError) -> Self {
          match err {
-@@ -1188,6 +2424,7 @@
+@@ -1236,6 +2513,7 @@
          }
      }
  }
@@ -2331,7 +2406,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl<R>
      From<
          ::aws_smithy_runtime_api::client::result::SdkError<
-@@ -1213,6 +2450,7 @@
+@@ -1261,6 +2539,7 @@
          }
      }
  }
@@ -2339,7 +2414,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl From<crate::operation::delete_email_identity_policy::DeleteEmailIdentityPolicyError> for Error {
      fn from(err: crate::operation::delete_email_identity_policy::DeleteEmailIdentityPolicyError) -> Self {
          match err {
-@@ -1229,6 +2467,7 @@
+@@ -1277,6 +2556,7 @@
          }
      }
  }
@@ -2347,7 +2422,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl<R>
      From<
          ::aws_smithy_runtime_api::client::result::SdkError<
-@@ -1254,6 +2493,7 @@
+@@ -1302,6 +2582,7 @@
          }
      }
  }
@@ -2355,7 +2430,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl From<crate::operation::delete_email_template::DeleteEmailTemplateError> for Error {
      fn from(err: crate::operation::delete_email_template::DeleteEmailTemplateError) -> Self {
          match err {
-@@ -1272,6 +2512,7 @@
+@@ -1320,6 +2601,7 @@
          }
      }
  }
@@ -2363,7 +2438,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl<R>
      From<
          ::aws_smithy_runtime_api::client::result::SdkError<
-@@ -1297,6 +2538,7 @@
+@@ -1345,6 +2627,7 @@
          }
      }
  }
@@ -2371,7 +2446,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl From<crate::operation::delete_multi_region_endpoint::DeleteMultiRegionEndpointError> for Error {
      fn from(err: crate::operation::delete_multi_region_endpoint::DeleteMultiRegionEndpointError) -> Self {
          match err {
-@@ -1316,6 +2558,7 @@
+@@ -1364,6 +2647,7 @@
          }
      }
  }
@@ -2379,7 +2454,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl<R>
      From<
          ::aws_smithy_runtime_api::client::result::SdkError<
-@@ -1341,6 +2584,7 @@
+@@ -1389,6 +2673,7 @@
          }
      }
  }
@@ -2387,7 +2462,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl From<crate::operation::delete_suppressed_destination::DeleteSuppressedDestinationError> for Error {
      fn from(err: crate::operation::delete_suppressed_destination::DeleteSuppressedDestinationError) -> Self {
          match err {
-@@ -1357,6 +2601,7 @@
+@@ -1405,6 +2690,7 @@
          }
      }
  }
@@ -2395,7 +2470,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl<R> From<::aws_smithy_runtime_api::client::result::SdkError<crate::operation::delete_tenant::DeleteTenantError, R>>
      for Error
  where
-@@ -1374,6 +2619,7 @@
+@@ -1422,6 +2708,7 @@
          }
      }
  }
@@ -2403,7 +2478,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl From<crate::operation::delete_tenant::DeleteTenantError> for Error {
      fn from(err: crate::operation::delete_tenant::DeleteTenantError) -> Self {
          match err {
-@@ -1390,6 +2636,7 @@
+@@ -1438,6 +2725,7 @@
          }
      }
  }
@@ -2411,7 +2486,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl<R>
      From<
          ::aws_smithy_runtime_api::client::result::SdkError<
-@@ -1415,6 +2662,7 @@
+@@ -1463,6 +2751,7 @@
          }
      }
  }
@@ -2419,7 +2494,23 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl From<crate::operation::delete_tenant_resource_association::DeleteTenantResourceAssociationError> for Error {
      fn from(err: crate::operation::delete_tenant_resource_association::DeleteTenantResourceAssociationError) -> Self {
          match err {
-@@ -1431,6 +2679,7 @@
+@@ -1479,6 +2768,7 @@
+         }
+     }
+ }
++#[cfg(feature = "op_disassociate_email_identity_certificate")]
+ impl<R>
+     From<
+         ::aws_smithy_runtime_api::client::result::SdkError<
+@@ -1504,6 +2794,7 @@
+         }
+     }
+ }
++#[cfg(feature = "op_disassociate_email_identity_certificate")]
+ impl From<crate::operation::disassociate_email_identity_certificate::DisassociateEmailIdentityCertificateError>
+     for Error
+ {
+@@ -1526,6 +2817,7 @@
          }
      }
  }
@@ -2427,7 +2518,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl<R> From<::aws_smithy_runtime_api::client::result::SdkError<crate::operation::get_account::GetAccountError, R>>
      for Error
  where
-@@ -1448,6 +2697,7 @@
+@@ -1543,6 +2835,7 @@
          }
      }
  }
@@ -2435,7 +2526,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl From<crate::operation::get_account::GetAccountError> for Error {
      fn from(err: crate::operation::get_account::GetAccountError) -> Self {
          match err {
-@@ -1461,6 +2711,7 @@
+@@ -1556,6 +2849,7 @@
          }
      }
  }
@@ -2443,7 +2534,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl<R>
      From<
          ::aws_smithy_runtime_api::client::result::SdkError<
-@@ -1486,6 +2737,7 @@
+@@ -1581,6 +2875,7 @@
          }
      }
  }
@@ -2451,7 +2542,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl From<crate::operation::get_blacklist_reports::GetBlacklistReportsError> for Error {
      fn from(err: crate::operation::get_blacklist_reports::GetBlacklistReportsError) -> Self {
          match err {
-@@ -1504,6 +2756,7 @@
+@@ -1599,6 +2894,7 @@
          }
      }
  }
@@ -2459,7 +2550,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl<R>
      From<
          ::aws_smithy_runtime_api::client::result::SdkError<
-@@ -1529,6 +2782,7 @@
+@@ -1624,6 +2920,7 @@
          }
      }
  }
@@ -2467,7 +2558,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl From<crate::operation::get_configuration_set::GetConfigurationSetError> for Error {
      fn from(err: crate::operation::get_configuration_set::GetConfigurationSetError) -> Self {
          match err {
-@@ -1547,6 +2801,7 @@
+@@ -1642,6 +2939,7 @@
          }
      }
  }
@@ -2475,7 +2566,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl<R>
      From<
          ::aws_smithy_runtime_api::client::result::SdkError<
-@@ -1572,6 +2827,7 @@
+@@ -1667,6 +2965,7 @@
          }
      }
  }
@@ -2483,7 +2574,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl From<crate::operation::get_configuration_set_event_destinations::GetConfigurationSetEventDestinationsError>
      for Error
  {
-@@ -1594,6 +2850,7 @@
+@@ -1689,6 +2988,7 @@
          }
      }
  }
@@ -2491,7 +2582,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl<R> From<::aws_smithy_runtime_api::client::result::SdkError<crate::operation::get_contact::GetContactError, R>>
      for Error
  where
-@@ -1611,6 +2868,7 @@
+@@ -1706,6 +3006,7 @@
          }
      }
  }
@@ -2499,7 +2590,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl From<crate::operation::get_contact::GetContactError> for Error {
      fn from(err: crate::operation::get_contact::GetContactError) -> Self {
          match err {
-@@ -1625,6 +2883,7 @@
+@@ -1720,6 +3021,7 @@
          }
      }
  }
@@ -2507,7 +2598,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl<R>
      From<::aws_smithy_runtime_api::client::result::SdkError<crate::operation::get_contact_list::GetContactListError, R>>
      for Error
-@@ -1646,6 +2905,7 @@
+@@ -1741,6 +3043,7 @@
          }
      }
  }
@@ -2515,7 +2606,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl From<crate::operation::get_contact_list::GetContactListError> for Error {
      fn from(err: crate::operation::get_contact_list::GetContactListError) -> Self {
          match err {
-@@ -1662,6 +2922,7 @@
+@@ -1757,6 +3060,7 @@
          }
      }
  }
@@ -2523,7 +2614,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl<R>
      From<
          ::aws_smithy_runtime_api::client::result::SdkError<
-@@ -1687,6 +2948,7 @@
+@@ -1782,6 +3086,7 @@
          }
      }
  }
@@ -2531,7 +2622,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl From<crate::operation::get_custom_verification_email_template::GetCustomVerificationEmailTemplateError> for Error {
      fn from(
          err: crate::operation::get_custom_verification_email_template::GetCustomVerificationEmailTemplateError,
-@@ -1707,6 +2969,7 @@
+@@ -1802,6 +3107,7 @@
          }
      }
  }
@@ -2539,7 +2630,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl<R>
      From<::aws_smithy_runtime_api::client::result::SdkError<crate::operation::get_dedicated_ip::GetDedicatedIpError, R>>
      for Error
-@@ -1728,6 +2991,7 @@
+@@ -1823,6 +3129,7 @@
          }
      }
  }
@@ -2547,7 +2638,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl From<crate::operation::get_dedicated_ip::GetDedicatedIpError> for Error {
      fn from(err: crate::operation::get_dedicated_ip::GetDedicatedIpError) -> Self {
          match err {
-@@ -1744,6 +3008,7 @@
+@@ -1839,6 +3146,7 @@
          }
      }
  }
@@ -2555,7 +2646,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl<R>
      From<
          ::aws_smithy_runtime_api::client::result::SdkError<
-@@ -1769,6 +3034,7 @@
+@@ -1864,6 +3172,7 @@
          }
      }
  }
@@ -2563,7 +2654,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl From<crate::operation::get_dedicated_ip_pool::GetDedicatedIpPoolError> for Error {
      fn from(err: crate::operation::get_dedicated_ip_pool::GetDedicatedIpPoolError) -> Self {
          match err {
-@@ -1787,6 +3053,7 @@
+@@ -1882,6 +3191,7 @@
          }
      }
  }
@@ -2571,7 +2662,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl<R>
      From<
          ::aws_smithy_runtime_api::client::result::SdkError<
-@@ -1812,6 +3079,7 @@
+@@ -1907,6 +3217,7 @@
          }
      }
  }
@@ -2579,7 +2670,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl From<crate::operation::get_dedicated_ips::GetDedicatedIpsError> for Error {
      fn from(err: crate::operation::get_dedicated_ips::GetDedicatedIpsError) -> Self {
          match err {
-@@ -1828,6 +3096,7 @@
+@@ -1923,6 +3234,7 @@
          }
      }
  }
@@ -2587,7 +2678,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl<R>
      From<
          ::aws_smithy_runtime_api::client::result::SdkError<
-@@ -1853,6 +3122,7 @@
+@@ -1948,6 +3260,7 @@
          }
      }
  }
@@ -2595,7 +2686,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl From<crate::operation::get_deliverability_dashboard_options::GetDeliverabilityDashboardOptionsError> for Error {
      fn from(
          err: crate::operation::get_deliverability_dashboard_options::GetDeliverabilityDashboardOptionsError,
-@@ -1873,6 +3143,7 @@
+@@ -1968,6 +3281,7 @@
          }
      }
  }
@@ -2603,7 +2694,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl<R>
      From<
          ::aws_smithy_runtime_api::client::result::SdkError<
-@@ -1898,6 +3169,7 @@
+@@ -1993,6 +3307,7 @@
          }
      }
  }
@@ -2611,7 +2702,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl From<crate::operation::get_deliverability_test_report::GetDeliverabilityTestReportError> for Error {
      fn from(err: crate::operation::get_deliverability_test_report::GetDeliverabilityTestReportError) -> Self {
          match err {
-@@ -1914,6 +3186,7 @@
+@@ -2009,6 +3324,7 @@
          }
      }
  }
@@ -2619,7 +2710,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl<R>
      From<
          ::aws_smithy_runtime_api::client::result::SdkError<
-@@ -1939,6 +3212,7 @@
+@@ -2034,6 +3350,7 @@
          }
      }
  }
@@ -2627,7 +2718,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl From<crate::operation::get_domain_deliverability_campaign::GetDomainDeliverabilityCampaignError> for Error {
      fn from(err: crate::operation::get_domain_deliverability_campaign::GetDomainDeliverabilityCampaignError) -> Self {
          match err {
-@@ -1955,6 +3229,7 @@
+@@ -2050,6 +3367,7 @@
          }
      }
  }
@@ -2635,7 +2726,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl<R>
      From<
          ::aws_smithy_runtime_api::client::result::SdkError<
-@@ -1980,6 +3255,7 @@
+@@ -2075,6 +3393,7 @@
          }
      }
  }
@@ -2643,7 +2734,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl From<crate::operation::get_domain_statistics_report::GetDomainStatisticsReportError> for Error {
      fn from(err: crate::operation::get_domain_statistics_report::GetDomainStatisticsReportError) -> Self {
          match err {
-@@ -1996,6 +3272,7 @@
+@@ -2091,6 +3410,7 @@
          }
      }
  }
@@ -2651,7 +2742,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl<R>
      From<
          ::aws_smithy_runtime_api::client::result::SdkError<
-@@ -2021,6 +3298,7 @@
+@@ -2116,6 +3436,7 @@
          }
      }
  }
@@ -2659,7 +2750,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl From<crate::operation::get_email_address_insights::GetEmailAddressInsightsError> for Error {
      fn from(err: crate::operation::get_email_address_insights::GetEmailAddressInsightsError) -> Self {
          match err {
-@@ -2036,6 +3314,7 @@
+@@ -2131,6 +3452,7 @@
          }
      }
  }
@@ -2667,7 +2758,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl<R>
      From<
          ::aws_smithy_runtime_api::client::result::SdkError<
-@@ -2061,6 +3340,7 @@
+@@ -2156,6 +3478,7 @@
          }
      }
  }
@@ -2675,7 +2766,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl From<crate::operation::get_email_identity::GetEmailIdentityError> for Error {
      fn from(err: crate::operation::get_email_identity::GetEmailIdentityError) -> Self {
          match err {
-@@ -2077,6 +3357,7 @@
+@@ -2172,6 +3495,7 @@
          }
      }
  }
@@ -2683,7 +2774,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl<R>
      From<
          ::aws_smithy_runtime_api::client::result::SdkError<
-@@ -2102,6 +3383,7 @@
+@@ -2197,6 +3521,7 @@
          }
      }
  }
@@ -2691,7 +2782,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl From<crate::operation::get_email_identity_policies::GetEmailIdentityPoliciesError> for Error {
      fn from(err: crate::operation::get_email_identity_policies::GetEmailIdentityPoliciesError) -> Self {
          match err {
-@@ -2120,6 +3402,7 @@
+@@ -2215,6 +3540,7 @@
          }
      }
  }
@@ -2699,7 +2790,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl<R>
      From<
          ::aws_smithy_runtime_api::client::result::SdkError<
-@@ -2145,6 +3428,7 @@
+@@ -2240,6 +3566,7 @@
          }
      }
  }
@@ -2707,7 +2798,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl From<crate::operation::get_email_template::GetEmailTemplateError> for Error {
      fn from(err: crate::operation::get_email_template::GetEmailTemplateError) -> Self {
          match err {
-@@ -2161,6 +3445,7 @@
+@@ -2256,6 +3583,7 @@
          }
      }
  }
@@ -2715,7 +2806,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl<R> From<::aws_smithy_runtime_api::client::result::SdkError<crate::operation::get_export_job::GetExportJobError, R>>
      for Error
  where
-@@ -2178,6 +3463,7 @@
+@@ -2273,6 +3601,7 @@
          }
      }
  }
@@ -2723,7 +2814,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl From<crate::operation::get_export_job::GetExportJobError> for Error {
      fn from(err: crate::operation::get_export_job::GetExportJobError) -> Self {
          match err {
-@@ -2194,6 +3480,7 @@
+@@ -2289,6 +3618,7 @@
          }
      }
  }
@@ -2731,7 +2822,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl<R> From<::aws_smithy_runtime_api::client::result::SdkError<crate::operation::get_import_job::GetImportJobError, R>>
      for Error
  where
-@@ -2211,6 +3498,7 @@
+@@ -2306,6 +3636,7 @@
          }
      }
  }
@@ -2739,7 +2830,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl From<crate::operation::get_import_job::GetImportJobError> for Error {
      fn from(err: crate::operation::get_import_job::GetImportJobError) -> Self {
          match err {
-@@ -2227,6 +3515,7 @@
+@@ -2322,6 +3653,7 @@
          }
      }
  }
@@ -2747,7 +2838,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl<R>
      From<
          ::aws_smithy_runtime_api::client::result::SdkError<
-@@ -2252,6 +3541,7 @@
+@@ -2347,6 +3679,7 @@
          }
      }
  }
@@ -2755,7 +2846,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl From<crate::operation::get_message_insights::GetMessageInsightsError> for Error {
      fn from(err: crate::operation::get_message_insights::GetMessageInsightsError) -> Self {
          match err {
-@@ -2270,6 +3560,7 @@
+@@ -2365,6 +3698,7 @@
          }
      }
  }
@@ -2763,7 +2854,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl<R>
      From<
          ::aws_smithy_runtime_api::client::result::SdkError<
-@@ -2295,6 +3586,7 @@
+@@ -2390,6 +3724,7 @@
          }
      }
  }
@@ -2771,7 +2862,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl From<crate::operation::get_multi_region_endpoint::GetMultiRegionEndpointError> for Error {
      fn from(err: crate::operation::get_multi_region_endpoint::GetMultiRegionEndpointError) -> Self {
          match err {
-@@ -2313,6 +3605,7 @@
+@@ -2408,6 +3743,7 @@
          }
      }
  }
@@ -2779,7 +2870,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl<R>
      From<
          ::aws_smithy_runtime_api::client::result::SdkError<
-@@ -2338,6 +3631,7 @@
+@@ -2433,6 +3769,7 @@
          }
      }
  }
@@ -2787,7 +2878,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl From<crate::operation::get_reputation_entity::GetReputationEntityError> for Error {
      fn from(err: crate::operation::get_reputation_entity::GetReputationEntityError) -> Self {
          match err {
-@@ -2356,6 +3650,7 @@
+@@ -2451,6 +3788,7 @@
          }
      }
  }
@@ -2795,7 +2886,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl<R>
      From<
          ::aws_smithy_runtime_api::client::result::SdkError<
-@@ -2381,6 +3676,7 @@
+@@ -2476,6 +3814,7 @@
          }
      }
  }
@@ -2803,7 +2894,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl From<crate::operation::get_suppressed_destination::GetSuppressedDestinationError> for Error {
      fn from(err: crate::operation::get_suppressed_destination::GetSuppressedDestinationError) -> Self {
          match err {
-@@ -2399,6 +3695,7 @@
+@@ -2494,6 +3833,7 @@
          }
      }
  }
@@ -2811,7 +2902,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl<R> From<::aws_smithy_runtime_api::client::result::SdkError<crate::operation::get_tenant::GetTenantError, R>>
      for Error
  where
-@@ -2416,6 +3713,7 @@
+@@ -2511,6 +3851,7 @@
          }
      }
  }
@@ -2819,7 +2910,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl From<crate::operation::get_tenant::GetTenantError> for Error {
      fn from(err: crate::operation::get_tenant::GetTenantError) -> Self {
          match err {
-@@ -2430,6 +3728,7 @@
+@@ -2525,6 +3866,7 @@
          }
      }
  }
@@ -2827,7 +2918,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl<R>
      From<
          ::aws_smithy_runtime_api::client::result::SdkError<
-@@ -2455,6 +3754,7 @@
+@@ -2550,6 +3892,7 @@
          }
      }
  }
@@ -2835,7 +2926,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl From<crate::operation::list_configuration_sets::ListConfigurationSetsError> for Error {
      fn from(err: crate::operation::list_configuration_sets::ListConfigurationSetsError) -> Self {
          match err {
-@@ -2470,6 +3770,7 @@
+@@ -2565,6 +3908,7 @@
          }
      }
  }
@@ -2843,7 +2934,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl<R>
      From<
          ::aws_smithy_runtime_api::client::result::SdkError<
-@@ -2495,6 +3796,7 @@
+@@ -2590,6 +3934,7 @@
          }
      }
  }
@@ -2851,7 +2942,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl From<crate::operation::list_contact_lists::ListContactListsError> for Error {
      fn from(err: crate::operation::list_contact_lists::ListContactListsError) -> Self {
          match err {
-@@ -2508,6 +3810,7 @@
+@@ -2603,6 +3948,7 @@
          }
      }
  }
@@ -2859,7 +2950,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl<R> From<::aws_smithy_runtime_api::client::result::SdkError<crate::operation::list_contacts::ListContactsError, R>>
      for Error
  where
-@@ -2525,6 +3828,7 @@
+@@ -2620,6 +3966,7 @@
          }
      }
  }
@@ -2867,7 +2958,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl From<crate::operation::list_contacts::ListContactsError> for Error {
      fn from(err: crate::operation::list_contacts::ListContactsError) -> Self {
          match err {
-@@ -2541,6 +3845,7 @@
+@@ -2636,6 +3983,7 @@
          }
      }
  }
@@ -2875,7 +2966,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl<R>
      From<
          ::aws_smithy_runtime_api::client::result::SdkError<
-@@ -2566,6 +3871,7 @@
+@@ -2661,6 +4009,7 @@
          }
      }
  }
@@ -2883,7 +2974,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl From<crate::operation::list_custom_verification_email_templates::ListCustomVerificationEmailTemplatesError>
      for Error
  {
-@@ -2585,6 +3891,7 @@
+@@ -2680,6 +4029,7 @@
          }
      }
  }
@@ -2891,7 +2982,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl<R>
      From<
          ::aws_smithy_runtime_api::client::result::SdkError<
-@@ -2610,6 +3917,7 @@
+@@ -2705,6 +4055,7 @@
          }
      }
  }
@@ -2899,7 +2990,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl From<crate::operation::list_dedicated_ip_pools::ListDedicatedIpPoolsError> for Error {
      fn from(err: crate::operation::list_dedicated_ip_pools::ListDedicatedIpPoolsError) -> Self {
          match err {
-@@ -2625,6 +3933,7 @@
+@@ -2720,6 +4071,7 @@
          }
      }
  }
@@ -2907,7 +2998,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl<R>
      From<
          ::aws_smithy_runtime_api::client::result::SdkError<
-@@ -2650,6 +3959,7 @@
+@@ -2745,6 +4097,7 @@
          }
      }
  }
@@ -2915,7 +3006,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl From<crate::operation::list_deliverability_test_reports::ListDeliverabilityTestReportsError> for Error {
      fn from(err: crate::operation::list_deliverability_test_reports::ListDeliverabilityTestReportsError) -> Self {
          match err {
-@@ -2666,6 +3976,7 @@
+@@ -2761,6 +4114,7 @@
          }
      }
  }
@@ -2923,7 +3014,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl<R>
      From<
          ::aws_smithy_runtime_api::client::result::SdkError<
-@@ -2691,6 +4002,7 @@
+@@ -2786,6 +4140,7 @@
          }
      }
  }
@@ -2931,7 +3022,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl From<crate::operation::list_domain_deliverability_campaigns::ListDomainDeliverabilityCampaignsError> for Error {
      fn from(
          err: crate::operation::list_domain_deliverability_campaigns::ListDomainDeliverabilityCampaignsError,
-@@ -2711,6 +4023,7 @@
+@@ -2806,6 +4161,7 @@
          }
      }
  }
@@ -2939,7 +3030,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl<R>
      From<
          ::aws_smithy_runtime_api::client::result::SdkError<
-@@ -2736,6 +4049,7 @@
+@@ -2831,6 +4187,7 @@
          }
      }
  }
@@ -2947,7 +3038,23 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl From<crate::operation::list_email_identities::ListEmailIdentitiesError> for Error {
      fn from(err: crate::operation::list_email_identities::ListEmailIdentitiesError) -> Self {
          match err {
-@@ -2751,6 +4065,7 @@
+@@ -2846,6 +4203,7 @@
+         }
+     }
+ }
++#[cfg(feature = "op_list_email_identity_certificates")]
+ impl<R>
+     From<
+         ::aws_smithy_runtime_api::client::result::SdkError<
+@@ -2871,6 +4229,7 @@
+         }
+     }
+ }
++#[cfg(feature = "op_list_email_identity_certificates")]
+ impl From<crate::operation::list_email_identity_certificates::ListEmailIdentityCertificatesError> for Error {
+     fn from(err: crate::operation::list_email_identity_certificates::ListEmailIdentityCertificatesError) -> Self {
+         match err {
+@@ -2887,6 +4246,7 @@
          }
      }
  }
@@ -2955,7 +3062,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl<R>
      From<
          ::aws_smithy_runtime_api::client::result::SdkError<
-@@ -2776,6 +4091,7 @@
+@@ -2912,6 +4272,7 @@
          }
      }
  }
@@ -2963,7 +3070,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl From<crate::operation::list_email_templates::ListEmailTemplatesError> for Error {
      fn from(err: crate::operation::list_email_templates::ListEmailTemplatesError) -> Self {
          match err {
-@@ -2791,6 +4107,7 @@
+@@ -2927,6 +4288,7 @@
          }
      }
  }
@@ -2971,7 +3078,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl<R>
      From<::aws_smithy_runtime_api::client::result::SdkError<crate::operation::list_export_jobs::ListExportJobsError, R>>
      for Error
-@@ -2812,6 +4129,7 @@
+@@ -2948,6 +4310,7 @@
          }
      }
  }
@@ -2979,7 +3086,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl From<crate::operation::list_export_jobs::ListExportJobsError> for Error {
      fn from(err: crate::operation::list_export_jobs::ListExportJobsError) -> Self {
          match err {
-@@ -2825,6 +4143,7 @@
+@@ -2961,6 +4324,7 @@
          }
      }
  }
@@ -2987,7 +3094,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl<R>
      From<::aws_smithy_runtime_api::client::result::SdkError<crate::operation::list_import_jobs::ListImportJobsError, R>>
      for Error
-@@ -2846,6 +4165,7 @@
+@@ -2982,6 +4346,7 @@
          }
      }
  }
@@ -2995,7 +3102,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl From<crate::operation::list_import_jobs::ListImportJobsError> for Error {
      fn from(err: crate::operation::list_import_jobs::ListImportJobsError) -> Self {
          match err {
-@@ -2859,6 +4179,7 @@
+@@ -2995,6 +4360,7 @@
          }
      }
  }
@@ -3003,7 +3110,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl<R>
      From<
          ::aws_smithy_runtime_api::client::result::SdkError<
-@@ -2884,6 +4205,7 @@
+@@ -3020,6 +4386,7 @@
          }
      }
  }
@@ -3011,7 +3118,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl From<crate::operation::list_multi_region_endpoints::ListMultiRegionEndpointsError> for Error {
      fn from(err: crate::operation::list_multi_region_endpoints::ListMultiRegionEndpointsError) -> Self {
          match err {
-@@ -2899,6 +4221,7 @@
+@@ -3035,6 +4402,7 @@
          }
      }
  }
@@ -3019,7 +3126,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl<R>
      From<
          ::aws_smithy_runtime_api::client::result::SdkError<
-@@ -2924,6 +4247,7 @@
+@@ -3060,6 +4428,7 @@
          }
      }
  }
@@ -3027,7 +3134,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl From<crate::operation::list_recommendations::ListRecommendationsError> for Error {
      fn from(err: crate::operation::list_recommendations::ListRecommendationsError) -> Self {
          match err {
-@@ -2942,6 +4266,7 @@
+@@ -3078,6 +4447,7 @@
          }
      }
  }
@@ -3035,7 +3142,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl<R>
      From<
          ::aws_smithy_runtime_api::client::result::SdkError<
-@@ -2967,6 +4292,7 @@
+@@ -3103,6 +4473,7 @@
          }
      }
  }
@@ -3043,7 +3150,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl From<crate::operation::list_reputation_entities::ListReputationEntitiesError> for Error {
      fn from(err: crate::operation::list_reputation_entities::ListReputationEntitiesError) -> Self {
          match err {
-@@ -2982,6 +4308,7 @@
+@@ -3118,6 +4489,7 @@
          }
      }
  }
@@ -3051,7 +3158,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl<R>
      From<
          ::aws_smithy_runtime_api::client::result::SdkError<
-@@ -3007,6 +4334,7 @@
+@@ -3143,6 +4515,7 @@
          }
      }
  }
@@ -3059,7 +3166,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl From<crate::operation::list_resource_tenants::ListResourceTenantsError> for Error {
      fn from(err: crate::operation::list_resource_tenants::ListResourceTenantsError) -> Self {
          match err {
-@@ -3025,6 +4353,7 @@
+@@ -3161,6 +4534,7 @@
          }
      }
  }
@@ -3067,7 +3174,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl<R>
      From<
          ::aws_smithy_runtime_api::client::result::SdkError<
-@@ -3050,6 +4379,7 @@
+@@ -3186,6 +4560,7 @@
          }
      }
  }
@@ -3075,7 +3182,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl From<crate::operation::list_suppressed_destinations::ListSuppressedDestinationsError> for Error {
      fn from(err: crate::operation::list_suppressed_destinations::ListSuppressedDestinationsError) -> Self {
          match err {
-@@ -3069,6 +4399,7 @@
+@@ -3205,6 +4580,7 @@
          }
      }
  }
@@ -3083,7 +3190,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl<R>
      From<
          ::aws_smithy_runtime_api::client::result::SdkError<
-@@ -3094,6 +4425,7 @@
+@@ -3230,6 +4606,7 @@
          }
      }
  }
@@ -3091,7 +3198,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl From<crate::operation::list_tags_for_resource::ListTagsForResourceError> for Error {
      fn from(err: crate::operation::list_tags_for_resource::ListTagsForResourceError) -> Self {
          match err {
-@@ -3112,6 +4444,7 @@
+@@ -3248,6 +4625,7 @@
          }
      }
  }
@@ -3099,7 +3206,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl<R>
      From<
          ::aws_smithy_runtime_api::client::result::SdkError<
-@@ -3137,6 +4470,7 @@
+@@ -3273,6 +4651,7 @@
          }
      }
  }
@@ -3107,7 +3214,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl From<crate::operation::list_tenant_resources::ListTenantResourcesError> for Error {
      fn from(err: crate::operation::list_tenant_resources::ListTenantResourcesError) -> Self {
          match err {
-@@ -3155,6 +4489,7 @@
+@@ -3291,6 +4670,7 @@
          }
      }
  }
@@ -3115,7 +3222,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl<R> From<::aws_smithy_runtime_api::client::result::SdkError<crate::operation::list_tenants::ListTenantsError, R>>
      for Error
  where
-@@ -3172,6 +4507,7 @@
+@@ -3308,6 +4688,7 @@
          }
      }
  }
@@ -3123,7 +3230,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl From<crate::operation::list_tenants::ListTenantsError> for Error {
      fn from(err: crate::operation::list_tenants::ListTenantsError) -> Self {
          match err {
-@@ -3185,6 +4521,7 @@
+@@ -3321,6 +4702,7 @@
          }
      }
  }
@@ -3131,7 +3238,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl<R>
      From<
          ::aws_smithy_runtime_api::client::result::SdkError<
-@@ -3210,6 +4547,7 @@
+@@ -3346,6 +4728,7 @@
          }
      }
  }
@@ -3139,7 +3246,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl From<crate::operation::put_account_dedicated_ip_warmup_attributes::PutAccountDedicatedIpWarmupAttributesError>
      for Error
  {
-@@ -3229,6 +4567,7 @@
+@@ -3365,6 +4748,7 @@
          }
      }
  }
@@ -3147,7 +3254,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl<R>
      From<
          ::aws_smithy_runtime_api::client::result::SdkError<
-@@ -3254,6 +4593,7 @@
+@@ -3390,6 +4774,7 @@
          }
      }
  }
@@ -3155,7 +3262,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl From<crate::operation::put_account_details::PutAccountDetailsError> for Error {
      fn from(err: crate::operation::put_account_details::PutAccountDetailsError) -> Self {
          match err {
-@@ -3270,6 +4610,7 @@
+@@ -3406,6 +4791,7 @@
          }
      }
  }
@@ -3163,7 +3270,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl<R>
      From<
          ::aws_smithy_runtime_api::client::result::SdkError<
-@@ -3295,6 +4636,7 @@
+@@ -3431,6 +4817,7 @@
          }
      }
  }
@@ -3171,7 +3278,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl From<crate::operation::put_account_pricing_attributes::PutAccountPricingAttributesError> for Error {
      fn from(err: crate::operation::put_account_pricing_attributes::PutAccountPricingAttributesError) -> Self {
          match err {
-@@ -3311,6 +4653,7 @@
+@@ -3447,6 +4834,7 @@
          }
      }
  }
@@ -3179,7 +3286,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl<R>
      From<
          ::aws_smithy_runtime_api::client::result::SdkError<
-@@ -3336,6 +4679,7 @@
+@@ -3472,6 +4860,7 @@
          }
      }
  }
@@ -3187,7 +3294,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl From<crate::operation::put_account_sending_attributes::PutAccountSendingAttributesError> for Error {
      fn from(err: crate::operation::put_account_sending_attributes::PutAccountSendingAttributesError) -> Self {
          match err {
-@@ -3349,6 +4693,7 @@
+@@ -3485,6 +4874,7 @@
          }
      }
  }
@@ -3195,7 +3302,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl<R>
      From<
          ::aws_smithy_runtime_api::client::result::SdkError<
-@@ -3374,6 +4719,7 @@
+@@ -3510,6 +4900,7 @@
          }
      }
  }
@@ -3203,7 +3310,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl From<crate::operation::put_account_suppression_attributes::PutAccountSuppressionAttributesError> for Error {
      fn from(err: crate::operation::put_account_suppression_attributes::PutAccountSuppressionAttributesError) -> Self {
          match err {
-@@ -3387,6 +4733,7 @@
+@@ -3523,6 +4914,7 @@
          }
      }
  }
@@ -3211,7 +3318,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl<R>
      From<
          ::aws_smithy_runtime_api::client::result::SdkError<
-@@ -3412,6 +4759,7 @@
+@@ -3548,6 +4940,7 @@
          }
      }
  }
@@ -3219,7 +3326,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl From<crate::operation::put_account_vdm_attributes::PutAccountVdmAttributesError> for Error {
      fn from(err: crate::operation::put_account_vdm_attributes::PutAccountVdmAttributesError) -> Self {
          match err {
-@@ -3427,6 +4775,7 @@
+@@ -3563,6 +4956,7 @@
          }
      }
  }
@@ -3227,7 +3334,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl<R>
      From<
          ::aws_smithy_runtime_api::client::result::SdkError<
-@@ -3452,6 +4801,7 @@
+@@ -3588,6 +4982,7 @@
          }
      }
  }
@@ -3235,7 +3342,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl From<crate::operation::put_configuration_set_archiving_options::PutConfigurationSetArchivingOptionsError>
      for Error
  {
-@@ -3474,6 +4824,7 @@
+@@ -3610,6 +5005,7 @@
          }
      }
  }
@@ -3243,7 +3350,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl<R>
      From<
          ::aws_smithy_runtime_api::client::result::SdkError<
-@@ -3499,6 +4850,7 @@
+@@ -3635,6 +5031,7 @@
          }
      }
  }
@@ -3251,7 +3358,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl From<crate::operation::put_configuration_set_delivery_options::PutConfigurationSetDeliveryOptionsError> for Error {
      fn from(
          err: crate::operation::put_configuration_set_delivery_options::PutConfigurationSetDeliveryOptionsError,
-@@ -3519,6 +4871,7 @@
+@@ -3655,6 +5052,7 @@
          }
      }
  }
@@ -3259,7 +3366,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl<R>
      From<
          ::aws_smithy_runtime_api::client::result::SdkError<
-@@ -3544,6 +4897,7 @@
+@@ -3680,6 +5078,7 @@
          }
      }
  }
@@ -3267,7 +3374,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl From<crate::operation::put_configuration_set_reputation_options::PutConfigurationSetReputationOptionsError>
      for Error
  {
-@@ -3566,6 +4920,7 @@
+@@ -3702,6 +5101,7 @@
          }
      }
  }
@@ -3275,7 +3382,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl<R>
      From<
          ::aws_smithy_runtime_api::client::result::SdkError<
-@@ -3591,6 +4946,7 @@
+@@ -3727,6 +5127,7 @@
          }
      }
  }
@@ -3283,7 +3390,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl From<crate::operation::put_configuration_set_sending_options::PutConfigurationSetSendingOptionsError> for Error {
      fn from(
          err: crate::operation::put_configuration_set_sending_options::PutConfigurationSetSendingOptionsError,
-@@ -3611,6 +4967,7 @@
+@@ -3747,6 +5148,7 @@
          }
      }
  }
@@ -3291,7 +3398,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl<R>
      From<
          ::aws_smithy_runtime_api::client::result::SdkError<
-@@ -3636,6 +4993,7 @@
+@@ -3772,6 +5174,7 @@
          }
      }
  }
@@ -3299,7 +3406,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl From<crate::operation::put_configuration_set_suppression_options::PutConfigurationSetSuppressionOptionsError>
      for Error
  {
-@@ -3658,6 +5016,7 @@
+@@ -3794,6 +5197,7 @@
          }
      }
  }
@@ -3307,7 +3414,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl<R>
      From<
          ::aws_smithy_runtime_api::client::result::SdkError<
-@@ -3683,6 +5042,7 @@
+@@ -3819,6 +5223,7 @@
          }
      }
  }
@@ -3315,7 +3422,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl From<crate::operation::put_configuration_set_tracking_options::PutConfigurationSetTrackingOptionsError> for Error {
      fn from(
          err: crate::operation::put_configuration_set_tracking_options::PutConfigurationSetTrackingOptionsError,
-@@ -3703,6 +5063,7 @@
+@@ -3839,6 +5244,7 @@
          }
      }
  }
@@ -3323,7 +3430,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl<R>
      From<
          ::aws_smithy_runtime_api::client::result::SdkError<
-@@ -3728,6 +5089,7 @@
+@@ -3864,6 +5270,7 @@
          }
      }
  }
@@ -3331,7 +3438,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl From<crate::operation::put_configuration_set_vdm_options::PutConfigurationSetVdmOptionsError> for Error {
      fn from(err: crate::operation::put_configuration_set_vdm_options::PutConfigurationSetVdmOptionsError) -> Self {
          match err {
-@@ -3744,6 +5106,7 @@
+@@ -3880,6 +5287,7 @@
          }
      }
  }
@@ -3339,7 +3446,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl<R>
      From<
          ::aws_smithy_runtime_api::client::result::SdkError<
-@@ -3769,6 +5132,7 @@
+@@ -3905,6 +5313,7 @@
          }
      }
  }
@@ -3347,7 +3454,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl From<crate::operation::put_dedicated_ip_in_pool::PutDedicatedIpInPoolError> for Error {
      fn from(err: crate::operation::put_dedicated_ip_in_pool::PutDedicatedIpInPoolError) -> Self {
          match err {
-@@ -3787,6 +5151,7 @@
+@@ -3923,6 +5332,7 @@
          }
      }
  }
@@ -3355,7 +3462,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl<R>
      From<
          ::aws_smithy_runtime_api::client::result::SdkError<
-@@ -3812,6 +5177,7 @@
+@@ -3948,6 +5358,7 @@
          }
      }
  }
@@ -3363,7 +3470,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl From<crate::operation::put_dedicated_ip_pool_scaling_attributes::PutDedicatedIpPoolScalingAttributesError>
      for Error
  {
-@@ -3837,6 +5203,7 @@
+@@ -3973,6 +5384,7 @@
          }
      }
  }
@@ -3371,7 +3478,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl<R>
      From<
          ::aws_smithy_runtime_api::client::result::SdkError<
-@@ -3862,6 +5229,7 @@
+@@ -3998,6 +5410,7 @@
          }
      }
  }
@@ -3379,7 +3486,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl From<crate::operation::put_dedicated_ip_warmup_attributes::PutDedicatedIpWarmupAttributesError> for Error {
      fn from(err: crate::operation::put_dedicated_ip_warmup_attributes::PutDedicatedIpWarmupAttributesError) -> Self {
          match err {
-@@ -3878,6 +5246,7 @@
+@@ -4014,6 +5427,7 @@
          }
      }
  }
@@ -3387,7 +3494,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl<R>
      From<
          ::aws_smithy_runtime_api::client::result::SdkError<
-@@ -3903,6 +5272,7 @@
+@@ -4039,6 +5453,7 @@
          }
      }
  }
@@ -3395,7 +3502,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl From<crate::operation::put_deliverability_dashboard_option::PutDeliverabilityDashboardOptionError> for Error {
      fn from(err: crate::operation::put_deliverability_dashboard_option::PutDeliverabilityDashboardOptionError) -> Self {
          match err {
-@@ -3925,6 +5295,7 @@
+@@ -4061,6 +5476,7 @@
          }
      }
  }
@@ -3403,7 +3510,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl<R>
      From<
          ::aws_smithy_runtime_api::client::result::SdkError<
-@@ -3950,6 +5321,7 @@
+@@ -4086,6 +5502,7 @@
          }
      }
  }
@@ -3411,7 +3518,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl From<crate::operation::put_email_identity_configuration_set_attributes::PutEmailIdentityConfigurationSetAttributesError> for Error {
      fn from(err: crate::operation::put_email_identity_configuration_set_attributes::PutEmailIdentityConfigurationSetAttributesError) -> Self {
          match err {
-@@ -3960,6 +5332,7 @@
+@@ -4096,6 +5513,7 @@
          }
      }
  }
@@ -3419,7 +3526,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl<R>
      From<
          ::aws_smithy_runtime_api::client::result::SdkError<
-@@ -3985,6 +5358,7 @@
+@@ -4121,6 +5539,7 @@
          }
      }
  }
@@ -3427,7 +3534,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl From<crate::operation::put_email_identity_dkim_attributes::PutEmailIdentityDkimAttributesError> for Error {
      fn from(err: crate::operation::put_email_identity_dkim_attributes::PutEmailIdentityDkimAttributesError) -> Self {
          match err {
-@@ -4001,6 +5375,7 @@
+@@ -4137,6 +5556,7 @@
          }
      }
  }
@@ -3435,7 +3542,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl<R>
      From<
          ::aws_smithy_runtime_api::client::result::SdkError<
-@@ -4026,6 +5401,7 @@
+@@ -4162,6 +5582,7 @@
          }
      }
  }
@@ -3443,7 +3550,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl From<crate::operation::put_email_identity_dkim_signing_attributes::PutEmailIdentityDkimSigningAttributesError>
      for Error
  {
-@@ -4048,6 +5424,7 @@
+@@ -4184,6 +5605,7 @@
          }
      }
  }
@@ -3451,7 +3558,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl<R>
      From<
          ::aws_smithy_runtime_api::client::result::SdkError<
-@@ -4073,6 +5450,7 @@
+@@ -4209,6 +5631,7 @@
          }
      }
  }
@@ -3459,7 +3566,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl From<crate::operation::put_email_identity_feedback_attributes::PutEmailIdentityFeedbackAttributesError> for Error {
      fn from(
          err: crate::operation::put_email_identity_feedback_attributes::PutEmailIdentityFeedbackAttributesError,
-@@ -4093,6 +5471,7 @@
+@@ -4229,6 +5652,7 @@
          }
      }
  }
@@ -3467,7 +3574,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl<R>
      From<
          ::aws_smithy_runtime_api::client::result::SdkError<
-@@ -4118,6 +5497,7 @@
+@@ -4254,6 +5678,7 @@
          }
      }
  }
@@ -3475,7 +3582,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl From<crate::operation::put_email_identity_mail_from_attributes::PutEmailIdentityMailFromAttributesError>
      for Error
  {
-@@ -4140,6 +5520,7 @@
+@@ -4276,6 +5701,7 @@
          }
      }
  }
@@ -3483,7 +3590,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl<R>
      From<
          ::aws_smithy_runtime_api::client::result::SdkError<
-@@ -4165,6 +5546,7 @@
+@@ -4301,6 +5727,7 @@
          }
      }
  }
@@ -3491,7 +3598,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl From<crate::operation::put_suppressed_destination::PutSuppressedDestinationError> for Error {
      fn from(err: crate::operation::put_suppressed_destination::PutSuppressedDestinationError) -> Self {
          match err {
-@@ -4183,6 +5565,7 @@
+@@ -4319,6 +5746,7 @@
          }
      }
  }
@@ -3499,7 +3606,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl<R>
      From<
          ::aws_smithy_runtime_api::client::result::SdkError<
-@@ -4208,6 +5591,7 @@
+@@ -4344,6 +5772,7 @@
          }
      }
  }
@@ -3507,7 +3614,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl From<crate::operation::put_tenant_suppression_attributes::PutTenantSuppressionAttributesError> for Error {
      fn from(err: crate::operation::put_tenant_suppression_attributes::PutTenantSuppressionAttributesError) -> Self {
          match err {
-@@ -4224,6 +5608,7 @@
+@@ -4360,6 +5789,7 @@
          }
      }
  }
@@ -3515,7 +3622,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl<R>
      From<::aws_smithy_runtime_api::client::result::SdkError<crate::operation::send_bulk_email::SendBulkEmailError, R>>
      for Error
-@@ -4245,6 +5630,7 @@
+@@ -4381,6 +5811,7 @@
          }
      }
  }
@@ -3523,7 +3630,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl From<crate::operation::send_bulk_email::SendBulkEmailError> for Error {
      fn from(err: crate::operation::send_bulk_email::SendBulkEmailError) -> Self {
          match err {
-@@ -4276,6 +5662,7 @@
+@@ -4412,6 +5843,7 @@
          }
      }
  }
@@ -3531,7 +3638,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl<R>
      From<
          ::aws_smithy_runtime_api::client::result::SdkError<
-@@ -4301,6 +5688,7 @@
+@@ -4437,6 +5869,7 @@
          }
      }
  }
@@ -3539,7 +3646,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl From<crate::operation::send_custom_verification_email::SendCustomVerificationEmailError> for Error {
      fn from(err: crate::operation::send_custom_verification_email::SendCustomVerificationEmailError) -> Self {
          match err {
-@@ -4329,6 +5717,7 @@
+@@ -4465,6 +5898,7 @@
          }
      }
  }
@@ -3547,7 +3654,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl<R> From<::aws_smithy_runtime_api::client::result::SdkError<crate::operation::send_email::SendEmailError, R>>
      for Error
  where
-@@ -4346,6 +5735,7 @@
+@@ -4482,6 +5916,7 @@
          }
      }
  }
@@ -3555,7 +3662,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl From<crate::operation::send_email::SendEmailError> for Error {
      fn from(err: crate::operation::send_email::SendEmailError) -> Self {
          match err {
-@@ -4373,6 +5763,7 @@
+@@ -4509,6 +5944,7 @@
          }
      }
  }
@@ -3563,7 +3670,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl<R> From<::aws_smithy_runtime_api::client::result::SdkError<crate::operation::tag_resource::TagResourceError, R>>
      for Error
  where
-@@ -4390,6 +5781,7 @@
+@@ -4526,6 +5962,7 @@
          }
      }
  }
@@ -3571,7 +3678,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl From<crate::operation::tag_resource::TagResourceError> for Error {
      fn from(err: crate::operation::tag_resource::TagResourceError) -> Self {
          match err {
-@@ -4409,6 +5801,7 @@
+@@ -4545,6 +5982,7 @@
          }
      }
  }
@@ -3579,7 +3686,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl<R>
      From<
          ::aws_smithy_runtime_api::client::result::SdkError<
-@@ -4434,6 +5827,7 @@
+@@ -4570,6 +6008,7 @@
          }
      }
  }
@@ -3587,7 +3694,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl From<crate::operation::test_render_email_template::TestRenderEmailTemplateError> for Error {
      fn from(err: crate::operation::test_render_email_template::TestRenderEmailTemplateError) -> Self {
          match err {
-@@ -4452,6 +5846,7 @@
+@@ -4588,6 +6027,7 @@
          }
      }
  }
@@ -3595,7 +3702,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl<R>
      From<::aws_smithy_runtime_api::client::result::SdkError<crate::operation::untag_resource::UntagResourceError, R>>
      for Error
-@@ -4473,6 +5868,7 @@
+@@ -4609,6 +6049,7 @@
          }
      }
  }
@@ -3603,7 +3710,23 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl From<crate::operation::untag_resource::UntagResourceError> for Error {
      fn from(err: crate::operation::untag_resource::UntagResourceError) -> Self {
          match err {
-@@ -4492,6 +5888,7 @@
+@@ -4628,6 +6069,7 @@
+         }
+     }
+ }
++#[cfg(feature = "op_update_configuration_set")]
+ impl<R>
+     From<
+         ::aws_smithy_runtime_api::client::result::SdkError<
+@@ -4653,6 +6095,7 @@
+         }
+     }
+ }
++#[cfg(feature = "op_update_configuration_set")]
+ impl From<crate::operation::update_configuration_set::UpdateConfigurationSetError> for Error {
+     fn from(err: crate::operation::update_configuration_set::UpdateConfigurationSetError) -> Self {
+         match err {
+@@ -4671,6 +6114,7 @@
          }
      }
  }
@@ -3611,7 +3734,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl<R>
      From<
          ::aws_smithy_runtime_api::client::result::SdkError<
-@@ -4517,6 +5914,7 @@
+@@ -4696,6 +6140,7 @@
          }
      }
  }
@@ -3619,7 +3742,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl From<crate::operation::update_configuration_set_event_destination::UpdateConfigurationSetEventDestinationError>
      for Error
  {
-@@ -4539,6 +5937,7 @@
+@@ -4718,6 +6163,7 @@
          }
      }
  }
@@ -3627,7 +3750,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl<R>
      From<::aws_smithy_runtime_api::client::result::SdkError<crate::operation::update_contact::UpdateContactError, R>>
      for Error
-@@ -4560,6 +5959,7 @@
+@@ -4739,6 +6185,7 @@
          }
      }
  }
@@ -3635,7 +3758,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl From<crate::operation::update_contact::UpdateContactError> for Error {
      fn from(err: crate::operation::update_contact::UpdateContactError) -> Self {
          match err {
-@@ -4579,6 +5979,7 @@
+@@ -4758,6 +6205,7 @@
          }
      }
  }
@@ -3643,7 +3766,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl<R>
      From<
          ::aws_smithy_runtime_api::client::result::SdkError<
-@@ -4604,6 +6005,7 @@
+@@ -4783,6 +6231,7 @@
          }
      }
  }
@@ -3651,7 +3774,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl From<crate::operation::update_contact_list::UpdateContactListError> for Error {
      fn from(err: crate::operation::update_contact_list::UpdateContactListError) -> Self {
          match err {
-@@ -4623,6 +6025,7 @@
+@@ -4802,6 +6251,7 @@
          }
      }
  }
@@ -3659,7 +3782,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl<R>
      From<
          ::aws_smithy_runtime_api::client::result::SdkError<
-@@ -4648,6 +6051,7 @@
+@@ -4827,6 +6277,7 @@
          }
      }
  }
@@ -3667,7 +3790,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl From<crate::operation::update_custom_verification_email_template::UpdateCustomVerificationEmailTemplateError>
      for Error
  {
-@@ -4670,6 +6074,7 @@
+@@ -4849,6 +6300,7 @@
          }
      }
  }
@@ -3675,7 +3798,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl<R>
      From<
          ::aws_smithy_runtime_api::client::result::SdkError<
-@@ -4695,6 +6100,7 @@
+@@ -4874,6 +6326,7 @@
          }
      }
  }
@@ -3683,7 +3806,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl From<crate::operation::update_email_identity_policy::UpdateEmailIdentityPolicyError> for Error {
      fn from(err: crate::operation::update_email_identity_policy::UpdateEmailIdentityPolicyError) -> Self {
          match err {
-@@ -4711,6 +6117,7 @@
+@@ -4890,6 +6343,7 @@
          }
      }
  }
@@ -3691,7 +3814,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl<R>
      From<
          ::aws_smithy_runtime_api::client::result::SdkError<
-@@ -4736,6 +6143,7 @@
+@@ -4915,6 +6369,7 @@
          }
      }
  }
@@ -3699,7 +3822,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl From<crate::operation::update_email_template::UpdateEmailTemplateError> for Error {
      fn from(err: crate::operation::update_email_template::UpdateEmailTemplateError) -> Self {
          match err {
-@@ -4754,6 +6162,7 @@
+@@ -4933,6 +6388,7 @@
          }
      }
  }
@@ -3707,7 +3830,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl<R>
      From<
          ::aws_smithy_runtime_api::client::result::SdkError<
-@@ -4779,6 +6188,7 @@
+@@ -4958,6 +6414,7 @@
          }
      }
  }
@@ -3715,7 +3838,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl From<crate::operation::update_reputation_entity_customer_managed_status::UpdateReputationEntityCustomerManagedStatusError> for Error {
      fn from(err: crate::operation::update_reputation_entity_customer_managed_status::UpdateReputationEntityCustomerManagedStatusError) -> Self {
          match err {
-@@ -4789,6 +6199,7 @@
+@@ -4968,6 +6425,7 @@
          }
      }
  }
@@ -3723,7 +3846,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl<R>
      From<
          ::aws_smithy_runtime_api::client::result::SdkError<
-@@ -4814,6 +6225,7 @@
+@@ -4993,6 +6451,7 @@
          }
      }
  }
@@ -3731,7 +3854,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl From<crate::operation::update_reputation_entity_policy::UpdateReputationEntityPolicyError> for Error {
      fn from(err: crate::operation::update_reputation_entity_policy::UpdateReputationEntityPolicyError) -> Self {
          match err {
-@@ -4833,18 +6245,414 @@
+@@ -5012,18 +6471,427 @@
  impl ::std::error::Error for Error {
      fn source(&self) -> std::option::Option<&(dyn ::std::error::Error + 'static)> {
          match self {
@@ -3742,6 +3865,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
 +            ))]
              Error::AccountSuspendedException(inner) => inner.source(),
 +            #[cfg(any(
++                feature = "op_associate_email_identity_certificate",
 +                feature = "op_create_configuration_set",
 +                feature = "op_create_configuration_set_event_destination",
 +                feature = "op_create_contact",
@@ -3758,6 +3882,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
 +            ))]
              Error::AlreadyExistsException(inner) => inner.source(),
 +            #[cfg(any(
++                feature = "op_associate_email_identity_certificate",
 +                feature = "op_batch_get_metric_data",
 +                feature = "op_cancel_export_job",
 +                feature = "op_create_configuration_set",
@@ -3788,6 +3913,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
 +                feature = "op_delete_suppressed_destination",
 +                feature = "op_delete_tenant",
 +                feature = "op_delete_tenant_resource_association",
++                feature = "op_disassociate_email_identity_certificate",
 +                feature = "op_get_account",
 +                feature = "op_get_blacklist_reports",
 +                feature = "op_get_configuration_set",
@@ -3821,6 +3947,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
 +                feature = "op_list_deliverability_test_reports",
 +                feature = "op_list_domain_deliverability_campaigns",
 +                feature = "op_list_email_identities",
++                feature = "op_list_email_identity_certificates",
 +                feature = "op_list_email_templates",
 +                feature = "op_list_export_jobs",
 +                feature = "op_list_import_jobs",
@@ -3862,6 +3989,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
 +                feature = "op_tag_resource",
 +                feature = "op_test_render_email_template",
 +                feature = "op_untag_resource",
++                feature = "op_update_configuration_set",
 +                feature = "op_update_configuration_set_event_destination",
 +                feature = "op_update_contact",
 +                feature = "op_update_contact_list",
@@ -3936,6 +4064,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
 +            ))]
              Error::MessageRejected(inner) => inner.source(),
 +            #[cfg(any(
++                feature = "op_associate_email_identity_certificate",
 +                feature = "op_batch_get_metric_data",
 +                feature = "op_cancel_export_job",
 +                feature = "op_create_configuration_set",
@@ -3960,6 +4089,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
 +                feature = "op_delete_suppressed_destination",
 +                feature = "op_delete_tenant",
 +                feature = "op_delete_tenant_resource_association",
++                feature = "op_disassociate_email_identity_certificate",
 +                feature = "op_get_blacklist_reports",
 +                feature = "op_get_configuration_set",
 +                feature = "op_get_configuration_set_event_destinations",
@@ -3985,6 +4115,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
 +                feature = "op_list_contacts",
 +                feature = "op_list_deliverability_test_reports",
 +                feature = "op_list_domain_deliverability_campaigns",
++                feature = "op_list_email_identity_certificates",
 +                feature = "op_list_recommendations",
 +                feature = "op_list_resource_tenants",
 +                feature = "op_list_suppressed_destinations",
@@ -4014,6 +4145,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
 +                feature = "op_tag_resource",
 +                feature = "op_test_render_email_template",
 +                feature = "op_untag_resource",
++                feature = "op_update_configuration_set",
 +                feature = "op_update_configuration_set_event_destination",
 +                feature = "op_update_contact",
 +                feature = "op_update_contact_list",
@@ -4030,6 +4162,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
 +            ))]
              Error::SendingPausedException(inner) => inner.source(),
 +            #[cfg(any(
++                feature = "op_associate_email_identity_certificate",
 +                feature = "op_batch_get_metric_data",
 +                feature = "op_cancel_export_job",
 +                feature = "op_create_configuration_set",
@@ -4060,6 +4193,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
 +                feature = "op_delete_suppressed_destination",
 +                feature = "op_delete_tenant",
 +                feature = "op_delete_tenant_resource_association",
++                feature = "op_disassociate_email_identity_certificate",
 +                feature = "op_get_account",
 +                feature = "op_get_blacklist_reports",
 +                feature = "op_get_configuration_set",
@@ -4093,6 +4227,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
 +                feature = "op_list_deliverability_test_reports",
 +                feature = "op_list_domain_deliverability_campaigns",
 +                feature = "op_list_email_identities",
++                feature = "op_list_email_identity_certificates",
 +                feature = "op_list_email_templates",
 +                feature = "op_list_export_jobs",
 +                feature = "op_list_import_jobs",
@@ -4134,6 +4269,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
 +                feature = "op_tag_resource",
 +                feature = "op_test_render_email_template",
 +                feature = "op_untag_resource",
++                feature = "op_update_configuration_set",
 +                feature = "op_update_configuration_set_event_destination",
 +                feature = "op_update_contact",
 +                feature = "op_update_contact_list",
@@ -4146,7 +4282,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
              Error::TooManyRequestsException(inner) => inner.source(),
              Error::Unhandled(inner) => ::std::option::Option::Some(&*inner.source),
          }
-@@ -4853,18 +6661,414 @@
+@@ -5032,18 +6900,427 @@
  impl ::aws_types::request_id::RequestId for Error {
      fn request_id(&self) -> Option<&str> {
          match self {
@@ -4157,6 +4293,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
 +            ))]
              Self::AccountSuspendedException(e) => e.request_id(),
 +            #[cfg(any(
++                feature = "op_associate_email_identity_certificate",
 +                feature = "op_create_configuration_set",
 +                feature = "op_create_configuration_set_event_destination",
 +                feature = "op_create_contact",
@@ -4173,6 +4310,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
 +            ))]
              Self::AlreadyExistsException(e) => e.request_id(),
 +            #[cfg(any(
++                feature = "op_associate_email_identity_certificate",
 +                feature = "op_batch_get_metric_data",
 +                feature = "op_cancel_export_job",
 +                feature = "op_create_configuration_set",
@@ -4203,6 +4341,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
 +                feature = "op_delete_suppressed_destination",
 +                feature = "op_delete_tenant",
 +                feature = "op_delete_tenant_resource_association",
++                feature = "op_disassociate_email_identity_certificate",
 +                feature = "op_get_account",
 +                feature = "op_get_blacklist_reports",
 +                feature = "op_get_configuration_set",
@@ -4236,6 +4375,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
 +                feature = "op_list_deliverability_test_reports",
 +                feature = "op_list_domain_deliverability_campaigns",
 +                feature = "op_list_email_identities",
++                feature = "op_list_email_identity_certificates",
 +                feature = "op_list_email_templates",
 +                feature = "op_list_export_jobs",
 +                feature = "op_list_import_jobs",
@@ -4277,6 +4417,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
 +                feature = "op_tag_resource",
 +                feature = "op_test_render_email_template",
 +                feature = "op_untag_resource",
++                feature = "op_update_configuration_set",
 +                feature = "op_update_configuration_set_event_destination",
 +                feature = "op_update_contact",
 +                feature = "op_update_contact_list",
@@ -4351,6 +4492,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
 +            ))]
              Self::MessageRejected(e) => e.request_id(),
 +            #[cfg(any(
++                feature = "op_associate_email_identity_certificate",
 +                feature = "op_batch_get_metric_data",
 +                feature = "op_cancel_export_job",
 +                feature = "op_create_configuration_set",
@@ -4375,6 +4517,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
 +                feature = "op_delete_suppressed_destination",
 +                feature = "op_delete_tenant",
 +                feature = "op_delete_tenant_resource_association",
++                feature = "op_disassociate_email_identity_certificate",
 +                feature = "op_get_blacklist_reports",
 +                feature = "op_get_configuration_set",
 +                feature = "op_get_configuration_set_event_destinations",
@@ -4400,6 +4543,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
 +                feature = "op_list_contacts",
 +                feature = "op_list_deliverability_test_reports",
 +                feature = "op_list_domain_deliverability_campaigns",
++                feature = "op_list_email_identity_certificates",
 +                feature = "op_list_recommendations",
 +                feature = "op_list_resource_tenants",
 +                feature = "op_list_suppressed_destinations",
@@ -4429,6 +4573,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
 +                feature = "op_tag_resource",
 +                feature = "op_test_render_email_template",
 +                feature = "op_untag_resource",
++                feature = "op_update_configuration_set",
 +                feature = "op_update_configuration_set_event_destination",
 +                feature = "op_update_contact",
 +                feature = "op_update_contact_list",
@@ -4445,6 +4590,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
 +            ))]
              Self::SendingPausedException(e) => e.request_id(),
 +            #[cfg(any(
++                feature = "op_associate_email_identity_certificate",
 +                feature = "op_batch_get_metric_data",
 +                feature = "op_cancel_export_job",
 +                feature = "op_create_configuration_set",
@@ -4475,6 +4621,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
 +                feature = "op_delete_suppressed_destination",
 +                feature = "op_delete_tenant",
 +                feature = "op_delete_tenant_resource_association",
++                feature = "op_disassociate_email_identity_certificate",
 +                feature = "op_get_account",
 +                feature = "op_get_blacklist_reports",
 +                feature = "op_get_configuration_set",
@@ -4508,6 +4655,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
 +                feature = "op_list_deliverability_test_reports",
 +                feature = "op_list_domain_deliverability_campaigns",
 +                feature = "op_list_email_identities",
++                feature = "op_list_email_identity_certificates",
 +                feature = "op_list_email_templates",
 +                feature = "op_list_export_jobs",
 +                feature = "op_list_import_jobs",
@@ -4549,6 +4697,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
 +                feature = "op_tag_resource",
 +                feature = "op_test_render_email_template",
 +                feature = "op_untag_resource",
++                feature = "op_update_configuration_set",
 +                feature = "op_update_configuration_set_event_destination",
 +                feature = "op_update_contact",
 +                feature = "op_update_contact_list",
@@ -4643,11 +4792,19 @@ diff --git a/src/lens.rs b/src/lens.rs
      ::std::option::Option::Some(input)
  }
 
++#[cfg(feature = "op_list_email_identity_certificates")]
+ pub(crate) fn reflens_list_email_identity_certificates_output_output_next_token(
+     input: &crate::operation::list_email_identity_certificates::ListEmailIdentityCertificatesOutput,
+ ) -> ::std::option::Option<&::std::string::String> {
+@@ -99,6 +109,7 @@
+     ::std::option::Option::Some(input)
+ }
+
 +#[cfg(feature = "op_list_email_templates")]
  pub(crate) fn reflens_list_email_templates_output_output_next_token(
      input: &crate::operation::list_email_templates::ListEmailTemplatesOutput,
  ) -> ::std::option::Option<&::std::string::String> {
-@@ -99,6 +109,7 @@
+@@ -109,6 +120,7 @@
      ::std::option::Option::Some(input)
  }
 
@@ -4655,7 +4812,7 @@ diff --git a/src/lens.rs b/src/lens.rs
  pub(crate) fn reflens_list_export_jobs_output_output_next_token(
      input: &crate::operation::list_export_jobs::ListExportJobsOutput,
  ) -> ::std::option::Option<&::std::string::String> {
-@@ -109,6 +120,7 @@
+@@ -119,6 +131,7 @@
      ::std::option::Option::Some(input)
  }
 
@@ -4663,7 +4820,7 @@ diff --git a/src/lens.rs b/src/lens.rs
  pub(crate) fn reflens_list_import_jobs_output_output_next_token(
      input: &crate::operation::list_import_jobs::ListImportJobsOutput,
  ) -> ::std::option::Option<&::std::string::String> {
-@@ -119,6 +131,7 @@
+@@ -129,6 +142,7 @@
      ::std::option::Option::Some(input)
  }
 
@@ -4671,7 +4828,7 @@ diff --git a/src/lens.rs b/src/lens.rs
  pub(crate) fn reflens_list_multi_region_endpoints_output_output_next_token(
      input: &crate::operation::list_multi_region_endpoints::ListMultiRegionEndpointsOutput,
  ) -> ::std::option::Option<&::std::string::String> {
-@@ -129,6 +142,7 @@
+@@ -139,6 +153,7 @@
      ::std::option::Option::Some(input)
  }
 
@@ -4679,7 +4836,7 @@ diff --git a/src/lens.rs b/src/lens.rs
  pub(crate) fn reflens_list_recommendations_output_output_next_token(
      input: &crate::operation::list_recommendations::ListRecommendationsOutput,
  ) -> ::std::option::Option<&::std::string::String> {
-@@ -139,6 +153,7 @@
+@@ -149,6 +164,7 @@
      ::std::option::Option::Some(input)
  }
 
@@ -4687,7 +4844,7 @@ diff --git a/src/lens.rs b/src/lens.rs
  pub(crate) fn reflens_list_reputation_entities_output_output_next_token(
      input: &crate::operation::list_reputation_entities::ListReputationEntitiesOutput,
  ) -> ::std::option::Option<&::std::string::String> {
-@@ -149,6 +164,7 @@
+@@ -159,6 +175,7 @@
      ::std::option::Option::Some(input)
  }
 
@@ -4695,7 +4852,7 @@ diff --git a/src/lens.rs b/src/lens.rs
  pub(crate) fn reflens_list_resource_tenants_output_output_next_token(
      input: &crate::operation::list_resource_tenants::ListResourceTenantsOutput,
  ) -> ::std::option::Option<&::std::string::String> {
-@@ -159,6 +175,7 @@
+@@ -169,6 +186,7 @@
      ::std::option::Option::Some(input)
  }
 
@@ -4703,7 +4860,7 @@ diff --git a/src/lens.rs b/src/lens.rs
  pub(crate) fn reflens_list_suppressed_destinations_output_output_next_token(
      input: &crate::operation::list_suppressed_destinations::ListSuppressedDestinationsOutput,
  ) -> ::std::option::Option<&::std::string::String> {
-@@ -169,6 +186,7 @@
+@@ -179,6 +197,7 @@
      ::std::option::Option::Some(input)
  }
 
@@ -4711,7 +4868,7 @@ diff --git a/src/lens.rs b/src/lens.rs
  pub(crate) fn reflens_list_tenant_resources_output_output_next_token(
      input: &crate::operation::list_tenant_resources::ListTenantResourcesOutput,
  ) -> ::std::option::Option<&::std::string::String> {
-@@ -179,6 +197,7 @@
+@@ -189,6 +208,7 @@
      ::std::option::Option::Some(input)
  }
 
@@ -4719,7 +4876,15 @@ diff --git a/src/lens.rs b/src/lens.rs
  pub(crate) fn reflens_list_tenants_output_output_next_token(
      input: &crate::operation::list_tenants::ListTenantsOutput,
  ) -> ::std::option::Option<&::std::string::String> {
-@@ -189,6 +208,7 @@
+@@ -199,6 +219,7 @@
+     ::std::option::Option::Some(input)
+ }
+
++#[cfg(feature = "op_list_email_identity_certificates")]
+ pub(crate) fn lens_list_email_identity_certificates_output_output_certificates(
+     input: crate::operation::list_email_identity_certificates::ListEmailIdentityCertificatesOutput,
+ ) -> ::std::option::Option<::std::vec::Vec<crate::types::IdentityCertificate>> {
+@@ -206,6 +227,7 @@
      ::std::option::Option::Some(input)
  }
 
@@ -4727,7 +4892,7 @@ diff --git a/src/lens.rs b/src/lens.rs
  pub(crate) fn lens_list_multi_region_endpoints_output_output_multi_region_endpoints(
      input: crate::operation::list_multi_region_endpoints::ListMultiRegionEndpointsOutput,
  ) -> ::std::option::Option<::std::vec::Vec<crate::types::MultiRegionEndpoint>> {
-@@ -196,6 +216,7 @@
+@@ -213,6 +235,7 @@
      ::std::option::Option::Some(input)
  }
 
@@ -4735,7 +4900,7 @@ diff --git a/src/lens.rs b/src/lens.rs
  pub(crate) fn lens_list_reputation_entities_output_output_reputation_entities(
      input: crate::operation::list_reputation_entities::ListReputationEntitiesOutput,
  ) -> ::std::option::Option<::std::vec::Vec<crate::types::ReputationEntity>> {
-@@ -203,6 +224,7 @@
+@@ -220,6 +243,7 @@
      ::std::option::Option::Some(input)
  }
 
@@ -4743,7 +4908,7 @@ diff --git a/src/lens.rs b/src/lens.rs
  pub(crate) fn lens_list_resource_tenants_output_output_resource_tenants(
      input: crate::operation::list_resource_tenants::ListResourceTenantsOutput,
  ) -> ::std::option::Option<::std::vec::Vec<crate::types::ResourceTenantMetadata>> {
-@@ -210,6 +232,7 @@
+@@ -227,6 +251,7 @@
      ::std::option::Option::Some(input)
  }
 
@@ -4751,7 +4916,7 @@ diff --git a/src/lens.rs b/src/lens.rs
  pub(crate) fn lens_list_tenant_resources_output_output_tenant_resources(
      input: crate::operation::list_tenant_resources::ListTenantResourcesOutput,
  ) -> ::std::option::Option<::std::vec::Vec<crate::types::TenantResource>> {
-@@ -217,6 +240,7 @@
+@@ -234,6 +259,7 @@
      ::std::option::Option::Some(input)
  }
 
@@ -4767,9 +4932,13 @@ diff --git a/src/lens.rs b/src/lens.rs
 diff --git a/src/operation.rs b/src/operation.rs
 --- a/src/operation.rs
 +++ b/src/operation.rs
-@@ -1,338 +1,450 @@
+@@ -1,350 +1,466 @@
  // Code generated by software.amazon.smithy.rust.codegen.smithy-rs. DO NOT EDIT.
  pub use ::aws_types::request_id::RequestId;
+
++#[cfg(feature = "op_associate_email_identity_certificate")]
+ /// Types for the `AssociateEmailIdentityCertificate` operation.
+ pub mod associate_email_identity_certificate;
 
 +#[cfg(feature = "op_batch_get_metric_data")]
  /// Types for the `BatchGetMetricData` operation.
@@ -4890,6 +5059,10 @@ diff --git a/src/operation.rs b/src/operation.rs
 +#[cfg(feature = "op_delete_tenant_resource_association")]
  /// Types for the `DeleteTenantResourceAssociation` operation.
  pub mod delete_tenant_resource_association;
+
++#[cfg(feature = "op_disassociate_email_identity_certificate")]
+ /// Types for the `DisassociateEmailIdentityCertificate` operation.
+ pub mod disassociate_email_identity_certificate;
 
 +#[cfg(feature = "op_get_account")]
  /// Types for the `GetAccount` operation.
@@ -5022,6 +5195,10 @@ diff --git a/src/operation.rs b/src/operation.rs
 +#[cfg(feature = "op_list_email_identities")]
  /// Types for the `ListEmailIdentities` operation.
  pub mod list_email_identities;
+
++#[cfg(feature = "op_list_email_identity_certificates")]
+ /// Types for the `ListEmailIdentityCertificates` operation.
+ pub mod list_email_identity_certificates;
 
 +#[cfg(feature = "op_list_email_templates")]
  /// Types for the `ListEmailTemplates` operation.
@@ -5187,6 +5364,10 @@ diff --git a/src/operation.rs b/src/operation.rs
  /// Types for the `UntagResource` operation.
  pub mod untag_resource;
 
++#[cfg(feature = "op_update_configuration_set")]
+ /// Types for the `UpdateConfigurationSet` operation.
+ pub mod update_configuration_set;
+
 +#[cfg(feature = "op_update_configuration_set_event_destination")]
  /// Types for the `UpdateConfigurationSetEventDestination` operation.
  pub mod update_configuration_set_event_destination;
@@ -5226,9 +5407,10 @@ diff --git a/src/operation.rs b/src/operation.rs
 diff --git a/src/protocol_serde.rs b/src/protocol_serde.rs
 --- a/src/protocol_serde.rs
 +++ b/src/protocol_serde.rs
-@@ -1,4 +1,118 @@
+@@ -1,4 +1,122 @@
  // Code generated by software.amazon.smithy.rust.codegen.smithy-rs. DO NOT EDIT.
 +#[cfg(any(
++    feature = "op_associate_email_identity_certificate",
 +    feature = "op_batch_get_metric_data",
 +    feature = "op_cancel_export_job",
 +    feature = "op_create_configuration_set",
@@ -5259,6 +5441,7 @@ diff --git a/src/protocol_serde.rs b/src/protocol_serde.rs
 +    feature = "op_delete_suppressed_destination",
 +    feature = "op_delete_tenant",
 +    feature = "op_delete_tenant_resource_association",
++    feature = "op_disassociate_email_identity_certificate",
 +    feature = "op_get_account",
 +    feature = "op_get_blacklist_reports",
 +    feature = "op_get_configuration_set",
@@ -5292,6 +5475,7 @@ diff --git a/src/protocol_serde.rs b/src/protocol_serde.rs
 +    feature = "op_list_deliverability_test_reports",
 +    feature = "op_list_domain_deliverability_campaigns",
 +    feature = "op_list_email_identities",
++    feature = "op_list_email_identity_certificates",
 +    feature = "op_list_email_templates",
 +    feature = "op_list_export_jobs",
 +    feature = "op_list_import_jobs",
@@ -5333,6 +5517,7 @@ diff --git a/src/protocol_serde.rs b/src/protocol_serde.rs
 +    feature = "op_tag_resource",
 +    feature = "op_test_render_email_template",
 +    feature = "op_untag_resource",
++    feature = "op_update_configuration_set",
 +    feature = "op_update_configuration_set_event_destination",
 +    feature = "op_update_contact",
 +    feature = "op_update_contact_list",
@@ -5345,11 +5530,12 @@ diff --git a/src/protocol_serde.rs b/src/protocol_serde.rs
  pub(crate) fn type_erase_result<O, E>(
      result: ::std::result::Result<O, E>,
  ) -> ::std::result::Result<
-@@ -17,6 +131,120 @@
+@@ -17,6 +135,124 @@
          .map_err(::std::convert::Into::into)
  }
 
 +#[cfg(any(
++    feature = "op_associate_email_identity_certificate",
 +    feature = "op_batch_get_metric_data",
 +    feature = "op_cancel_export_job",
 +    feature = "op_create_configuration_set",
@@ -5380,6 +5566,7 @@ diff --git a/src/protocol_serde.rs b/src/protocol_serde.rs
 +    feature = "op_delete_suppressed_destination",
 +    feature = "op_delete_tenant",
 +    feature = "op_delete_tenant_resource_association",
++    feature = "op_disassociate_email_identity_certificate",
 +    feature = "op_get_account",
 +    feature = "op_get_blacklist_reports",
 +    feature = "op_get_configuration_set",
@@ -5413,6 +5600,7 @@ diff --git a/src/protocol_serde.rs b/src/protocol_serde.rs
 +    feature = "op_list_deliverability_test_reports",
 +    feature = "op_list_domain_deliverability_campaigns",
 +    feature = "op_list_email_identities",
++    feature = "op_list_email_identity_certificates",
 +    feature = "op_list_email_templates",
 +    feature = "op_list_export_jobs",
 +    feature = "op_list_import_jobs",
@@ -5454,6 +5642,7 @@ diff --git a/src/protocol_serde.rs b/src/protocol_serde.rs
 +    feature = "op_tag_resource",
 +    feature = "op_test_render_email_template",
 +    feature = "op_untag_resource",
++    feature = "op_update_configuration_set",
 +    feature = "op_update_configuration_set_event_destination",
 +    feature = "op_update_contact",
 +    feature = "op_update_contact_list",
@@ -5466,9 +5655,12 @@ diff --git a/src/protocol_serde.rs b/src/protocol_serde.rs
  pub fn parse_http_error_metadata(
      _response_status: u16,
      response_headers: &::aws_smithy_runtime_api::http::Headers,
-@@ -28,230 +256,456 @@
+@@ -28,238 +264,472 @@
      crate::json_errors::parse_error_metadata(response_body, response_headers)
  }
+
++#[cfg(feature = "op_associate_email_identity_certificate")]
+ pub(crate) mod shape_associate_email_identity_certificate;
 
 +#[cfg(feature = "op_batch_get_metric_data")]
  pub(crate) mod shape_batch_get_metric_data;
@@ -5559,6 +5751,9 @@ diff --git a/src/protocol_serde.rs b/src/protocol_serde.rs
 
 +#[cfg(feature = "op_delete_tenant_resource_association")]
  pub(crate) mod shape_delete_tenant_resource_association;
+
++#[cfg(feature = "op_disassociate_email_identity_certificate")]
+ pub(crate) mod shape_disassociate_email_identity_certificate;
 
 +#[cfg(feature = "op_get_account")]
  pub(crate) mod shape_get_account;
@@ -5658,6 +5853,9 @@ diff --git a/src/protocol_serde.rs b/src/protocol_serde.rs
 
 +#[cfg(feature = "op_list_email_identities")]
  pub(crate) mod shape_list_email_identities;
+
++#[cfg(feature = "op_list_email_identity_certificates")]
+ pub(crate) mod shape_list_email_identity_certificates;
 
 +#[cfg(feature = "op_list_email_templates")]
  pub(crate) mod shape_list_email_templates;
@@ -5782,6 +5980,9 @@ diff --git a/src/protocol_serde.rs b/src/protocol_serde.rs
 +#[cfg(feature = "op_untag_resource")]
  pub(crate) mod shape_untag_resource;
 
++#[cfg(feature = "op_update_configuration_set")]
+ pub(crate) mod shape_update_configuration_set;
+
 +#[cfg(feature = "op_update_configuration_set_event_destination")]
  pub(crate) mod shape_update_configuration_set_event_destination;
 
@@ -5807,6 +6008,7 @@ diff --git a/src/protocol_serde.rs b/src/protocol_serde.rs
  pub(crate) mod shape_update_reputation_entity_policy;
 
 +#[cfg(any(
++    feature = "op_associate_email_identity_certificate",
 +    feature = "op_batch_get_metric_data",
 +    feature = "op_cancel_export_job",
 +    feature = "op_create_configuration_set",
@@ -5837,6 +6039,7 @@ diff --git a/src/protocol_serde.rs b/src/protocol_serde.rs
 +    feature = "op_delete_suppressed_destination",
 +    feature = "op_delete_tenant",
 +    feature = "op_delete_tenant_resource_association",
++    feature = "op_disassociate_email_identity_certificate",
 +    feature = "op_get_account",
 +    feature = "op_get_blacklist_reports",
 +    feature = "op_get_configuration_set",
@@ -5870,6 +6073,7 @@ diff --git a/src/protocol_serde.rs b/src/protocol_serde.rs
 +    feature = "op_list_deliverability_test_reports",
 +    feature = "op_list_domain_deliverability_campaigns",
 +    feature = "op_list_email_identities",
++    feature = "op_list_email_identity_certificates",
 +    feature = "op_list_email_templates",
 +    feature = "op_list_export_jobs",
 +    feature = "op_list_import_jobs",
@@ -5911,6 +6115,7 @@ diff --git a/src/protocol_serde.rs b/src/protocol_serde.rs
 +    feature = "op_tag_resource",
 +    feature = "op_test_render_email_template",
 +    feature = "op_untag_resource",
++    feature = "op_update_configuration_set",
 +    feature = "op_update_configuration_set_event_destination",
 +    feature = "op_update_contact",
 +    feature = "op_update_contact_list",
@@ -5923,7 +6128,7 @@ diff --git a/src/protocol_serde.rs b/src/protocol_serde.rs
  pub(crate) fn or_empty_doc(data: &[u8]) -> &[u8] {
      if data.is_empty() {
          b"{}"
-@@ -260,502 +714,1305 @@
+@@ -268,522 +738,1364 @@
      }
  }
 
@@ -5935,6 +6140,7 @@ diff --git a/src/protocol_serde.rs b/src/protocol_serde.rs
  pub(crate) mod shape_account_suspended_exception;
 
 +#[cfg(any(
++    feature = "op_associate_email_identity_certificate",
 +    feature = "op_create_configuration_set",
 +    feature = "op_create_configuration_set_event_destination",
 +    feature = "op_create_contact",
@@ -5951,7 +6157,11 @@ diff --git a/src/protocol_serde.rs b/src/protocol_serde.rs
 +))]
  pub(crate) mod shape_already_exists_exception;
 
++#[cfg(feature = "op_associate_email_identity_certificate")]
+ pub(crate) mod shape_associate_email_identity_certificate_input;
+
 +#[cfg(any(
++    feature = "op_associate_email_identity_certificate",
 +    feature = "op_batch_get_metric_data",
 +    feature = "op_cancel_export_job",
 +    feature = "op_create_configuration_set",
@@ -5982,6 +6192,7 @@ diff --git a/src/protocol_serde.rs b/src/protocol_serde.rs
 +    feature = "op_delete_suppressed_destination",
 +    feature = "op_delete_tenant",
 +    feature = "op_delete_tenant_resource_association",
++    feature = "op_disassociate_email_identity_certificate",
 +    feature = "op_get_account",
 +    feature = "op_get_blacklist_reports",
 +    feature = "op_get_configuration_set",
@@ -6015,6 +6226,7 @@ diff --git a/src/protocol_serde.rs b/src/protocol_serde.rs
 +    feature = "op_list_deliverability_test_reports",
 +    feature = "op_list_domain_deliverability_campaigns",
 +    feature = "op_list_email_identities",
++    feature = "op_list_email_identity_certificates",
 +    feature = "op_list_email_templates",
 +    feature = "op_list_export_jobs",
 +    feature = "op_list_import_jobs",
@@ -6056,6 +6268,7 @@ diff --git a/src/protocol_serde.rs b/src/protocol_serde.rs
 +    feature = "op_tag_resource",
 +    feature = "op_test_render_email_template",
 +    feature = "op_untag_resource",
++    feature = "op_update_configuration_set",
 +    feature = "op_update_configuration_set_event_destination",
 +    feature = "op_update_contact",
 +    feature = "op_update_contact_list",
@@ -6147,6 +6360,9 @@ diff --git a/src/protocol_serde.rs b/src/protocol_serde.rs
 +#[cfg(feature = "op_delete_tenant_resource_association")]
  pub(crate) mod shape_delete_tenant_resource_association_input;
 
++#[cfg(feature = "op_disassociate_email_identity_certificate")]
+ pub(crate) mod shape_disassociate_email_identity_certificate_input;
+
 +#[cfg(feature = "op_get_email_address_insights")]
  pub(crate) mod shape_get_email_address_insights_input;
 
@@ -6183,6 +6399,9 @@ diff --git a/src/protocol_serde.rs b/src/protocol_serde.rs
 
 +#[cfg(feature = "op_list_contacts")]
  pub(crate) mod shape_list_contacts_input;
+
++#[cfg(feature = "op_list_email_identity_certificates")]
+ pub(crate) mod shape_list_email_identity_certificates_input;
 
 +#[cfg(feature = "op_list_export_jobs")]
  pub(crate) mod shape_list_export_jobs_input;
@@ -6222,6 +6441,7 @@ diff --git a/src/protocol_serde.rs b/src/protocol_serde.rs
  pub(crate) mod shape_message_rejected;
 
 +#[cfg(any(
++    feature = "op_associate_email_identity_certificate",
 +    feature = "op_batch_get_metric_data",
 +    feature = "op_cancel_export_job",
 +    feature = "op_create_configuration_set",
@@ -6246,6 +6466,7 @@ diff --git a/src/protocol_serde.rs b/src/protocol_serde.rs
 +    feature = "op_delete_suppressed_destination",
 +    feature = "op_delete_tenant",
 +    feature = "op_delete_tenant_resource_association",
++    feature = "op_disassociate_email_identity_certificate",
 +    feature = "op_get_blacklist_reports",
 +    feature = "op_get_configuration_set",
 +    feature = "op_get_configuration_set_event_destinations",
@@ -6271,6 +6492,7 @@ diff --git a/src/protocol_serde.rs b/src/protocol_serde.rs
 +    feature = "op_list_contacts",
 +    feature = "op_list_deliverability_test_reports",
 +    feature = "op_list_domain_deliverability_campaigns",
++    feature = "op_list_email_identity_certificates",
 +    feature = "op_list_recommendations",
 +    feature = "op_list_resource_tenants",
 +    feature = "op_list_suppressed_destinations",
@@ -6300,6 +6522,7 @@ diff --git a/src/protocol_serde.rs b/src/protocol_serde.rs
 +    feature = "op_tag_resource",
 +    feature = "op_test_render_email_template",
 +    feature = "op_untag_resource",
++    feature = "op_update_configuration_set",
 +    feature = "op_update_configuration_set_event_destination",
 +    feature = "op_update_contact",
 +    feature = "op_update_contact_list",
@@ -6405,6 +6628,7 @@ diff --git a/src/protocol_serde.rs b/src/protocol_serde.rs
  pub(crate) mod shape_test_render_email_template_input;
 
 +#[cfg(any(
++    feature = "op_associate_email_identity_certificate",
 +    feature = "op_batch_get_metric_data",
 +    feature = "op_cancel_export_job",
 +    feature = "op_create_configuration_set",
@@ -6435,6 +6659,7 @@ diff --git a/src/protocol_serde.rs b/src/protocol_serde.rs
 +    feature = "op_delete_suppressed_destination",
 +    feature = "op_delete_tenant",
 +    feature = "op_delete_tenant_resource_association",
++    feature = "op_disassociate_email_identity_certificate",
 +    feature = "op_get_account",
 +    feature = "op_get_blacklist_reports",
 +    feature = "op_get_configuration_set",
@@ -6468,6 +6693,7 @@ diff --git a/src/protocol_serde.rs b/src/protocol_serde.rs
 +    feature = "op_list_deliverability_test_reports",
 +    feature = "op_list_domain_deliverability_campaigns",
 +    feature = "op_list_email_identities",
++    feature = "op_list_email_identity_certificates",
 +    feature = "op_list_email_templates",
 +    feature = "op_list_export_jobs",
 +    feature = "op_list_import_jobs",
@@ -6509,6 +6735,7 @@ diff --git a/src/protocol_serde.rs b/src/protocol_serde.rs
 +    feature = "op_tag_resource",
 +    feature = "op_test_render_email_template",
 +    feature = "op_untag_resource",
++    feature = "op_update_configuration_set",
 +    feature = "op_update_configuration_set_event_destination",
 +    feature = "op_update_contact",
 +    feature = "op_update_contact_list",
@@ -6522,6 +6749,9 @@ diff --git a/src/protocol_serde.rs b/src/protocol_serde.rs
 
 +#[cfg(feature = "op_update_configuration_set_event_destination")]
  pub(crate) mod shape_update_configuration_set_event_destination_input;
+
++#[cfg(feature = "op_update_configuration_set")]
+ pub(crate) mod shape_update_configuration_set_input;
 
 +#[cfg(feature = "op_update_contact")]
  pub(crate) mod shape_update_contact_input;
@@ -6681,6 +6911,9 @@ diff --git a/src/protocol_serde.rs b/src/protocol_serde.rs
 +#[cfg(any(feature = "op_get_export_job", feature = "op_get_import_job"))]
  pub(crate) mod shape_failure_info;
 
++#[cfg(feature = "op_list_email_identity_certificates")]
+ pub(crate) mod shape_identity_certificate_list;
+
 +#[cfg(feature = "op_list_email_identities")]
  pub(crate) mod shape_identity_info_list;
 
@@ -6720,6 +6953,13 @@ diff --git a/src/protocol_serde.rs b/src/protocol_serde.rs
 
 +#[cfg(feature = "op_get_email_address_insights")]
  pub(crate) mod shape_mailbox_validation;
+
++#[cfg(any(
++    feature = "op_create_configuration_set",
++    feature = "op_get_configuration_set",
++    feature = "op_update_configuration_set"
++))]
+ pub(crate) mod shape_message_security_options;
 
 +#[cfg(any(
 +    feature = "op_get_message_insights",
@@ -6971,6 +7211,9 @@ diff --git a/src/protocol_serde.rs b/src/protocol_serde.rs
 +))]
  pub(crate) mod shape_guardian_options;
 
++#[cfg(feature = "op_list_email_identity_certificates")]
+ pub(crate) mod shape_identity_certificate;
+
 +#[cfg(feature = "op_list_email_identities")]
  pub(crate) mod shape_identity_info;
 
@@ -7051,6 +7294,13 @@ diff --git a/src/protocol_serde.rs b/src/protocol_serde.rs
 
 +#[cfg(feature = "op_create_multi_region_endpoint")]
  pub(crate) mod shape_route_details;
+
++#[cfg(any(
++    feature = "op_create_configuration_set",
++    feature = "op_get_configuration_set",
++    feature = "op_update_configuration_set"
++))]
+ pub(crate) mod shape_signing_scheme;
 
 +#[cfg(any(
 +    feature = "op_create_configuration_set_event_destination",
@@ -7141,6 +7391,13 @@ diff --git a/src/protocol_serde.rs b/src/protocol_serde.rs
 +#[cfg(any(feature = "op_create_deliverability_test_report", feature = "op_send_email"))]
  pub(crate) mod shape_content;
 
++#[cfg(any(
++    feature = "op_create_configuration_set",
++    feature = "op_get_configuration_set",
++    feature = "op_update_configuration_set"
++))]
+ pub(crate) mod shape_default_signing_scheme;
+
 +#[cfg(feature = "op_get_domain_statistics_report")]
  pub(crate) mod shape_domain_isp_placement;
 
@@ -7170,6 +7427,13 @@ diff --git a/src/protocol_serde.rs b/src/protocol_serde.rs
 
 +#[cfg(feature = "op_send_bulk_email")]
  pub(crate) mod shape_replacement_template;
+
++#[cfg(any(
++    feature = "op_create_configuration_set",
++    feature = "op_get_configuration_set",
++    feature = "op_update_configuration_set"
++))]
+ pub(crate) mod shape_smime_signing_scheme;
 
 +#[cfg(any(
 +    feature = "op_create_configuration_set",
@@ -7647,7 +7911,7 @@ diff --git a/src/serde_util.rs b/src/serde_util.rs
 diff --git a/src/types.rs b/src/types.rs
 --- a/src/types.rs
 +++ b/src/types.rs
-@@ -1,678 +1,1572 @@
+@@ -1,706 +1,1654 @@
  // Code generated by software.amazon.smithy.rust.codegen.smithy-rs. DO NOT EDIT.
 +#[cfg(any(feature = "op_create_configuration_set", feature = "op_get_configuration_set"))]
  pub use crate::types::_tracking_options::TrackingOptions;
@@ -7673,6 +7937,13 @@ diff --git a/src/types.rs b/src/types.rs
 
 +#[cfg(any(feature = "op_create_configuration_set", feature = "op_get_configuration_set"))]
  pub use crate::types::_archiving_options::ArchivingOptions;
+
++#[cfg(any(
++    feature = "op_create_configuration_set",
++    feature = "op_get_configuration_set",
++    feature = "op_update_configuration_set"
++))]
+ pub use crate::types::_message_security_options::MessageSecurityOptions;
 
 +#[cfg(any(
 +    feature = "op_create_configuration_set_event_destination",
@@ -7992,6 +8263,13 @@ diff --git a/src/types.rs b/src/types.rs
  pub use crate::types::_guardian_options::GuardianOptions;
 
 +#[cfg(any(
++    feature = "op_create_configuration_set",
++    feature = "op_get_configuration_set",
++    feature = "op_update_configuration_set"
++))]
+ pub use crate::types::_signing_scheme::SigningScheme;
+
++#[cfg(any(
 +    feature = "op_create_configuration_set_event_destination",
 +    feature = "op_get_configuration_set_event_destinations",
 +    feature = "op_update_configuration_set_event_destination"
@@ -8199,6 +8477,9 @@ diff --git a/src/types.rs b/src/types.rs
 +#[cfg(feature = "op_list_email_identities")]
  pub use crate::types::_identity_info::IdentityInfo;
 
++#[cfg(feature = "op_list_email_identity_certificates")]
+ pub use crate::types::_identity_certificate::IdentityCertificate;
+
 +#[cfg(feature = "op_list_email_templates")]
  pub use crate::types::_email_template_metadata::EmailTemplateMetadata;
 
@@ -8271,6 +8552,20 @@ diff --git a/src/types.rs b/src/types.rs
  pub use crate::types::_query_error_code::QueryErrorCode;
 
 +#[cfg(any(
++    feature = "op_create_configuration_set",
++    feature = "op_get_configuration_set",
++    feature = "op_update_configuration_set"
++))]
+ pub use crate::types::_default_signing_scheme::DefaultSigningScheme;
+
++#[cfg(any(
++    feature = "op_create_configuration_set",
++    feature = "op_get_configuration_set",
++    feature = "op_update_configuration_set"
++))]
+ pub use crate::types::_smime_signing_scheme::SmimeSigningScheme;
+
++#[cfg(any(
 +    feature = "op_create_configuration_set_event_destination",
 +    feature = "op_get_configuration_set_event_destinations",
 +    feature = "op_get_message_insights",
@@ -8322,6 +8617,9 @@ diff --git a/src/types.rs b/src/types.rs
 +#[cfg(feature = "op_get_email_address_insights")]
  pub use crate::types::_email_address_insights_confidence_verdict::EmailAddressInsightsConfidenceVerdict;
 
++#[cfg(feature = "op_list_email_identity_certificates")]
+ pub use crate::types::_identity_certificate_status::IdentityCertificateStatus;
+
 +#[cfg(feature = "op_list_recommendations")]
  pub use crate::types::_recommendation_type::RecommendationType;
 
@@ -8352,6 +8650,13 @@ diff --git a/src/types.rs b/src/types.rs
 +    feature = "op_get_export_job"
 +))]
  pub use crate::types::_metric_dimension_name::MetricDimensionName;
+
++#[cfg(any(
++    feature = "op_create_configuration_set",
++    feature = "op_get_configuration_set",
++    feature = "op_update_configuration_set"
++))]
+ pub use crate::types::_signature_format::SignatureFormat;
 
 +#[cfg(any(
 +    feature = "op_create_configuration_set_event_destination",
@@ -8570,6 +8875,13 @@ diff --git a/src/types.rs b/src/types.rs
 +#[cfg(feature = "op_get_dedicated_ip_pool")]
  mod _dedicated_ip_pool;
 
++#[cfg(any(
++    feature = "op_create_configuration_set",
++    feature = "op_get_configuration_set",
++    feature = "op_update_configuration_set"
++))]
+ mod _default_signing_scheme;
+
 +#[cfg(feature = "op_get_deliverability_dashboard_options")]
  mod _deliverability_dashboard_account_status;
 
@@ -8759,6 +9071,12 @@ diff --git a/src/types.rs b/src/types.rs
 +))]
  mod _https_policy;
 
++#[cfg(feature = "op_list_email_identity_certificates")]
+ mod _identity_certificate;
+
++#[cfg(feature = "op_list_email_identity_certificates")]
+ mod _identity_certificate_status;
+
 +#[cfg(feature = "op_list_email_identities")]
  mod _identity_info;
 
@@ -8851,6 +9169,13 @@ diff --git a/src/types.rs b/src/types.rs
 
 +#[cfg(any(feature = "op_create_export_job", feature = "op_get_export_job"))]
  mod _message_insights_filters;
+
++#[cfg(any(
++    feature = "op_create_configuration_set",
++    feature = "op_get_configuration_set",
++    feature = "op_update_configuration_set"
++))]
+ mod _message_security_options;
 
 +#[cfg(any(
 +    feature = "op_get_message_insights",
@@ -8998,6 +9323,27 @@ diff --git a/src/types.rs b/src/types.rs
 +    feature = "op_update_reputation_entity_customer_managed_status"
 +))]
  mod _sending_status;
+
++#[cfg(any(
++    feature = "op_create_configuration_set",
++    feature = "op_get_configuration_set",
++    feature = "op_update_configuration_set"
++))]
+ mod _signature_format;
+
++#[cfg(any(
++    feature = "op_create_configuration_set",
++    feature = "op_get_configuration_set",
++    feature = "op_update_configuration_set"
++))]
+ mod _signing_scheme;
+
++#[cfg(any(
++    feature = "op_create_configuration_set",
++    feature = "op_get_configuration_set",
++    feature = "op_update_configuration_set"
++))]
+ mod _smime_signing_scheme;
 
 +#[cfg(any(
 +    feature = "op_create_configuration_set_event_destination",
@@ -9228,7 +9574,7 @@ diff --git a/src/types.rs b/src/types.rs
 diff --git a/src/types/builders.rs b/src/types/builders.rs
 --- a/src/types/builders.rs
 +++ b/src/types/builders.rs
-@@ -1,232 +1,481 @@
+@@ -1,240 +1,505 @@
  // Code generated by software.amazon.smithy.rust.codegen.smithy-rs. DO NOT EDIT.
 +#[cfg(any(feature = "op_create_configuration_set", feature = "op_get_configuration_set"))]
  pub use crate::types::_tracking_options::TrackingOptionsBuilder;
@@ -9254,6 +9600,13 @@ diff --git a/src/types/builders.rs b/src/types/builders.rs
 
 +#[cfg(any(feature = "op_create_configuration_set", feature = "op_get_configuration_set"))]
  pub use crate::types::_archiving_options::ArchivingOptionsBuilder;
+
++#[cfg(any(
++    feature = "op_create_configuration_set",
++    feature = "op_get_configuration_set",
++    feature = "op_update_configuration_set"
++))]
+ pub use crate::types::_message_security_options::MessageSecurityOptionsBuilder;
 
 +#[cfg(any(
 +    feature = "op_create_configuration_set_event_destination",
@@ -9591,6 +9944,9 @@ diff --git a/src/types/builders.rs b/src/types/builders.rs
 +#[cfg(feature = "op_list_email_identities")]
  pub use crate::types::_identity_info::IdentityInfoBuilder;
 
++#[cfg(feature = "op_list_email_identity_certificates")]
+ pub use crate::types::_identity_certificate::IdentityCertificateBuilder;
+
 +#[cfg(feature = "op_list_email_templates")]
  pub use crate::types::_email_template_metadata::EmailTemplateMetadataBuilder;
 
@@ -9635,6 +9991,20 @@ diff --git a/src/types/builders.rs b/src/types/builders.rs
 
 +#[cfg(feature = "op_send_bulk_email")]
  pub use crate::types::_bulk_email_entry_result::BulkEmailEntryResultBuilder;
+
++#[cfg(any(
++    feature = "op_create_configuration_set",
++    feature = "op_get_configuration_set",
++    feature = "op_update_configuration_set"
++))]
+ pub use crate::types::_default_signing_scheme::DefaultSigningSchemeBuilder;
+
++#[cfg(any(
++    feature = "op_create_configuration_set",
++    feature = "op_get_configuration_set",
++    feature = "op_update_configuration_set"
++))]
+ pub use crate::types::_smime_signing_scheme::SmimeSigningSchemeBuilder;
 
 +#[cfg(any(feature = "op_create_deliverability_test_report", feature = "op_send_email"))]
  pub use crate::types::_content::ContentBuilder;
@@ -9718,332 +10088,10 @@ diff --git a/src/types/builders.rs b/src/types/builders.rs
 diff --git a/src/types/error.rs b/src/types/error.rs
 --- a/src/types/error.rs
 +++ b/src/types/error.rs
-@@ -1,54 +1,846 @@
+@@ -1,54 +1,872 @@
  // Code generated by software.amazon.smithy.rust.codegen.smithy-rs. DO NOT EDIT.
 +#[cfg(any(
-+    feature = "op_batch_get_metric_data",
-+    feature = "op_cancel_export_job",
-+    feature = "op_create_configuration_set",
-+    feature = "op_create_configuration_set_event_destination",
-+    feature = "op_create_contact",
-+    feature = "op_create_contact_list",
-+    feature = "op_create_custom_verification_email_template",
-+    feature = "op_create_dedicated_ip_pool",
-+    feature = "op_create_deliverability_test_report",
-+    feature = "op_create_email_identity",
-+    feature = "op_create_email_identity_policy",
-+    feature = "op_create_email_template",
-+    feature = "op_create_export_job",
-+    feature = "op_create_import_job",
-+    feature = "op_create_multi_region_endpoint",
-+    feature = "op_create_tenant",
-+    feature = "op_create_tenant_resource_association",
-+    feature = "op_delete_configuration_set",
-+    feature = "op_delete_configuration_set_event_destination",
-+    feature = "op_delete_contact",
-+    feature = "op_delete_contact_list",
-+    feature = "op_delete_custom_verification_email_template",
-+    feature = "op_delete_dedicated_ip_pool",
-+    feature = "op_delete_email_identity",
-+    feature = "op_delete_email_identity_policy",
-+    feature = "op_delete_email_template",
-+    feature = "op_delete_multi_region_endpoint",
-+    feature = "op_delete_suppressed_destination",
-+    feature = "op_delete_tenant",
-+    feature = "op_delete_tenant_resource_association",
-+    feature = "op_get_account",
-+    feature = "op_get_blacklist_reports",
-+    feature = "op_get_configuration_set",
-+    feature = "op_get_configuration_set_event_destinations",
-+    feature = "op_get_contact",
-+    feature = "op_get_contact_list",
-+    feature = "op_get_custom_verification_email_template",
-+    feature = "op_get_dedicated_ip",
-+    feature = "op_get_dedicated_ip_pool",
-+    feature = "op_get_dedicated_ips",
-+    feature = "op_get_deliverability_dashboard_options",
-+    feature = "op_get_deliverability_test_report",
-+    feature = "op_get_domain_deliverability_campaign",
-+    feature = "op_get_domain_statistics_report",
-+    feature = "op_get_email_address_insights",
-+    feature = "op_get_email_identity",
-+    feature = "op_get_email_identity_policies",
-+    feature = "op_get_email_template",
-+    feature = "op_get_export_job",
-+    feature = "op_get_import_job",
-+    feature = "op_get_message_insights",
-+    feature = "op_get_multi_region_endpoint",
-+    feature = "op_get_reputation_entity",
-+    feature = "op_get_suppressed_destination",
-+    feature = "op_get_tenant",
-+    feature = "op_list_configuration_sets",
-+    feature = "op_list_contact_lists",
-+    feature = "op_list_contacts",
-+    feature = "op_list_custom_verification_email_templates",
-+    feature = "op_list_dedicated_ip_pools",
-+    feature = "op_list_deliverability_test_reports",
-+    feature = "op_list_domain_deliverability_campaigns",
-+    feature = "op_list_email_identities",
-+    feature = "op_list_email_templates",
-+    feature = "op_list_export_jobs",
-+    feature = "op_list_import_jobs",
-+    feature = "op_list_multi_region_endpoints",
-+    feature = "op_list_recommendations",
-+    feature = "op_list_reputation_entities",
-+    feature = "op_list_resource_tenants",
-+    feature = "op_list_suppressed_destinations",
-+    feature = "op_list_tags_for_resource",
-+    feature = "op_list_tenant_resources",
-+    feature = "op_list_tenants",
-+    feature = "op_put_account_dedicated_ip_warmup_attributes",
-+    feature = "op_put_account_details",
-+    feature = "op_put_account_pricing_attributes",
-+    feature = "op_put_account_sending_attributes",
-+    feature = "op_put_account_suppression_attributes",
-+    feature = "op_put_account_vdm_attributes",
-+    feature = "op_put_configuration_set_archiving_options",
-+    feature = "op_put_configuration_set_delivery_options",
-+    feature = "op_put_configuration_set_reputation_options",
-+    feature = "op_put_configuration_set_sending_options",
-+    feature = "op_put_configuration_set_suppression_options",
-+    feature = "op_put_configuration_set_tracking_options",
-+    feature = "op_put_configuration_set_vdm_options",
-+    feature = "op_put_dedicated_ip_in_pool",
-+    feature = "op_put_dedicated_ip_pool_scaling_attributes",
-+    feature = "op_put_dedicated_ip_warmup_attributes",
-+    feature = "op_put_deliverability_dashboard_option",
-+    feature = "op_put_email_identity_configuration_set_attributes",
-+    feature = "op_put_email_identity_dkim_attributes",
-+    feature = "op_put_email_identity_dkim_signing_attributes",
-+    feature = "op_put_email_identity_feedback_attributes",
-+    feature = "op_put_email_identity_mail_from_attributes",
-+    feature = "op_put_suppressed_destination",
-+    feature = "op_put_tenant_suppression_attributes",
-+    feature = "op_send_bulk_email",
-+    feature = "op_send_custom_verification_email",
-+    feature = "op_send_email",
-+    feature = "op_tag_resource",
-+    feature = "op_test_render_email_template",
-+    feature = "op_untag_resource",
-+    feature = "op_update_configuration_set_event_destination",
-+    feature = "op_update_contact",
-+    feature = "op_update_contact_list",
-+    feature = "op_update_custom_verification_email_template",
-+    feature = "op_update_email_identity_policy",
-+    feature = "op_update_email_template",
-+    feature = "op_update_reputation_entity_customer_managed_status",
-+    feature = "op_update_reputation_entity_policy"
-+))]
- pub use crate::types::error::_bad_request_exception::BadRequestException;
-
-+#[cfg(feature = "op_batch_get_metric_data")]
- pub use crate::types::error::_internal_service_error_exception::InternalServiceErrorException;
-
-+#[cfg(any(
-+    feature = "op_batch_get_metric_data",
-+    feature = "op_cancel_export_job",
-+    feature = "op_create_configuration_set",
-+    feature = "op_create_configuration_set_event_destination",
-+    feature = "op_create_contact",
-+    feature = "op_create_custom_verification_email_template",
-+    feature = "op_create_deliverability_test_report",
-+    feature = "op_create_email_identity",
-+    feature = "op_create_email_identity_policy",
-+    feature = "op_create_export_job",
-+    feature = "op_create_tenant_resource_association",
-+    feature = "op_delete_configuration_set",
-+    feature = "op_delete_configuration_set_event_destination",
-+    feature = "op_delete_contact",
-+    feature = "op_delete_contact_list",
-+    feature = "op_delete_custom_verification_email_template",
-+    feature = "op_delete_dedicated_ip_pool",
-+    feature = "op_delete_email_identity",
-+    feature = "op_delete_email_identity_policy",
-+    feature = "op_delete_email_template",
-+    feature = "op_delete_multi_region_endpoint",
-+    feature = "op_delete_suppressed_destination",
-+    feature = "op_delete_tenant",
-+    feature = "op_delete_tenant_resource_association",
-+    feature = "op_get_blacklist_reports",
-+    feature = "op_get_configuration_set",
-+    feature = "op_get_configuration_set_event_destinations",
-+    feature = "op_get_contact",
-+    feature = "op_get_contact_list",
-+    feature = "op_get_custom_verification_email_template",
-+    feature = "op_get_dedicated_ip",
-+    feature = "op_get_dedicated_ip_pool",
-+    feature = "op_get_dedicated_ips",
-+    feature = "op_get_deliverability_test_report",
-+    feature = "op_get_domain_deliverability_campaign",
-+    feature = "op_get_domain_statistics_report",
-+    feature = "op_get_email_identity",
-+    feature = "op_get_email_identity_policies",
-+    feature = "op_get_email_template",
-+    feature = "op_get_export_job",
-+    feature = "op_get_import_job",
-+    feature = "op_get_message_insights",
-+    feature = "op_get_multi_region_endpoint",
-+    feature = "op_get_reputation_entity",
-+    feature = "op_get_suppressed_destination",
-+    feature = "op_get_tenant",
-+    feature = "op_list_contacts",
-+    feature = "op_list_deliverability_test_reports",
-+    feature = "op_list_domain_deliverability_campaigns",
-+    feature = "op_list_recommendations",
-+    feature = "op_list_resource_tenants",
-+    feature = "op_list_suppressed_destinations",
-+    feature = "op_list_tags_for_resource",
-+    feature = "op_list_tenant_resources",
-+    feature = "op_put_configuration_set_archiving_options",
-+    feature = "op_put_configuration_set_delivery_options",
-+    feature = "op_put_configuration_set_reputation_options",
-+    feature = "op_put_configuration_set_sending_options",
-+    feature = "op_put_configuration_set_suppression_options",
-+    feature = "op_put_configuration_set_tracking_options",
-+    feature = "op_put_configuration_set_vdm_options",
-+    feature = "op_put_dedicated_ip_in_pool",
-+    feature = "op_put_dedicated_ip_pool_scaling_attributes",
-+    feature = "op_put_dedicated_ip_warmup_attributes",
-+    feature = "op_put_deliverability_dashboard_option",
-+    feature = "op_put_email_identity_configuration_set_attributes",
-+    feature = "op_put_email_identity_dkim_attributes",
-+    feature = "op_put_email_identity_dkim_signing_attributes",
-+    feature = "op_put_email_identity_feedback_attributes",
-+    feature = "op_put_email_identity_mail_from_attributes",
-+    feature = "op_put_suppressed_destination",
-+    feature = "op_put_tenant_suppression_attributes",
-+    feature = "op_send_bulk_email",
-+    feature = "op_send_custom_verification_email",
-+    feature = "op_send_email",
-+    feature = "op_tag_resource",
-+    feature = "op_test_render_email_template",
-+    feature = "op_untag_resource",
-+    feature = "op_update_configuration_set_event_destination",
-+    feature = "op_update_contact",
-+    feature = "op_update_contact_list",
-+    feature = "op_update_custom_verification_email_template",
-+    feature = "op_update_email_identity_policy",
-+    feature = "op_update_email_template"
-+))]
- pub use crate::types::error::_not_found_exception::NotFoundException;
-
-+#[cfg(any(
-+    feature = "op_batch_get_metric_data",
-+    feature = "op_cancel_export_job",
-+    feature = "op_create_configuration_set",
-+    feature = "op_create_configuration_set_event_destination",
-+    feature = "op_create_contact",
-+    feature = "op_create_contact_list",
-+    feature = "op_create_custom_verification_email_template",
-+    feature = "op_create_dedicated_ip_pool",
-+    feature = "op_create_deliverability_test_report",
-+    feature = "op_create_email_identity",
-+    feature = "op_create_email_identity_policy",
-+    feature = "op_create_email_template",
-+    feature = "op_create_export_job",
-+    feature = "op_create_import_job",
-+    feature = "op_create_multi_region_endpoint",
-+    feature = "op_create_tenant",
-+    feature = "op_create_tenant_resource_association",
-+    feature = "op_delete_configuration_set",
-+    feature = "op_delete_configuration_set_event_destination",
-+    feature = "op_delete_contact",
-+    feature = "op_delete_contact_list",
-+    feature = "op_delete_custom_verification_email_template",
-+    feature = "op_delete_dedicated_ip_pool",
-+    feature = "op_delete_email_identity",
-+    feature = "op_delete_email_identity_policy",
-+    feature = "op_delete_email_template",
-+    feature = "op_delete_multi_region_endpoint",
-+    feature = "op_delete_suppressed_destination",
-+    feature = "op_delete_tenant",
-+    feature = "op_delete_tenant_resource_association",
-+    feature = "op_get_account",
-+    feature = "op_get_blacklist_reports",
-+    feature = "op_get_configuration_set",
-+    feature = "op_get_configuration_set_event_destinations",
-+    feature = "op_get_contact",
-+    feature = "op_get_contact_list",
-+    feature = "op_get_custom_verification_email_template",
-+    feature = "op_get_dedicated_ip",
-+    feature = "op_get_dedicated_ip_pool",
-+    feature = "op_get_dedicated_ips",
-+    feature = "op_get_deliverability_dashboard_options",
-+    feature = "op_get_deliverability_test_report",
-+    feature = "op_get_domain_deliverability_campaign",
-+    feature = "op_get_domain_statistics_report",
-+    feature = "op_get_email_address_insights",
-+    feature = "op_get_email_identity",
-+    feature = "op_get_email_identity_policies",
-+    feature = "op_get_email_template",
-+    feature = "op_get_export_job",
-+    feature = "op_get_import_job",
-+    feature = "op_get_message_insights",
-+    feature = "op_get_multi_region_endpoint",
-+    feature = "op_get_reputation_entity",
-+    feature = "op_get_suppressed_destination",
-+    feature = "op_get_tenant",
-+    feature = "op_list_configuration_sets",
-+    feature = "op_list_contact_lists",
-+    feature = "op_list_contacts",
-+    feature = "op_list_custom_verification_email_templates",
-+    feature = "op_list_dedicated_ip_pools",
-+    feature = "op_list_deliverability_test_reports",
-+    feature = "op_list_domain_deliverability_campaigns",
-+    feature = "op_list_email_identities",
-+    feature = "op_list_email_templates",
-+    feature = "op_list_export_jobs",
-+    feature = "op_list_import_jobs",
-+    feature = "op_list_multi_region_endpoints",
-+    feature = "op_list_recommendations",
-+    feature = "op_list_reputation_entities",
-+    feature = "op_list_resource_tenants",
-+    feature = "op_list_suppressed_destinations",
-+    feature = "op_list_tags_for_resource",
-+    feature = "op_list_tenant_resources",
-+    feature = "op_list_tenants",
-+    feature = "op_put_account_dedicated_ip_warmup_attributes",
-+    feature = "op_put_account_details",
-+    feature = "op_put_account_pricing_attributes",
-+    feature = "op_put_account_sending_attributes",
-+    feature = "op_put_account_suppression_attributes",
-+    feature = "op_put_account_vdm_attributes",
-+    feature = "op_put_configuration_set_archiving_options",
-+    feature = "op_put_configuration_set_delivery_options",
-+    feature = "op_put_configuration_set_reputation_options",
-+    feature = "op_put_configuration_set_sending_options",
-+    feature = "op_put_configuration_set_suppression_options",
-+    feature = "op_put_configuration_set_tracking_options",
-+    feature = "op_put_configuration_set_vdm_options",
-+    feature = "op_put_dedicated_ip_in_pool",
-+    feature = "op_put_dedicated_ip_pool_scaling_attributes",
-+    feature = "op_put_dedicated_ip_warmup_attributes",
-+    feature = "op_put_deliverability_dashboard_option",
-+    feature = "op_put_email_identity_configuration_set_attributes",
-+    feature = "op_put_email_identity_dkim_attributes",
-+    feature = "op_put_email_identity_dkim_signing_attributes",
-+    feature = "op_put_email_identity_feedback_attributes",
-+    feature = "op_put_email_identity_mail_from_attributes",
-+    feature = "op_put_suppressed_destination",
-+    feature = "op_put_tenant_suppression_attributes",
-+    feature = "op_send_bulk_email",
-+    feature = "op_send_custom_verification_email",
-+    feature = "op_send_email",
-+    feature = "op_tag_resource",
-+    feature = "op_test_render_email_template",
-+    feature = "op_untag_resource",
-+    feature = "op_update_configuration_set_event_destination",
-+    feature = "op_update_contact",
-+    feature = "op_update_contact_list",
-+    feature = "op_update_custom_verification_email_template",
-+    feature = "op_update_email_identity_policy",
-+    feature = "op_update_email_template",
-+    feature = "op_update_reputation_entity_customer_managed_status",
-+    feature = "op_update_reputation_entity_policy"
-+))]
- pub use crate::types::error::_too_many_requests_exception::TooManyRequestsException;
-
-+#[cfg(any(
++    feature = "op_associate_email_identity_certificate",
 +    feature = "op_create_configuration_set",
 +    feature = "op_create_configuration_set_event_destination",
 +    feature = "op_create_contact",
@@ -10059,6 +10107,341 @@ diff --git a/src/types/error.rs b/src/types/error.rs
 +    feature = "op_put_deliverability_dashboard_option"
 +))]
  pub use crate::types::error::_already_exists_exception::AlreadyExistsException;
+
++#[cfg(any(
++    feature = "op_associate_email_identity_certificate",
++    feature = "op_batch_get_metric_data",
++    feature = "op_cancel_export_job",
++    feature = "op_create_configuration_set",
++    feature = "op_create_configuration_set_event_destination",
++    feature = "op_create_contact",
++    feature = "op_create_contact_list",
++    feature = "op_create_custom_verification_email_template",
++    feature = "op_create_dedicated_ip_pool",
++    feature = "op_create_deliverability_test_report",
++    feature = "op_create_email_identity",
++    feature = "op_create_email_identity_policy",
++    feature = "op_create_email_template",
++    feature = "op_create_export_job",
++    feature = "op_create_import_job",
++    feature = "op_create_multi_region_endpoint",
++    feature = "op_create_tenant",
++    feature = "op_create_tenant_resource_association",
++    feature = "op_delete_configuration_set",
++    feature = "op_delete_configuration_set_event_destination",
++    feature = "op_delete_contact",
++    feature = "op_delete_contact_list",
++    feature = "op_delete_custom_verification_email_template",
++    feature = "op_delete_dedicated_ip_pool",
++    feature = "op_delete_email_identity",
++    feature = "op_delete_email_identity_policy",
++    feature = "op_delete_email_template",
++    feature = "op_delete_multi_region_endpoint",
++    feature = "op_delete_suppressed_destination",
++    feature = "op_delete_tenant",
++    feature = "op_delete_tenant_resource_association",
++    feature = "op_disassociate_email_identity_certificate",
++    feature = "op_get_account",
++    feature = "op_get_blacklist_reports",
++    feature = "op_get_configuration_set",
++    feature = "op_get_configuration_set_event_destinations",
++    feature = "op_get_contact",
++    feature = "op_get_contact_list",
++    feature = "op_get_custom_verification_email_template",
++    feature = "op_get_dedicated_ip",
++    feature = "op_get_dedicated_ip_pool",
++    feature = "op_get_dedicated_ips",
++    feature = "op_get_deliverability_dashboard_options",
++    feature = "op_get_deliverability_test_report",
++    feature = "op_get_domain_deliverability_campaign",
++    feature = "op_get_domain_statistics_report",
++    feature = "op_get_email_address_insights",
++    feature = "op_get_email_identity",
++    feature = "op_get_email_identity_policies",
++    feature = "op_get_email_template",
++    feature = "op_get_export_job",
++    feature = "op_get_import_job",
++    feature = "op_get_message_insights",
++    feature = "op_get_multi_region_endpoint",
++    feature = "op_get_reputation_entity",
++    feature = "op_get_suppressed_destination",
++    feature = "op_get_tenant",
++    feature = "op_list_configuration_sets",
++    feature = "op_list_contact_lists",
++    feature = "op_list_contacts",
++    feature = "op_list_custom_verification_email_templates",
++    feature = "op_list_dedicated_ip_pools",
++    feature = "op_list_deliverability_test_reports",
++    feature = "op_list_domain_deliverability_campaigns",
++    feature = "op_list_email_identities",
++    feature = "op_list_email_identity_certificates",
++    feature = "op_list_email_templates",
++    feature = "op_list_export_jobs",
++    feature = "op_list_import_jobs",
++    feature = "op_list_multi_region_endpoints",
++    feature = "op_list_recommendations",
++    feature = "op_list_reputation_entities",
++    feature = "op_list_resource_tenants",
++    feature = "op_list_suppressed_destinations",
++    feature = "op_list_tags_for_resource",
++    feature = "op_list_tenant_resources",
++    feature = "op_list_tenants",
++    feature = "op_put_account_dedicated_ip_warmup_attributes",
++    feature = "op_put_account_details",
++    feature = "op_put_account_pricing_attributes",
++    feature = "op_put_account_sending_attributes",
++    feature = "op_put_account_suppression_attributes",
++    feature = "op_put_account_vdm_attributes",
++    feature = "op_put_configuration_set_archiving_options",
++    feature = "op_put_configuration_set_delivery_options",
++    feature = "op_put_configuration_set_reputation_options",
++    feature = "op_put_configuration_set_sending_options",
++    feature = "op_put_configuration_set_suppression_options",
++    feature = "op_put_configuration_set_tracking_options",
++    feature = "op_put_configuration_set_vdm_options",
++    feature = "op_put_dedicated_ip_in_pool",
++    feature = "op_put_dedicated_ip_pool_scaling_attributes",
++    feature = "op_put_dedicated_ip_warmup_attributes",
++    feature = "op_put_deliverability_dashboard_option",
++    feature = "op_put_email_identity_configuration_set_attributes",
++    feature = "op_put_email_identity_dkim_attributes",
++    feature = "op_put_email_identity_dkim_signing_attributes",
++    feature = "op_put_email_identity_feedback_attributes",
++    feature = "op_put_email_identity_mail_from_attributes",
++    feature = "op_put_suppressed_destination",
++    feature = "op_put_tenant_suppression_attributes",
++    feature = "op_send_bulk_email",
++    feature = "op_send_custom_verification_email",
++    feature = "op_send_email",
++    feature = "op_tag_resource",
++    feature = "op_test_render_email_template",
++    feature = "op_untag_resource",
++    feature = "op_update_configuration_set",
++    feature = "op_update_configuration_set_event_destination",
++    feature = "op_update_contact",
++    feature = "op_update_contact_list",
++    feature = "op_update_custom_verification_email_template",
++    feature = "op_update_email_identity_policy",
++    feature = "op_update_email_template",
++    feature = "op_update_reputation_entity_customer_managed_status",
++    feature = "op_update_reputation_entity_policy"
++))]
+ pub use crate::types::error::_bad_request_exception::BadRequestException;
+
++#[cfg(any(
++    feature = "op_associate_email_identity_certificate",
++    feature = "op_batch_get_metric_data",
++    feature = "op_cancel_export_job",
++    feature = "op_create_configuration_set",
++    feature = "op_create_configuration_set_event_destination",
++    feature = "op_create_contact",
++    feature = "op_create_custom_verification_email_template",
++    feature = "op_create_deliverability_test_report",
++    feature = "op_create_email_identity",
++    feature = "op_create_email_identity_policy",
++    feature = "op_create_export_job",
++    feature = "op_create_tenant_resource_association",
++    feature = "op_delete_configuration_set",
++    feature = "op_delete_configuration_set_event_destination",
++    feature = "op_delete_contact",
++    feature = "op_delete_contact_list",
++    feature = "op_delete_custom_verification_email_template",
++    feature = "op_delete_dedicated_ip_pool",
++    feature = "op_delete_email_identity",
++    feature = "op_delete_email_identity_policy",
++    feature = "op_delete_email_template",
++    feature = "op_delete_multi_region_endpoint",
++    feature = "op_delete_suppressed_destination",
++    feature = "op_delete_tenant",
++    feature = "op_delete_tenant_resource_association",
++    feature = "op_disassociate_email_identity_certificate",
++    feature = "op_get_blacklist_reports",
++    feature = "op_get_configuration_set",
++    feature = "op_get_configuration_set_event_destinations",
++    feature = "op_get_contact",
++    feature = "op_get_contact_list",
++    feature = "op_get_custom_verification_email_template",
++    feature = "op_get_dedicated_ip",
++    feature = "op_get_dedicated_ip_pool",
++    feature = "op_get_dedicated_ips",
++    feature = "op_get_deliverability_test_report",
++    feature = "op_get_domain_deliverability_campaign",
++    feature = "op_get_domain_statistics_report",
++    feature = "op_get_email_identity",
++    feature = "op_get_email_identity_policies",
++    feature = "op_get_email_template",
++    feature = "op_get_export_job",
++    feature = "op_get_import_job",
++    feature = "op_get_message_insights",
++    feature = "op_get_multi_region_endpoint",
++    feature = "op_get_reputation_entity",
++    feature = "op_get_suppressed_destination",
++    feature = "op_get_tenant",
++    feature = "op_list_contacts",
++    feature = "op_list_deliverability_test_reports",
++    feature = "op_list_domain_deliverability_campaigns",
++    feature = "op_list_email_identity_certificates",
++    feature = "op_list_recommendations",
++    feature = "op_list_resource_tenants",
++    feature = "op_list_suppressed_destinations",
++    feature = "op_list_tags_for_resource",
++    feature = "op_list_tenant_resources",
++    feature = "op_put_configuration_set_archiving_options",
++    feature = "op_put_configuration_set_delivery_options",
++    feature = "op_put_configuration_set_reputation_options",
++    feature = "op_put_configuration_set_sending_options",
++    feature = "op_put_configuration_set_suppression_options",
++    feature = "op_put_configuration_set_tracking_options",
++    feature = "op_put_configuration_set_vdm_options",
++    feature = "op_put_dedicated_ip_in_pool",
++    feature = "op_put_dedicated_ip_pool_scaling_attributes",
++    feature = "op_put_dedicated_ip_warmup_attributes",
++    feature = "op_put_deliverability_dashboard_option",
++    feature = "op_put_email_identity_configuration_set_attributes",
++    feature = "op_put_email_identity_dkim_attributes",
++    feature = "op_put_email_identity_dkim_signing_attributes",
++    feature = "op_put_email_identity_feedback_attributes",
++    feature = "op_put_email_identity_mail_from_attributes",
++    feature = "op_put_suppressed_destination",
++    feature = "op_put_tenant_suppression_attributes",
++    feature = "op_send_bulk_email",
++    feature = "op_send_custom_verification_email",
++    feature = "op_send_email",
++    feature = "op_tag_resource",
++    feature = "op_test_render_email_template",
++    feature = "op_untag_resource",
++    feature = "op_update_configuration_set",
++    feature = "op_update_configuration_set_event_destination",
++    feature = "op_update_contact",
++    feature = "op_update_contact_list",
++    feature = "op_update_custom_verification_email_template",
++    feature = "op_update_email_identity_policy",
++    feature = "op_update_email_template"
++))]
+ pub use crate::types::error::_not_found_exception::NotFoundException;
+
++#[cfg(any(
++    feature = "op_associate_email_identity_certificate",
++    feature = "op_batch_get_metric_data",
++    feature = "op_cancel_export_job",
++    feature = "op_create_configuration_set",
++    feature = "op_create_configuration_set_event_destination",
++    feature = "op_create_contact",
++    feature = "op_create_contact_list",
++    feature = "op_create_custom_verification_email_template",
++    feature = "op_create_dedicated_ip_pool",
++    feature = "op_create_deliverability_test_report",
++    feature = "op_create_email_identity",
++    feature = "op_create_email_identity_policy",
++    feature = "op_create_email_template",
++    feature = "op_create_export_job",
++    feature = "op_create_import_job",
++    feature = "op_create_multi_region_endpoint",
++    feature = "op_create_tenant",
++    feature = "op_create_tenant_resource_association",
++    feature = "op_delete_configuration_set",
++    feature = "op_delete_configuration_set_event_destination",
++    feature = "op_delete_contact",
++    feature = "op_delete_contact_list",
++    feature = "op_delete_custom_verification_email_template",
++    feature = "op_delete_dedicated_ip_pool",
++    feature = "op_delete_email_identity",
++    feature = "op_delete_email_identity_policy",
++    feature = "op_delete_email_template",
++    feature = "op_delete_multi_region_endpoint",
++    feature = "op_delete_suppressed_destination",
++    feature = "op_delete_tenant",
++    feature = "op_delete_tenant_resource_association",
++    feature = "op_disassociate_email_identity_certificate",
++    feature = "op_get_account",
++    feature = "op_get_blacklist_reports",
++    feature = "op_get_configuration_set",
++    feature = "op_get_configuration_set_event_destinations",
++    feature = "op_get_contact",
++    feature = "op_get_contact_list",
++    feature = "op_get_custom_verification_email_template",
++    feature = "op_get_dedicated_ip",
++    feature = "op_get_dedicated_ip_pool",
++    feature = "op_get_dedicated_ips",
++    feature = "op_get_deliverability_dashboard_options",
++    feature = "op_get_deliverability_test_report",
++    feature = "op_get_domain_deliverability_campaign",
++    feature = "op_get_domain_statistics_report",
++    feature = "op_get_email_address_insights",
++    feature = "op_get_email_identity",
++    feature = "op_get_email_identity_policies",
++    feature = "op_get_email_template",
++    feature = "op_get_export_job",
++    feature = "op_get_import_job",
++    feature = "op_get_message_insights",
++    feature = "op_get_multi_region_endpoint",
++    feature = "op_get_reputation_entity",
++    feature = "op_get_suppressed_destination",
++    feature = "op_get_tenant",
++    feature = "op_list_configuration_sets",
++    feature = "op_list_contact_lists",
++    feature = "op_list_contacts",
++    feature = "op_list_custom_verification_email_templates",
++    feature = "op_list_dedicated_ip_pools",
++    feature = "op_list_deliverability_test_reports",
++    feature = "op_list_domain_deliverability_campaigns",
++    feature = "op_list_email_identities",
++    feature = "op_list_email_identity_certificates",
++    feature = "op_list_email_templates",
++    feature = "op_list_export_jobs",
++    feature = "op_list_import_jobs",
++    feature = "op_list_multi_region_endpoints",
++    feature = "op_list_recommendations",
++    feature = "op_list_reputation_entities",
++    feature = "op_list_resource_tenants",
++    feature = "op_list_suppressed_destinations",
++    feature = "op_list_tags_for_resource",
++    feature = "op_list_tenant_resources",
++    feature = "op_list_tenants",
++    feature = "op_put_account_dedicated_ip_warmup_attributes",
++    feature = "op_put_account_details",
++    feature = "op_put_account_pricing_attributes",
++    feature = "op_put_account_sending_attributes",
++    feature = "op_put_account_suppression_attributes",
++    feature = "op_put_account_vdm_attributes",
++    feature = "op_put_configuration_set_archiving_options",
++    feature = "op_put_configuration_set_delivery_options",
++    feature = "op_put_configuration_set_reputation_options",
++    feature = "op_put_configuration_set_sending_options",
++    feature = "op_put_configuration_set_suppression_options",
++    feature = "op_put_configuration_set_tracking_options",
++    feature = "op_put_configuration_set_vdm_options",
++    feature = "op_put_dedicated_ip_in_pool",
++    feature = "op_put_dedicated_ip_pool_scaling_attributes",
++    feature = "op_put_dedicated_ip_warmup_attributes",
++    feature = "op_put_deliverability_dashboard_option",
++    feature = "op_put_email_identity_configuration_set_attributes",
++    feature = "op_put_email_identity_dkim_attributes",
++    feature = "op_put_email_identity_dkim_signing_attributes",
++    feature = "op_put_email_identity_feedback_attributes",
++    feature = "op_put_email_identity_mail_from_attributes",
++    feature = "op_put_suppressed_destination",
++    feature = "op_put_tenant_suppression_attributes",
++    feature = "op_send_bulk_email",
++    feature = "op_send_custom_verification_email",
++    feature = "op_send_email",
++    feature = "op_tag_resource",
++    feature = "op_test_render_email_template",
++    feature = "op_untag_resource",
++    feature = "op_update_configuration_set",
++    feature = "op_update_configuration_set_event_destination",
++    feature = "op_update_contact",
++    feature = "op_update_contact_list",
++    feature = "op_update_custom_verification_email_template",
++    feature = "op_update_email_identity_policy",
++    feature = "op_update_email_template",
++    feature = "op_update_reputation_entity_customer_managed_status",
++    feature = "op_update_reputation_entity_policy"
++))]
+ pub use crate::types::error::_too_many_requests_exception::TooManyRequestsException;
+
++#[cfg(feature = "op_batch_get_metric_data")]
+ pub use crate::types::error::_internal_service_error_exception::InternalServiceErrorException;
 
 +#[cfg(any(
 +    feature = "op_create_configuration_set",
@@ -10150,6 +10533,7 @@ diff --git a/src/types/error.rs b/src/types/error.rs
  mod _account_suspended_exception;
 
 +#[cfg(any(
++    feature = "op_associate_email_identity_certificate",
 +    feature = "op_create_configuration_set",
 +    feature = "op_create_configuration_set_event_destination",
 +    feature = "op_create_contact",
@@ -10167,6 +10551,7 @@ diff --git a/src/types/error.rs b/src/types/error.rs
  mod _already_exists_exception;
 
 +#[cfg(any(
++    feature = "op_associate_email_identity_certificate",
 +    feature = "op_batch_get_metric_data",
 +    feature = "op_cancel_export_job",
 +    feature = "op_create_configuration_set",
@@ -10197,6 +10582,7 @@ diff --git a/src/types/error.rs b/src/types/error.rs
 +    feature = "op_delete_suppressed_destination",
 +    feature = "op_delete_tenant",
 +    feature = "op_delete_tenant_resource_association",
++    feature = "op_disassociate_email_identity_certificate",
 +    feature = "op_get_account",
 +    feature = "op_get_blacklist_reports",
 +    feature = "op_get_configuration_set",
@@ -10230,6 +10616,7 @@ diff --git a/src/types/error.rs b/src/types/error.rs
 +    feature = "op_list_deliverability_test_reports",
 +    feature = "op_list_domain_deliverability_campaigns",
 +    feature = "op_list_email_identities",
++    feature = "op_list_email_identity_certificates",
 +    feature = "op_list_email_templates",
 +    feature = "op_list_export_jobs",
 +    feature = "op_list_import_jobs",
@@ -10271,6 +10658,7 @@ diff --git a/src/types/error.rs b/src/types/error.rs
 +    feature = "op_tag_resource",
 +    feature = "op_test_render_email_template",
 +    feature = "op_untag_resource",
++    feature = "op_update_configuration_set",
 +    feature = "op_update_configuration_set_event_destination",
 +    feature = "op_update_contact",
 +    feature = "op_update_contact_list",
@@ -10353,6 +10741,7 @@ diff --git a/src/types/error.rs b/src/types/error.rs
  mod _message_rejected;
 
 +#[cfg(any(
++    feature = "op_associate_email_identity_certificate",
 +    feature = "op_batch_get_metric_data",
 +    feature = "op_cancel_export_job",
 +    feature = "op_create_configuration_set",
@@ -10377,6 +10766,7 @@ diff --git a/src/types/error.rs b/src/types/error.rs
 +    feature = "op_delete_suppressed_destination",
 +    feature = "op_delete_tenant",
 +    feature = "op_delete_tenant_resource_association",
++    feature = "op_disassociate_email_identity_certificate",
 +    feature = "op_get_blacklist_reports",
 +    feature = "op_get_configuration_set",
 +    feature = "op_get_configuration_set_event_destinations",
@@ -10402,6 +10792,7 @@ diff --git a/src/types/error.rs b/src/types/error.rs
 +    feature = "op_list_contacts",
 +    feature = "op_list_deliverability_test_reports",
 +    feature = "op_list_domain_deliverability_campaigns",
++    feature = "op_list_email_identity_certificates",
 +    feature = "op_list_recommendations",
 +    feature = "op_list_resource_tenants",
 +    feature = "op_list_suppressed_destinations",
@@ -10431,6 +10822,7 @@ diff --git a/src/types/error.rs b/src/types/error.rs
 +    feature = "op_tag_resource",
 +    feature = "op_test_render_email_template",
 +    feature = "op_untag_resource",
++    feature = "op_update_configuration_set",
 +    feature = "op_update_configuration_set_event_destination",
 +    feature = "op_update_contact",
 +    feature = "op_update_contact_list",
@@ -10449,6 +10841,7 @@ diff --git a/src/types/error.rs b/src/types/error.rs
  mod _sending_paused_exception;
 
 +#[cfg(any(
++    feature = "op_associate_email_identity_certificate",
 +    feature = "op_batch_get_metric_data",
 +    feature = "op_cancel_export_job",
 +    feature = "op_create_configuration_set",
@@ -10479,6 +10872,7 @@ diff --git a/src/types/error.rs b/src/types/error.rs
 +    feature = "op_delete_suppressed_destination",
 +    feature = "op_delete_tenant",
 +    feature = "op_delete_tenant_resource_association",
++    feature = "op_disassociate_email_identity_certificate",
 +    feature = "op_get_account",
 +    feature = "op_get_blacklist_reports",
 +    feature = "op_get_configuration_set",
@@ -10512,6 +10906,7 @@ diff --git a/src/types/error.rs b/src/types/error.rs
 +    feature = "op_list_deliverability_test_reports",
 +    feature = "op_list_domain_deliverability_campaigns",
 +    feature = "op_list_email_identities",
++    feature = "op_list_email_identity_certificates",
 +    feature = "op_list_email_templates",
 +    feature = "op_list_export_jobs",
 +    feature = "op_list_import_jobs",
@@ -10553,6 +10948,7 @@ diff --git a/src/types/error.rs b/src/types/error.rs
 +    feature = "op_tag_resource",
 +    feature = "op_test_render_email_template",
 +    feature = "op_untag_resource",
++    feature = "op_update_configuration_set",
 +    feature = "op_update_configuration_set_event_destination",
 +    feature = "op_update_contact",
 +    feature = "op_update_contact_list",
@@ -10573,332 +10969,10 @@ diff --git a/src/types/error.rs b/src/types/error.rs
 diff --git a/src/types/error/builders.rs b/src/types/error/builders.rs
 --- a/src/types/error/builders.rs
 +++ b/src/types/error/builders.rs
-@@ -1,26 +1,422 @@
+@@ -1,26 +1,435 @@
  // Code generated by software.amazon.smithy.rust.codegen.smithy-rs. DO NOT EDIT.
 +#[cfg(any(
-+    feature = "op_batch_get_metric_data",
-+    feature = "op_cancel_export_job",
-+    feature = "op_create_configuration_set",
-+    feature = "op_create_configuration_set_event_destination",
-+    feature = "op_create_contact",
-+    feature = "op_create_contact_list",
-+    feature = "op_create_custom_verification_email_template",
-+    feature = "op_create_dedicated_ip_pool",
-+    feature = "op_create_deliverability_test_report",
-+    feature = "op_create_email_identity",
-+    feature = "op_create_email_identity_policy",
-+    feature = "op_create_email_template",
-+    feature = "op_create_export_job",
-+    feature = "op_create_import_job",
-+    feature = "op_create_multi_region_endpoint",
-+    feature = "op_create_tenant",
-+    feature = "op_create_tenant_resource_association",
-+    feature = "op_delete_configuration_set",
-+    feature = "op_delete_configuration_set_event_destination",
-+    feature = "op_delete_contact",
-+    feature = "op_delete_contact_list",
-+    feature = "op_delete_custom_verification_email_template",
-+    feature = "op_delete_dedicated_ip_pool",
-+    feature = "op_delete_email_identity",
-+    feature = "op_delete_email_identity_policy",
-+    feature = "op_delete_email_template",
-+    feature = "op_delete_multi_region_endpoint",
-+    feature = "op_delete_suppressed_destination",
-+    feature = "op_delete_tenant",
-+    feature = "op_delete_tenant_resource_association",
-+    feature = "op_get_account",
-+    feature = "op_get_blacklist_reports",
-+    feature = "op_get_configuration_set",
-+    feature = "op_get_configuration_set_event_destinations",
-+    feature = "op_get_contact",
-+    feature = "op_get_contact_list",
-+    feature = "op_get_custom_verification_email_template",
-+    feature = "op_get_dedicated_ip",
-+    feature = "op_get_dedicated_ip_pool",
-+    feature = "op_get_dedicated_ips",
-+    feature = "op_get_deliverability_dashboard_options",
-+    feature = "op_get_deliverability_test_report",
-+    feature = "op_get_domain_deliverability_campaign",
-+    feature = "op_get_domain_statistics_report",
-+    feature = "op_get_email_address_insights",
-+    feature = "op_get_email_identity",
-+    feature = "op_get_email_identity_policies",
-+    feature = "op_get_email_template",
-+    feature = "op_get_export_job",
-+    feature = "op_get_import_job",
-+    feature = "op_get_message_insights",
-+    feature = "op_get_multi_region_endpoint",
-+    feature = "op_get_reputation_entity",
-+    feature = "op_get_suppressed_destination",
-+    feature = "op_get_tenant",
-+    feature = "op_list_configuration_sets",
-+    feature = "op_list_contact_lists",
-+    feature = "op_list_contacts",
-+    feature = "op_list_custom_verification_email_templates",
-+    feature = "op_list_dedicated_ip_pools",
-+    feature = "op_list_deliverability_test_reports",
-+    feature = "op_list_domain_deliverability_campaigns",
-+    feature = "op_list_email_identities",
-+    feature = "op_list_email_templates",
-+    feature = "op_list_export_jobs",
-+    feature = "op_list_import_jobs",
-+    feature = "op_list_multi_region_endpoints",
-+    feature = "op_list_recommendations",
-+    feature = "op_list_reputation_entities",
-+    feature = "op_list_resource_tenants",
-+    feature = "op_list_suppressed_destinations",
-+    feature = "op_list_tags_for_resource",
-+    feature = "op_list_tenant_resources",
-+    feature = "op_list_tenants",
-+    feature = "op_put_account_dedicated_ip_warmup_attributes",
-+    feature = "op_put_account_details",
-+    feature = "op_put_account_pricing_attributes",
-+    feature = "op_put_account_sending_attributes",
-+    feature = "op_put_account_suppression_attributes",
-+    feature = "op_put_account_vdm_attributes",
-+    feature = "op_put_configuration_set_archiving_options",
-+    feature = "op_put_configuration_set_delivery_options",
-+    feature = "op_put_configuration_set_reputation_options",
-+    feature = "op_put_configuration_set_sending_options",
-+    feature = "op_put_configuration_set_suppression_options",
-+    feature = "op_put_configuration_set_tracking_options",
-+    feature = "op_put_configuration_set_vdm_options",
-+    feature = "op_put_dedicated_ip_in_pool",
-+    feature = "op_put_dedicated_ip_pool_scaling_attributes",
-+    feature = "op_put_dedicated_ip_warmup_attributes",
-+    feature = "op_put_deliverability_dashboard_option",
-+    feature = "op_put_email_identity_configuration_set_attributes",
-+    feature = "op_put_email_identity_dkim_attributes",
-+    feature = "op_put_email_identity_dkim_signing_attributes",
-+    feature = "op_put_email_identity_feedback_attributes",
-+    feature = "op_put_email_identity_mail_from_attributes",
-+    feature = "op_put_suppressed_destination",
-+    feature = "op_put_tenant_suppression_attributes",
-+    feature = "op_send_bulk_email",
-+    feature = "op_send_custom_verification_email",
-+    feature = "op_send_email",
-+    feature = "op_tag_resource",
-+    feature = "op_test_render_email_template",
-+    feature = "op_untag_resource",
-+    feature = "op_update_configuration_set_event_destination",
-+    feature = "op_update_contact",
-+    feature = "op_update_contact_list",
-+    feature = "op_update_custom_verification_email_template",
-+    feature = "op_update_email_identity_policy",
-+    feature = "op_update_email_template",
-+    feature = "op_update_reputation_entity_customer_managed_status",
-+    feature = "op_update_reputation_entity_policy"
-+))]
- pub use crate::types::error::_bad_request_exception::BadRequestExceptionBuilder;
-
-+#[cfg(feature = "op_batch_get_metric_data")]
- pub use crate::types::error::_internal_service_error_exception::InternalServiceErrorExceptionBuilder;
-
-+#[cfg(any(
-+    feature = "op_batch_get_metric_data",
-+    feature = "op_cancel_export_job",
-+    feature = "op_create_configuration_set",
-+    feature = "op_create_configuration_set_event_destination",
-+    feature = "op_create_contact",
-+    feature = "op_create_custom_verification_email_template",
-+    feature = "op_create_deliverability_test_report",
-+    feature = "op_create_email_identity",
-+    feature = "op_create_email_identity_policy",
-+    feature = "op_create_export_job",
-+    feature = "op_create_tenant_resource_association",
-+    feature = "op_delete_configuration_set",
-+    feature = "op_delete_configuration_set_event_destination",
-+    feature = "op_delete_contact",
-+    feature = "op_delete_contact_list",
-+    feature = "op_delete_custom_verification_email_template",
-+    feature = "op_delete_dedicated_ip_pool",
-+    feature = "op_delete_email_identity",
-+    feature = "op_delete_email_identity_policy",
-+    feature = "op_delete_email_template",
-+    feature = "op_delete_multi_region_endpoint",
-+    feature = "op_delete_suppressed_destination",
-+    feature = "op_delete_tenant",
-+    feature = "op_delete_tenant_resource_association",
-+    feature = "op_get_blacklist_reports",
-+    feature = "op_get_configuration_set",
-+    feature = "op_get_configuration_set_event_destinations",
-+    feature = "op_get_contact",
-+    feature = "op_get_contact_list",
-+    feature = "op_get_custom_verification_email_template",
-+    feature = "op_get_dedicated_ip",
-+    feature = "op_get_dedicated_ip_pool",
-+    feature = "op_get_dedicated_ips",
-+    feature = "op_get_deliverability_test_report",
-+    feature = "op_get_domain_deliverability_campaign",
-+    feature = "op_get_domain_statistics_report",
-+    feature = "op_get_email_identity",
-+    feature = "op_get_email_identity_policies",
-+    feature = "op_get_email_template",
-+    feature = "op_get_export_job",
-+    feature = "op_get_import_job",
-+    feature = "op_get_message_insights",
-+    feature = "op_get_multi_region_endpoint",
-+    feature = "op_get_reputation_entity",
-+    feature = "op_get_suppressed_destination",
-+    feature = "op_get_tenant",
-+    feature = "op_list_contacts",
-+    feature = "op_list_deliverability_test_reports",
-+    feature = "op_list_domain_deliverability_campaigns",
-+    feature = "op_list_recommendations",
-+    feature = "op_list_resource_tenants",
-+    feature = "op_list_suppressed_destinations",
-+    feature = "op_list_tags_for_resource",
-+    feature = "op_list_tenant_resources",
-+    feature = "op_put_configuration_set_archiving_options",
-+    feature = "op_put_configuration_set_delivery_options",
-+    feature = "op_put_configuration_set_reputation_options",
-+    feature = "op_put_configuration_set_sending_options",
-+    feature = "op_put_configuration_set_suppression_options",
-+    feature = "op_put_configuration_set_tracking_options",
-+    feature = "op_put_configuration_set_vdm_options",
-+    feature = "op_put_dedicated_ip_in_pool",
-+    feature = "op_put_dedicated_ip_pool_scaling_attributes",
-+    feature = "op_put_dedicated_ip_warmup_attributes",
-+    feature = "op_put_deliverability_dashboard_option",
-+    feature = "op_put_email_identity_configuration_set_attributes",
-+    feature = "op_put_email_identity_dkim_attributes",
-+    feature = "op_put_email_identity_dkim_signing_attributes",
-+    feature = "op_put_email_identity_feedback_attributes",
-+    feature = "op_put_email_identity_mail_from_attributes",
-+    feature = "op_put_suppressed_destination",
-+    feature = "op_put_tenant_suppression_attributes",
-+    feature = "op_send_bulk_email",
-+    feature = "op_send_custom_verification_email",
-+    feature = "op_send_email",
-+    feature = "op_tag_resource",
-+    feature = "op_test_render_email_template",
-+    feature = "op_untag_resource",
-+    feature = "op_update_configuration_set_event_destination",
-+    feature = "op_update_contact",
-+    feature = "op_update_contact_list",
-+    feature = "op_update_custom_verification_email_template",
-+    feature = "op_update_email_identity_policy",
-+    feature = "op_update_email_template"
-+))]
- pub use crate::types::error::_not_found_exception::NotFoundExceptionBuilder;
-
-+#[cfg(any(
-+    feature = "op_batch_get_metric_data",
-+    feature = "op_cancel_export_job",
-+    feature = "op_create_configuration_set",
-+    feature = "op_create_configuration_set_event_destination",
-+    feature = "op_create_contact",
-+    feature = "op_create_contact_list",
-+    feature = "op_create_custom_verification_email_template",
-+    feature = "op_create_dedicated_ip_pool",
-+    feature = "op_create_deliverability_test_report",
-+    feature = "op_create_email_identity",
-+    feature = "op_create_email_identity_policy",
-+    feature = "op_create_email_template",
-+    feature = "op_create_export_job",
-+    feature = "op_create_import_job",
-+    feature = "op_create_multi_region_endpoint",
-+    feature = "op_create_tenant",
-+    feature = "op_create_tenant_resource_association",
-+    feature = "op_delete_configuration_set",
-+    feature = "op_delete_configuration_set_event_destination",
-+    feature = "op_delete_contact",
-+    feature = "op_delete_contact_list",
-+    feature = "op_delete_custom_verification_email_template",
-+    feature = "op_delete_dedicated_ip_pool",
-+    feature = "op_delete_email_identity",
-+    feature = "op_delete_email_identity_policy",
-+    feature = "op_delete_email_template",
-+    feature = "op_delete_multi_region_endpoint",
-+    feature = "op_delete_suppressed_destination",
-+    feature = "op_delete_tenant",
-+    feature = "op_delete_tenant_resource_association",
-+    feature = "op_get_account",
-+    feature = "op_get_blacklist_reports",
-+    feature = "op_get_configuration_set",
-+    feature = "op_get_configuration_set_event_destinations",
-+    feature = "op_get_contact",
-+    feature = "op_get_contact_list",
-+    feature = "op_get_custom_verification_email_template",
-+    feature = "op_get_dedicated_ip",
-+    feature = "op_get_dedicated_ip_pool",
-+    feature = "op_get_dedicated_ips",
-+    feature = "op_get_deliverability_dashboard_options",
-+    feature = "op_get_deliverability_test_report",
-+    feature = "op_get_domain_deliverability_campaign",
-+    feature = "op_get_domain_statistics_report",
-+    feature = "op_get_email_address_insights",
-+    feature = "op_get_email_identity",
-+    feature = "op_get_email_identity_policies",
-+    feature = "op_get_email_template",
-+    feature = "op_get_export_job",
-+    feature = "op_get_import_job",
-+    feature = "op_get_message_insights",
-+    feature = "op_get_multi_region_endpoint",
-+    feature = "op_get_reputation_entity",
-+    feature = "op_get_suppressed_destination",
-+    feature = "op_get_tenant",
-+    feature = "op_list_configuration_sets",
-+    feature = "op_list_contact_lists",
-+    feature = "op_list_contacts",
-+    feature = "op_list_custom_verification_email_templates",
-+    feature = "op_list_dedicated_ip_pools",
-+    feature = "op_list_deliverability_test_reports",
-+    feature = "op_list_domain_deliverability_campaigns",
-+    feature = "op_list_email_identities",
-+    feature = "op_list_email_templates",
-+    feature = "op_list_export_jobs",
-+    feature = "op_list_import_jobs",
-+    feature = "op_list_multi_region_endpoints",
-+    feature = "op_list_recommendations",
-+    feature = "op_list_reputation_entities",
-+    feature = "op_list_resource_tenants",
-+    feature = "op_list_suppressed_destinations",
-+    feature = "op_list_tags_for_resource",
-+    feature = "op_list_tenant_resources",
-+    feature = "op_list_tenants",
-+    feature = "op_put_account_dedicated_ip_warmup_attributes",
-+    feature = "op_put_account_details",
-+    feature = "op_put_account_pricing_attributes",
-+    feature = "op_put_account_sending_attributes",
-+    feature = "op_put_account_suppression_attributes",
-+    feature = "op_put_account_vdm_attributes",
-+    feature = "op_put_configuration_set_archiving_options",
-+    feature = "op_put_configuration_set_delivery_options",
-+    feature = "op_put_configuration_set_reputation_options",
-+    feature = "op_put_configuration_set_sending_options",
-+    feature = "op_put_configuration_set_suppression_options",
-+    feature = "op_put_configuration_set_tracking_options",
-+    feature = "op_put_configuration_set_vdm_options",
-+    feature = "op_put_dedicated_ip_in_pool",
-+    feature = "op_put_dedicated_ip_pool_scaling_attributes",
-+    feature = "op_put_dedicated_ip_warmup_attributes",
-+    feature = "op_put_deliverability_dashboard_option",
-+    feature = "op_put_email_identity_configuration_set_attributes",
-+    feature = "op_put_email_identity_dkim_attributes",
-+    feature = "op_put_email_identity_dkim_signing_attributes",
-+    feature = "op_put_email_identity_feedback_attributes",
-+    feature = "op_put_email_identity_mail_from_attributes",
-+    feature = "op_put_suppressed_destination",
-+    feature = "op_put_tenant_suppression_attributes",
-+    feature = "op_send_bulk_email",
-+    feature = "op_send_custom_verification_email",
-+    feature = "op_send_email",
-+    feature = "op_tag_resource",
-+    feature = "op_test_render_email_template",
-+    feature = "op_untag_resource",
-+    feature = "op_update_configuration_set_event_destination",
-+    feature = "op_update_contact",
-+    feature = "op_update_contact_list",
-+    feature = "op_update_custom_verification_email_template",
-+    feature = "op_update_email_identity_policy",
-+    feature = "op_update_email_template",
-+    feature = "op_update_reputation_entity_customer_managed_status",
-+    feature = "op_update_reputation_entity_policy"
-+))]
- pub use crate::types::error::_too_many_requests_exception::TooManyRequestsExceptionBuilder;
-
-+#[cfg(any(
++    feature = "op_associate_email_identity_certificate",
 +    feature = "op_create_configuration_set",
 +    feature = "op_create_configuration_set_event_destination",
 +    feature = "op_create_contact",
@@ -10914,6 +10988,341 @@ diff --git a/src/types/error/builders.rs b/src/types/error/builders.rs
 +    feature = "op_put_deliverability_dashboard_option"
 +))]
  pub use crate::types::error::_already_exists_exception::AlreadyExistsExceptionBuilder;
+
++#[cfg(any(
++    feature = "op_associate_email_identity_certificate",
++    feature = "op_batch_get_metric_data",
++    feature = "op_cancel_export_job",
++    feature = "op_create_configuration_set",
++    feature = "op_create_configuration_set_event_destination",
++    feature = "op_create_contact",
++    feature = "op_create_contact_list",
++    feature = "op_create_custom_verification_email_template",
++    feature = "op_create_dedicated_ip_pool",
++    feature = "op_create_deliverability_test_report",
++    feature = "op_create_email_identity",
++    feature = "op_create_email_identity_policy",
++    feature = "op_create_email_template",
++    feature = "op_create_export_job",
++    feature = "op_create_import_job",
++    feature = "op_create_multi_region_endpoint",
++    feature = "op_create_tenant",
++    feature = "op_create_tenant_resource_association",
++    feature = "op_delete_configuration_set",
++    feature = "op_delete_configuration_set_event_destination",
++    feature = "op_delete_contact",
++    feature = "op_delete_contact_list",
++    feature = "op_delete_custom_verification_email_template",
++    feature = "op_delete_dedicated_ip_pool",
++    feature = "op_delete_email_identity",
++    feature = "op_delete_email_identity_policy",
++    feature = "op_delete_email_template",
++    feature = "op_delete_multi_region_endpoint",
++    feature = "op_delete_suppressed_destination",
++    feature = "op_delete_tenant",
++    feature = "op_delete_tenant_resource_association",
++    feature = "op_disassociate_email_identity_certificate",
++    feature = "op_get_account",
++    feature = "op_get_blacklist_reports",
++    feature = "op_get_configuration_set",
++    feature = "op_get_configuration_set_event_destinations",
++    feature = "op_get_contact",
++    feature = "op_get_contact_list",
++    feature = "op_get_custom_verification_email_template",
++    feature = "op_get_dedicated_ip",
++    feature = "op_get_dedicated_ip_pool",
++    feature = "op_get_dedicated_ips",
++    feature = "op_get_deliverability_dashboard_options",
++    feature = "op_get_deliverability_test_report",
++    feature = "op_get_domain_deliverability_campaign",
++    feature = "op_get_domain_statistics_report",
++    feature = "op_get_email_address_insights",
++    feature = "op_get_email_identity",
++    feature = "op_get_email_identity_policies",
++    feature = "op_get_email_template",
++    feature = "op_get_export_job",
++    feature = "op_get_import_job",
++    feature = "op_get_message_insights",
++    feature = "op_get_multi_region_endpoint",
++    feature = "op_get_reputation_entity",
++    feature = "op_get_suppressed_destination",
++    feature = "op_get_tenant",
++    feature = "op_list_configuration_sets",
++    feature = "op_list_contact_lists",
++    feature = "op_list_contacts",
++    feature = "op_list_custom_verification_email_templates",
++    feature = "op_list_dedicated_ip_pools",
++    feature = "op_list_deliverability_test_reports",
++    feature = "op_list_domain_deliverability_campaigns",
++    feature = "op_list_email_identities",
++    feature = "op_list_email_identity_certificates",
++    feature = "op_list_email_templates",
++    feature = "op_list_export_jobs",
++    feature = "op_list_import_jobs",
++    feature = "op_list_multi_region_endpoints",
++    feature = "op_list_recommendations",
++    feature = "op_list_reputation_entities",
++    feature = "op_list_resource_tenants",
++    feature = "op_list_suppressed_destinations",
++    feature = "op_list_tags_for_resource",
++    feature = "op_list_tenant_resources",
++    feature = "op_list_tenants",
++    feature = "op_put_account_dedicated_ip_warmup_attributes",
++    feature = "op_put_account_details",
++    feature = "op_put_account_pricing_attributes",
++    feature = "op_put_account_sending_attributes",
++    feature = "op_put_account_suppression_attributes",
++    feature = "op_put_account_vdm_attributes",
++    feature = "op_put_configuration_set_archiving_options",
++    feature = "op_put_configuration_set_delivery_options",
++    feature = "op_put_configuration_set_reputation_options",
++    feature = "op_put_configuration_set_sending_options",
++    feature = "op_put_configuration_set_suppression_options",
++    feature = "op_put_configuration_set_tracking_options",
++    feature = "op_put_configuration_set_vdm_options",
++    feature = "op_put_dedicated_ip_in_pool",
++    feature = "op_put_dedicated_ip_pool_scaling_attributes",
++    feature = "op_put_dedicated_ip_warmup_attributes",
++    feature = "op_put_deliverability_dashboard_option",
++    feature = "op_put_email_identity_configuration_set_attributes",
++    feature = "op_put_email_identity_dkim_attributes",
++    feature = "op_put_email_identity_dkim_signing_attributes",
++    feature = "op_put_email_identity_feedback_attributes",
++    feature = "op_put_email_identity_mail_from_attributes",
++    feature = "op_put_suppressed_destination",
++    feature = "op_put_tenant_suppression_attributes",
++    feature = "op_send_bulk_email",
++    feature = "op_send_custom_verification_email",
++    feature = "op_send_email",
++    feature = "op_tag_resource",
++    feature = "op_test_render_email_template",
++    feature = "op_untag_resource",
++    feature = "op_update_configuration_set",
++    feature = "op_update_configuration_set_event_destination",
++    feature = "op_update_contact",
++    feature = "op_update_contact_list",
++    feature = "op_update_custom_verification_email_template",
++    feature = "op_update_email_identity_policy",
++    feature = "op_update_email_template",
++    feature = "op_update_reputation_entity_customer_managed_status",
++    feature = "op_update_reputation_entity_policy"
++))]
+ pub use crate::types::error::_bad_request_exception::BadRequestExceptionBuilder;
+
++#[cfg(any(
++    feature = "op_associate_email_identity_certificate",
++    feature = "op_batch_get_metric_data",
++    feature = "op_cancel_export_job",
++    feature = "op_create_configuration_set",
++    feature = "op_create_configuration_set_event_destination",
++    feature = "op_create_contact",
++    feature = "op_create_custom_verification_email_template",
++    feature = "op_create_deliverability_test_report",
++    feature = "op_create_email_identity",
++    feature = "op_create_email_identity_policy",
++    feature = "op_create_export_job",
++    feature = "op_create_tenant_resource_association",
++    feature = "op_delete_configuration_set",
++    feature = "op_delete_configuration_set_event_destination",
++    feature = "op_delete_contact",
++    feature = "op_delete_contact_list",
++    feature = "op_delete_custom_verification_email_template",
++    feature = "op_delete_dedicated_ip_pool",
++    feature = "op_delete_email_identity",
++    feature = "op_delete_email_identity_policy",
++    feature = "op_delete_email_template",
++    feature = "op_delete_multi_region_endpoint",
++    feature = "op_delete_suppressed_destination",
++    feature = "op_delete_tenant",
++    feature = "op_delete_tenant_resource_association",
++    feature = "op_disassociate_email_identity_certificate",
++    feature = "op_get_blacklist_reports",
++    feature = "op_get_configuration_set",
++    feature = "op_get_configuration_set_event_destinations",
++    feature = "op_get_contact",
++    feature = "op_get_contact_list",
++    feature = "op_get_custom_verification_email_template",
++    feature = "op_get_dedicated_ip",
++    feature = "op_get_dedicated_ip_pool",
++    feature = "op_get_dedicated_ips",
++    feature = "op_get_deliverability_test_report",
++    feature = "op_get_domain_deliverability_campaign",
++    feature = "op_get_domain_statistics_report",
++    feature = "op_get_email_identity",
++    feature = "op_get_email_identity_policies",
++    feature = "op_get_email_template",
++    feature = "op_get_export_job",
++    feature = "op_get_import_job",
++    feature = "op_get_message_insights",
++    feature = "op_get_multi_region_endpoint",
++    feature = "op_get_reputation_entity",
++    feature = "op_get_suppressed_destination",
++    feature = "op_get_tenant",
++    feature = "op_list_contacts",
++    feature = "op_list_deliverability_test_reports",
++    feature = "op_list_domain_deliverability_campaigns",
++    feature = "op_list_email_identity_certificates",
++    feature = "op_list_recommendations",
++    feature = "op_list_resource_tenants",
++    feature = "op_list_suppressed_destinations",
++    feature = "op_list_tags_for_resource",
++    feature = "op_list_tenant_resources",
++    feature = "op_put_configuration_set_archiving_options",
++    feature = "op_put_configuration_set_delivery_options",
++    feature = "op_put_configuration_set_reputation_options",
++    feature = "op_put_configuration_set_sending_options",
++    feature = "op_put_configuration_set_suppression_options",
++    feature = "op_put_configuration_set_tracking_options",
++    feature = "op_put_configuration_set_vdm_options",
++    feature = "op_put_dedicated_ip_in_pool",
++    feature = "op_put_dedicated_ip_pool_scaling_attributes",
++    feature = "op_put_dedicated_ip_warmup_attributes",
++    feature = "op_put_deliverability_dashboard_option",
++    feature = "op_put_email_identity_configuration_set_attributes",
++    feature = "op_put_email_identity_dkim_attributes",
++    feature = "op_put_email_identity_dkim_signing_attributes",
++    feature = "op_put_email_identity_feedback_attributes",
++    feature = "op_put_email_identity_mail_from_attributes",
++    feature = "op_put_suppressed_destination",
++    feature = "op_put_tenant_suppression_attributes",
++    feature = "op_send_bulk_email",
++    feature = "op_send_custom_verification_email",
++    feature = "op_send_email",
++    feature = "op_tag_resource",
++    feature = "op_test_render_email_template",
++    feature = "op_untag_resource",
++    feature = "op_update_configuration_set",
++    feature = "op_update_configuration_set_event_destination",
++    feature = "op_update_contact",
++    feature = "op_update_contact_list",
++    feature = "op_update_custom_verification_email_template",
++    feature = "op_update_email_identity_policy",
++    feature = "op_update_email_template"
++))]
+ pub use crate::types::error::_not_found_exception::NotFoundExceptionBuilder;
+
++#[cfg(any(
++    feature = "op_associate_email_identity_certificate",
++    feature = "op_batch_get_metric_data",
++    feature = "op_cancel_export_job",
++    feature = "op_create_configuration_set",
++    feature = "op_create_configuration_set_event_destination",
++    feature = "op_create_contact",
++    feature = "op_create_contact_list",
++    feature = "op_create_custom_verification_email_template",
++    feature = "op_create_dedicated_ip_pool",
++    feature = "op_create_deliverability_test_report",
++    feature = "op_create_email_identity",
++    feature = "op_create_email_identity_policy",
++    feature = "op_create_email_template",
++    feature = "op_create_export_job",
++    feature = "op_create_import_job",
++    feature = "op_create_multi_region_endpoint",
++    feature = "op_create_tenant",
++    feature = "op_create_tenant_resource_association",
++    feature = "op_delete_configuration_set",
++    feature = "op_delete_configuration_set_event_destination",
++    feature = "op_delete_contact",
++    feature = "op_delete_contact_list",
++    feature = "op_delete_custom_verification_email_template",
++    feature = "op_delete_dedicated_ip_pool",
++    feature = "op_delete_email_identity",
++    feature = "op_delete_email_identity_policy",
++    feature = "op_delete_email_template",
++    feature = "op_delete_multi_region_endpoint",
++    feature = "op_delete_suppressed_destination",
++    feature = "op_delete_tenant",
++    feature = "op_delete_tenant_resource_association",
++    feature = "op_disassociate_email_identity_certificate",
++    feature = "op_get_account",
++    feature = "op_get_blacklist_reports",
++    feature = "op_get_configuration_set",
++    feature = "op_get_configuration_set_event_destinations",
++    feature = "op_get_contact",
++    feature = "op_get_contact_list",
++    feature = "op_get_custom_verification_email_template",
++    feature = "op_get_dedicated_ip",
++    feature = "op_get_dedicated_ip_pool",
++    feature = "op_get_dedicated_ips",
++    feature = "op_get_deliverability_dashboard_options",
++    feature = "op_get_deliverability_test_report",
++    feature = "op_get_domain_deliverability_campaign",
++    feature = "op_get_domain_statistics_report",
++    feature = "op_get_email_address_insights",
++    feature = "op_get_email_identity",
++    feature = "op_get_email_identity_policies",
++    feature = "op_get_email_template",
++    feature = "op_get_export_job",
++    feature = "op_get_import_job",
++    feature = "op_get_message_insights",
++    feature = "op_get_multi_region_endpoint",
++    feature = "op_get_reputation_entity",
++    feature = "op_get_suppressed_destination",
++    feature = "op_get_tenant",
++    feature = "op_list_configuration_sets",
++    feature = "op_list_contact_lists",
++    feature = "op_list_contacts",
++    feature = "op_list_custom_verification_email_templates",
++    feature = "op_list_dedicated_ip_pools",
++    feature = "op_list_deliverability_test_reports",
++    feature = "op_list_domain_deliverability_campaigns",
++    feature = "op_list_email_identities",
++    feature = "op_list_email_identity_certificates",
++    feature = "op_list_email_templates",
++    feature = "op_list_export_jobs",
++    feature = "op_list_import_jobs",
++    feature = "op_list_multi_region_endpoints",
++    feature = "op_list_recommendations",
++    feature = "op_list_reputation_entities",
++    feature = "op_list_resource_tenants",
++    feature = "op_list_suppressed_destinations",
++    feature = "op_list_tags_for_resource",
++    feature = "op_list_tenant_resources",
++    feature = "op_list_tenants",
++    feature = "op_put_account_dedicated_ip_warmup_attributes",
++    feature = "op_put_account_details",
++    feature = "op_put_account_pricing_attributes",
++    feature = "op_put_account_sending_attributes",
++    feature = "op_put_account_suppression_attributes",
++    feature = "op_put_account_vdm_attributes",
++    feature = "op_put_configuration_set_archiving_options",
++    feature = "op_put_configuration_set_delivery_options",
++    feature = "op_put_configuration_set_reputation_options",
++    feature = "op_put_configuration_set_sending_options",
++    feature = "op_put_configuration_set_suppression_options",
++    feature = "op_put_configuration_set_tracking_options",
++    feature = "op_put_configuration_set_vdm_options",
++    feature = "op_put_dedicated_ip_in_pool",
++    feature = "op_put_dedicated_ip_pool_scaling_attributes",
++    feature = "op_put_dedicated_ip_warmup_attributes",
++    feature = "op_put_deliverability_dashboard_option",
++    feature = "op_put_email_identity_configuration_set_attributes",
++    feature = "op_put_email_identity_dkim_attributes",
++    feature = "op_put_email_identity_dkim_signing_attributes",
++    feature = "op_put_email_identity_feedback_attributes",
++    feature = "op_put_email_identity_mail_from_attributes",
++    feature = "op_put_suppressed_destination",
++    feature = "op_put_tenant_suppression_attributes",
++    feature = "op_send_bulk_email",
++    feature = "op_send_custom_verification_email",
++    feature = "op_send_email",
++    feature = "op_tag_resource",
++    feature = "op_test_render_email_template",
++    feature = "op_untag_resource",
++    feature = "op_update_configuration_set",
++    feature = "op_update_configuration_set_event_destination",
++    feature = "op_update_contact",
++    feature = "op_update_contact_list",
++    feature = "op_update_custom_verification_email_template",
++    feature = "op_update_email_identity_policy",
++    feature = "op_update_email_template",
++    feature = "op_update_reputation_entity_customer_managed_status",
++    feature = "op_update_reputation_entity_policy"
++))]
+ pub use crate::types::error::_too_many_requests_exception::TooManyRequestsExceptionBuilder;
+
++#[cfg(feature = "op_batch_get_metric_data")]
+ pub use crate::types::error::_internal_service_error_exception::InternalServiceErrorExceptionBuilder;
 
 +#[cfg(any(
 +    feature = "op_create_configuration_set",
@@ -11013,7 +11422,7 @@ diff --git a/Cargo.toml b/Cargo.toml
 
  [dependencies.aws-runtime]
 -path = "../aws-runtime"
- version = "1.9.1"
+ version = "1.9.2"
 
  [dependencies.aws-smithy-async]
 -path = "../aws-smithy-async"
@@ -11039,7 +11448,7 @@ diff --git a/Cargo.toml b/Cargo.toml
  [dependencies.aws-smithy-runtime-api]
 -path = "../aws-smithy-runtime-api"
  features = ["client", "http-1x"]
- version = "1.15.0"
+ version = "1.16.0"
 
  [dependencies.aws-smithy-schema]
 -path = "../aws-smithy-schema"
@@ -11048,11 +11457,11 @@ diff --git a/Cargo.toml b/Cargo.toml
  [dependencies.aws-smithy-types]
 -path = "../aws-smithy-types"
  features = ["http-body-1-x"]
- version = "1.6.2"
+ version = "1.6.3"
 
  [dependencies.aws-types]
 -path = "../aws-types"
- version = "1.5.0"
+ version = "1.6.0"
 
  [dependencies.bytes]
 @@ -84,11 +73,9 @@
@@ -11060,17 +11469,18 @@ diff --git a/Cargo.toml b/Cargo.toml
  version = "0.1"
  [dev-dependencies.aws-config]
 -path = "../aws-config"
- version = "1.11.0"
+ version = "1.12.0"
 
  [dev-dependencies.aws-credential-types]
 -path = "../aws-credential-types"
  features = ["test-util"]
  version = "1.3.0"
 
-@@ -108,3 +95,115 @@
+@@ -108,3 +95,119 @@
  test-util = ["aws-credential-types/test-util", "aws-smithy-runtime/legacy-test-util", "aws-smithy-runtime/test-util"]
  gated-tests = []
  default = ["sigv4a", "rustls", "default-https-client", "rt-tokio"]
++op_associate_email_identity_certificate = []
 +op_batch_get_metric_data = []
 +op_cancel_export_job = []
 +op_create_configuration_set = []
@@ -11101,6 +11511,7 @@ diff --git a/Cargo.toml b/Cargo.toml
 +op_delete_suppressed_destination = []
 +op_delete_tenant = []
 +op_delete_tenant_resource_association = []
++op_disassociate_email_identity_certificate = []
 +op_get_account = []
 +op_get_blacklist_reports = []
 +op_get_configuration_set = []
@@ -11134,6 +11545,7 @@ diff --git a/Cargo.toml b/Cargo.toml
 +op_list_deliverability_test_reports = []
 +op_list_domain_deliverability_campaigns = []
 +op_list_email_identities = []
++op_list_email_identity_certificates = []
 +op_list_email_templates = []
 +op_list_export_jobs = []
 +op_list_import_jobs = []
@@ -11175,6 +11587,7 @@ diff --git a/Cargo.toml b/Cargo.toml
 +op_tag_resource = []
 +op_test_render_email_template = []
 +op_untag_resource = []
++op_update_configuration_set = []
 +op_update_configuration_set_event_destination = []
 +op_update_contact = []
 +op_update_contact_list = []
@@ -11186,9 +11599,12 @@ diff --git a/Cargo.toml b/Cargo.toml
 diff --git a/src/client.rs b/src/client.rs
 --- a/src/client.rs
 +++ b/src/client.rs
-@@ -136,38 +136,55 @@
+@@ -136,40 +136,58 @@
      }
  }
+
++#[cfg(feature = "op_associate_email_identity_certificate")]
+ mod associate_email_identity_certificate;
 
 +#[cfg(feature = "op_batch_get_metric_data")]
  mod batch_get_metric_data;
@@ -11242,7 +11658,7 @@ diff --git a/src/client.rs b/src/client.rs
  mod create_tenant_resource_association;
 
  /// Operation customization and supporting types.
-@@ -197,192 +214,287 @@
+@@ -199,198 +217,296 @@
  /// ```
  pub mod customize;
 
@@ -11284,6 +11700,9 @@ diff --git a/src/client.rs b/src/client.rs
 
 +#[cfg(feature = "op_delete_tenant_resource_association")]
  mod delete_tenant_resource_association;
+
++#[cfg(feature = "op_disassociate_email_identity_certificate")]
+ mod disassociate_email_identity_certificate;
 
 +#[cfg(feature = "op_get_account")]
  mod get_account;
@@ -11383,6 +11802,9 @@ diff --git a/src/client.rs b/src/client.rs
 
 +#[cfg(feature = "op_list_email_identities")]
  mod list_email_identities;
+
++#[cfg(feature = "op_list_email_identity_certificates")]
+ mod list_email_identity_certificates;
 
 +#[cfg(feature = "op_list_email_templates")]
  mod list_email_templates;
@@ -11507,6 +11929,9 @@ diff --git a/src/client.rs b/src/client.rs
 +#[cfg(feature = "op_untag_resource")]
  mod untag_resource;
 
++#[cfg(feature = "op_update_configuration_set")]
+ mod update_configuration_set;
+
 +#[cfg(feature = "op_update_configuration_set_event_destination")]
  mod update_configuration_set_event_destination;
 
@@ -11533,7 +11958,7 @@ diff --git a/src/client.rs b/src/client.rs
 diff --git a/src/error_meta.rs b/src/error_meta.rs
 --- a/src/error_meta.rs
 +++ b/src/error_meta.rs
-@@ -3,30 +3,426 @@
+@@ -3,30 +3,439 @@
  #[non_exhaustive]
  #[derive(::std::fmt::Debug)]
  pub enum Error {
@@ -11545,6 +11970,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
      /// <p>The message can't be sent because the account's ability to send email has been permanently restricted.</p>
      AccountSuspendedException(crate::types::error::AccountSuspendedException),
 +    #[cfg(any(
++        feature = "op_associate_email_identity_certificate",
 +        feature = "op_create_configuration_set",
 +        feature = "op_create_configuration_set_event_destination",
 +        feature = "op_create_contact",
@@ -11562,6 +11988,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
      /// <p>The resource specified in your request already exists.</p>
      AlreadyExistsException(crate::types::error::AlreadyExistsException),
 +    #[cfg(any(
++        feature = "op_associate_email_identity_certificate",
 +        feature = "op_batch_get_metric_data",
 +        feature = "op_cancel_export_job",
 +        feature = "op_create_configuration_set",
@@ -11592,6 +12019,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
 +        feature = "op_delete_suppressed_destination",
 +        feature = "op_delete_tenant",
 +        feature = "op_delete_tenant_resource_association",
++        feature = "op_disassociate_email_identity_certificate",
 +        feature = "op_get_account",
 +        feature = "op_get_blacklist_reports",
 +        feature = "op_get_configuration_set",
@@ -11625,6 +12053,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
 +        feature = "op_list_deliverability_test_reports",
 +        feature = "op_list_domain_deliverability_campaigns",
 +        feature = "op_list_email_identities",
++        feature = "op_list_email_identity_certificates",
 +        feature = "op_list_email_templates",
 +        feature = "op_list_export_jobs",
 +        feature = "op_list_import_jobs",
@@ -11666,6 +12095,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
 +        feature = "op_tag_resource",
 +        feature = "op_test_render_email_template",
 +        feature = "op_untag_resource",
++        feature = "op_update_configuration_set",
 +        feature = "op_update_configuration_set_event_destination",
 +        feature = "op_update_contact",
 +        feature = "op_update_contact_list",
@@ -11748,6 +12178,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
      /// <p>The message can't be sent because it contains invalid content.</p>
      MessageRejected(crate::types::error::MessageRejected),
 +    #[cfg(any(
++        feature = "op_associate_email_identity_certificate",
 +        feature = "op_batch_get_metric_data",
 +        feature = "op_cancel_export_job",
 +        feature = "op_create_configuration_set",
@@ -11772,6 +12203,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
 +        feature = "op_delete_suppressed_destination",
 +        feature = "op_delete_tenant",
 +        feature = "op_delete_tenant_resource_association",
++        feature = "op_disassociate_email_identity_certificate",
 +        feature = "op_get_blacklist_reports",
 +        feature = "op_get_configuration_set",
 +        feature = "op_get_configuration_set_event_destinations",
@@ -11797,6 +12229,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
 +        feature = "op_list_contacts",
 +        feature = "op_list_deliverability_test_reports",
 +        feature = "op_list_domain_deliverability_campaigns",
++        feature = "op_list_email_identity_certificates",
 +        feature = "op_list_recommendations",
 +        feature = "op_list_resource_tenants",
 +        feature = "op_list_suppressed_destinations",
@@ -11826,6 +12259,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
 +        feature = "op_tag_resource",
 +        feature = "op_test_render_email_template",
 +        feature = "op_untag_resource",
++        feature = "op_update_configuration_set",
 +        feature = "op_update_configuration_set_event_destination",
 +        feature = "op_update_contact",
 +        feature = "op_update_contact_list",
@@ -11844,6 +12278,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
      /// <p>The message can't be sent because the account's ability to send email is currently paused.</p>
      SendingPausedException(crate::types::error::SendingPausedException),
 +    #[cfg(any(
++        feature = "op_associate_email_identity_certificate",
 +        feature = "op_batch_get_metric_data",
 +        feature = "op_cancel_export_job",
 +        feature = "op_create_configuration_set",
@@ -11874,6 +12309,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
 +        feature = "op_delete_suppressed_destination",
 +        feature = "op_delete_tenant",
 +        feature = "op_delete_tenant_resource_association",
++        feature = "op_disassociate_email_identity_certificate",
 +        feature = "op_get_account",
 +        feature = "op_get_blacklist_reports",
 +        feature = "op_get_configuration_set",
@@ -11907,6 +12343,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
 +        feature = "op_list_deliverability_test_reports",
 +        feature = "op_list_domain_deliverability_campaigns",
 +        feature = "op_list_email_identities",
++        feature = "op_list_email_identity_certificates",
 +        feature = "op_list_email_templates",
 +        feature = "op_list_export_jobs",
 +        feature = "op_list_import_jobs",
@@ -11948,6 +12385,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
 +        feature = "op_tag_resource",
 +        feature = "op_test_render_email_template",
 +        feature = "op_untag_resource",
++        feature = "op_update_configuration_set",
 +        feature = "op_update_configuration_set_event_destination",
 +        feature = "op_update_contact",
 +        feature = "op_update_contact_list",
@@ -11960,7 +12398,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
      /// <p>Too many requests have been made to the operation.</p>
      TooManyRequestsException(crate::types::error::TooManyRequestsException),
      /// An unexpected error occurred (e.g., invalid JSON returned by the service or an unknown error code).
-@@ -43,18 +439,414 @@
+@@ -43,18 +452,427 @@
  impl ::std::fmt::Display for Error {
      fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
          match self {
@@ -11971,6 +12409,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
 +            ))]
              Error::AccountSuspendedException(inner) => inner.fmt(f),
 +            #[cfg(any(
++                feature = "op_associate_email_identity_certificate",
 +                feature = "op_create_configuration_set",
 +                feature = "op_create_configuration_set_event_destination",
 +                feature = "op_create_contact",
@@ -11987,6 +12426,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
 +            ))]
              Error::AlreadyExistsException(inner) => inner.fmt(f),
 +            #[cfg(any(
++                feature = "op_associate_email_identity_certificate",
 +                feature = "op_batch_get_metric_data",
 +                feature = "op_cancel_export_job",
 +                feature = "op_create_configuration_set",
@@ -12017,6 +12457,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
 +                feature = "op_delete_suppressed_destination",
 +                feature = "op_delete_tenant",
 +                feature = "op_delete_tenant_resource_association",
++                feature = "op_disassociate_email_identity_certificate",
 +                feature = "op_get_account",
 +                feature = "op_get_blacklist_reports",
 +                feature = "op_get_configuration_set",
@@ -12050,6 +12491,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
 +                feature = "op_list_deliverability_test_reports",
 +                feature = "op_list_domain_deliverability_campaigns",
 +                feature = "op_list_email_identities",
++                feature = "op_list_email_identity_certificates",
 +                feature = "op_list_email_templates",
 +                feature = "op_list_export_jobs",
 +                feature = "op_list_import_jobs",
@@ -12091,6 +12533,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
 +                feature = "op_tag_resource",
 +                feature = "op_test_render_email_template",
 +                feature = "op_untag_resource",
++                feature = "op_update_configuration_set",
 +                feature = "op_update_configuration_set_event_destination",
 +                feature = "op_update_contact",
 +                feature = "op_update_contact_list",
@@ -12165,6 +12608,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
 +            ))]
              Error::MessageRejected(inner) => inner.fmt(f),
 +            #[cfg(any(
++                feature = "op_associate_email_identity_certificate",
 +                feature = "op_batch_get_metric_data",
 +                feature = "op_cancel_export_job",
 +                feature = "op_create_configuration_set",
@@ -12189,6 +12633,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
 +                feature = "op_delete_suppressed_destination",
 +                feature = "op_delete_tenant",
 +                feature = "op_delete_tenant_resource_association",
++                feature = "op_disassociate_email_identity_certificate",
 +                feature = "op_get_blacklist_reports",
 +                feature = "op_get_configuration_set",
 +                feature = "op_get_configuration_set_event_destinations",
@@ -12214,6 +12659,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
 +                feature = "op_list_contacts",
 +                feature = "op_list_deliverability_test_reports",
 +                feature = "op_list_domain_deliverability_campaigns",
++                feature = "op_list_email_identity_certificates",
 +                feature = "op_list_recommendations",
 +                feature = "op_list_resource_tenants",
 +                feature = "op_list_suppressed_destinations",
@@ -12243,6 +12689,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
 +                feature = "op_tag_resource",
 +                feature = "op_test_render_email_template",
 +                feature = "op_untag_resource",
++                feature = "op_update_configuration_set",
 +                feature = "op_update_configuration_set_event_destination",
 +                feature = "op_update_contact",
 +                feature = "op_update_contact_list",
@@ -12259,6 +12706,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
 +            ))]
              Error::SendingPausedException(inner) => inner.fmt(f),
 +            #[cfg(any(
++                feature = "op_associate_email_identity_certificate",
 +                feature = "op_batch_get_metric_data",
 +                feature = "op_cancel_export_job",
 +                feature = "op_create_configuration_set",
@@ -12289,6 +12737,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
 +                feature = "op_delete_suppressed_destination",
 +                feature = "op_delete_tenant",
 +                feature = "op_delete_tenant_resource_association",
++                feature = "op_disassociate_email_identity_certificate",
 +                feature = "op_get_account",
 +                feature = "op_get_blacklist_reports",
 +                feature = "op_get_configuration_set",
@@ -12322,6 +12771,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
 +                feature = "op_list_deliverability_test_reports",
 +                feature = "op_list_domain_deliverability_campaigns",
 +                feature = "op_list_email_identities",
++                feature = "op_list_email_identity_certificates",
 +                feature = "op_list_email_templates",
 +                feature = "op_list_export_jobs",
 +                feature = "op_list_import_jobs",
@@ -12363,6 +12813,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
 +                feature = "op_tag_resource",
 +                feature = "op_test_render_email_template",
 +                feature = "op_untag_resource",
++                feature = "op_update_configuration_set",
 +                feature = "op_update_configuration_set_event_destination",
 +                feature = "op_update_contact",
 +                feature = "op_update_contact_list",
@@ -12375,7 +12826,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
              Error::TooManyRequestsException(inner) => inner.fmt(f),
              Error::Unhandled(_) => {
                  if let ::std::option::Option::Some(code) =
-@@ -79,23 +871,420 @@
+@@ -79,23 +897,433 @@
  impl ::aws_smithy_types::error::metadata::ProvideErrorMetadata for Error {
      fn meta(&self) -> &::aws_smithy_types::error::metadata::ErrorMetadata {
          match self {
@@ -12386,6 +12837,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
 +            ))]
              Self::AccountSuspendedException(inner) => inner.meta(),
 +            #[cfg(any(
++                feature = "op_associate_email_identity_certificate",
 +                feature = "op_create_configuration_set",
 +                feature = "op_create_configuration_set_event_destination",
 +                feature = "op_create_contact",
@@ -12402,6 +12854,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
 +            ))]
              Self::AlreadyExistsException(inner) => inner.meta(),
 +            #[cfg(any(
++                feature = "op_associate_email_identity_certificate",
 +                feature = "op_batch_get_metric_data",
 +                feature = "op_cancel_export_job",
 +                feature = "op_create_configuration_set",
@@ -12432,6 +12885,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
 +                feature = "op_delete_suppressed_destination",
 +                feature = "op_delete_tenant",
 +                feature = "op_delete_tenant_resource_association",
++                feature = "op_disassociate_email_identity_certificate",
 +                feature = "op_get_account",
 +                feature = "op_get_blacklist_reports",
 +                feature = "op_get_configuration_set",
@@ -12465,6 +12919,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
 +                feature = "op_list_deliverability_test_reports",
 +                feature = "op_list_domain_deliverability_campaigns",
 +                feature = "op_list_email_identities",
++                feature = "op_list_email_identity_certificates",
 +                feature = "op_list_email_templates",
 +                feature = "op_list_export_jobs",
 +                feature = "op_list_import_jobs",
@@ -12506,6 +12961,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
 +                feature = "op_tag_resource",
 +                feature = "op_test_render_email_template",
 +                feature = "op_untag_resource",
++                feature = "op_update_configuration_set",
 +                feature = "op_update_configuration_set_event_destination",
 +                feature = "op_update_contact",
 +                feature = "op_update_contact_list",
@@ -12580,6 +13036,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
 +            ))]
              Self::MessageRejected(inner) => inner.meta(),
 +            #[cfg(any(
++                feature = "op_associate_email_identity_certificate",
 +                feature = "op_batch_get_metric_data",
 +                feature = "op_cancel_export_job",
 +                feature = "op_create_configuration_set",
@@ -12604,6 +13061,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
 +                feature = "op_delete_suppressed_destination",
 +                feature = "op_delete_tenant",
 +                feature = "op_delete_tenant_resource_association",
++                feature = "op_disassociate_email_identity_certificate",
 +                feature = "op_get_blacklist_reports",
 +                feature = "op_get_configuration_set",
 +                feature = "op_get_configuration_set_event_destinations",
@@ -12629,6 +13087,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
 +                feature = "op_list_contacts",
 +                feature = "op_list_deliverability_test_reports",
 +                feature = "op_list_domain_deliverability_campaigns",
++                feature = "op_list_email_identity_certificates",
 +                feature = "op_list_recommendations",
 +                feature = "op_list_resource_tenants",
 +                feature = "op_list_suppressed_destinations",
@@ -12658,6 +13117,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
 +                feature = "op_tag_resource",
 +                feature = "op_test_render_email_template",
 +                feature = "op_untag_resource",
++                feature = "op_update_configuration_set",
 +                feature = "op_update_configuration_set_event_destination",
 +                feature = "op_update_contact",
 +                feature = "op_update_contact_list",
@@ -12674,6 +13134,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
 +            ))]
              Self::SendingPausedException(inner) => inner.meta(),
 +            #[cfg(any(
++                feature = "op_associate_email_identity_certificate",
 +                feature = "op_batch_get_metric_data",
 +                feature = "op_cancel_export_job",
 +                feature = "op_create_configuration_set",
@@ -12704,6 +13165,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
 +                feature = "op_delete_suppressed_destination",
 +                feature = "op_delete_tenant",
 +                feature = "op_delete_tenant_resource_association",
++                feature = "op_disassociate_email_identity_certificate",
 +                feature = "op_get_account",
 +                feature = "op_get_blacklist_reports",
 +                feature = "op_get_configuration_set",
@@ -12737,6 +13199,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
 +                feature = "op_list_deliverability_test_reports",
 +                feature = "op_list_domain_deliverability_campaigns",
 +                feature = "op_list_email_identities",
++                feature = "op_list_email_identity_certificates",
 +                feature = "op_list_email_templates",
 +                feature = "op_list_export_jobs",
 +                feature = "op_list_import_jobs",
@@ -12778,6 +13241,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
 +                feature = "op_tag_resource",
 +                feature = "op_test_render_email_template",
 +                feature = "op_untag_resource",
++                feature = "op_update_configuration_set",
 +                feature = "op_update_configuration_set_event_destination",
 +                feature = "op_update_contact",
 +                feature = "op_update_contact_list",
@@ -12792,11 +13256,27 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
          }
      }
  }
++#[cfg(feature = "op_associate_email_identity_certificate")]
+ impl<R>
+     From<
+         ::aws_smithy_runtime_api::client::result::SdkError<
+@@ -121,6 +1349,7 @@
+         }
+     }
+ }
++#[cfg(feature = "op_associate_email_identity_certificate")]
+ impl From<crate::operation::associate_email_identity_certificate::AssociateEmailIdentityCertificateError> for Error {
+     fn from(
+         err: crate::operation::associate_email_identity_certificate::AssociateEmailIdentityCertificateError,
+@@ -144,6 +1373,7 @@
+         }
+     }
+ }
 +#[cfg(feature = "op_batch_get_metric_data")]
  impl<R>
      From<
          ::aws_smithy_runtime_api::client::result::SdkError<
-@@ -121,6 +1310,7 @@
+@@ -169,6 +1399,7 @@
          }
      }
  }
@@ -12804,7 +13284,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl From<crate::operation::batch_get_metric_data::BatchGetMetricDataError> for Error {
      fn from(err: crate::operation::batch_get_metric_data::BatchGetMetricDataError) -> Self {
          match err {
-@@ -142,6 +1332,7 @@
+@@ -190,6 +1421,7 @@
          }
      }
  }
@@ -12812,7 +13292,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl<R>
      From<
          ::aws_smithy_runtime_api::client::result::SdkError<
-@@ -167,6 +1358,7 @@
+@@ -215,6 +1447,7 @@
          }
      }
  }
@@ -12820,7 +13300,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl From<crate::operation::cancel_export_job::CancelExportJobError> for Error {
      fn from(err: crate::operation::cancel_export_job::CancelExportJobError) -> Self {
          match err {
-@@ -183,6 +1375,7 @@
+@@ -231,6 +1464,7 @@
          }
      }
  }
@@ -12828,7 +13308,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl<R>
      From<
          ::aws_smithy_runtime_api::client::result::SdkError<
-@@ -208,6 +1401,7 @@
+@@ -256,6 +1490,7 @@
          }
      }
  }
@@ -12836,7 +13316,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl From<crate::operation::create_configuration_set::CreateConfigurationSetError> for Error {
      fn from(err: crate::operation::create_configuration_set::CreateConfigurationSetError) -> Self {
          match err {
-@@ -229,6 +1423,7 @@
+@@ -277,6 +1512,7 @@
          }
      }
  }
@@ -12844,7 +13324,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl<R>
      From<
          ::aws_smithy_runtime_api::client::result::SdkError<
-@@ -254,6 +1449,7 @@
+@@ -302,6 +1538,7 @@
          }
      }
  }
@@ -12852,7 +13332,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl From<crate::operation::create_configuration_set_event_destination::CreateConfigurationSetEventDestinationError>
      for Error
  {
-@@ -282,6 +1478,7 @@
+@@ -330,6 +1567,7 @@
          }
      }
  }
@@ -12860,7 +13340,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl<R>
      From<::aws_smithy_runtime_api::client::result::SdkError<crate::operation::create_contact::CreateContactError, R>>
      for Error
-@@ -303,6 +1500,7 @@
+@@ -351,6 +1589,7 @@
          }
      }
  }
@@ -12868,7 +13348,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl From<crate::operation::create_contact::CreateContactError> for Error {
      fn from(err: crate::operation::create_contact::CreateContactError) -> Self {
          match err {
-@@ -322,6 +1520,7 @@
+@@ -370,6 +1609,7 @@
          }
      }
  }
@@ -12876,7 +13356,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl<R>
      From<
          ::aws_smithy_runtime_api::client::result::SdkError<
-@@ -347,6 +1546,7 @@
+@@ -395,6 +1635,7 @@
          }
      }
  }
@@ -12884,7 +13364,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl From<crate::operation::create_contact_list::CreateContactListError> for Error {
      fn from(err: crate::operation::create_contact_list::CreateContactListError) -> Self {
          match err {
-@@ -366,6 +1566,7 @@
+@@ -414,6 +1655,7 @@
          }
      }
  }
@@ -12892,7 +13372,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl<R>
      From<
          ::aws_smithy_runtime_api::client::result::SdkError<
-@@ -391,6 +1592,7 @@
+@@ -439,6 +1681,7 @@
          }
      }
  }
@@ -12900,7 +13380,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl From<crate::operation::create_custom_verification_email_template::CreateCustomVerificationEmailTemplateError>
      for Error
  {
-@@ -419,6 +1621,7 @@
+@@ -467,6 +1710,7 @@
          }
      }
  }
@@ -12908,7 +13388,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl<R>
      From<
          ::aws_smithy_runtime_api::client::result::SdkError<
-@@ -444,6 +1647,7 @@
+@@ -492,6 +1736,7 @@
          }
      }
  }
@@ -12916,7 +13396,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl From<crate::operation::create_dedicated_ip_pool::CreateDedicatedIpPoolError> for Error {
      fn from(err: crate::operation::create_dedicated_ip_pool::CreateDedicatedIpPoolError) -> Self {
          match err {
-@@ -468,6 +1672,7 @@
+@@ -516,6 +1761,7 @@
          }
      }
  }
@@ -12924,7 +13404,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl<R>
      From<
          ::aws_smithy_runtime_api::client::result::SdkError<
-@@ -493,6 +1698,7 @@
+@@ -541,6 +1787,7 @@
          }
      }
  }
@@ -12932,7 +13412,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl From<crate::operation::create_deliverability_test_report::CreateDeliverabilityTestReportError> for Error {
      fn from(err: crate::operation::create_deliverability_test_report::CreateDeliverabilityTestReportError) -> Self {
          match err {
-@@ -527,6 +1733,7 @@
+@@ -575,6 +1822,7 @@
          }
      }
  }
@@ -12940,7 +13420,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl<R>
      From<
          ::aws_smithy_runtime_api::client::result::SdkError<
-@@ -552,6 +1759,7 @@
+@@ -600,6 +1848,7 @@
          }
      }
  }
@@ -12948,7 +13428,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl From<crate::operation::create_email_identity::CreateEmailIdentityError> for Error {
      fn from(err: crate::operation::create_email_identity::CreateEmailIdentityError) -> Self {
          match err {
-@@ -579,6 +1787,7 @@
+@@ -627,6 +1876,7 @@
          }
      }
  }
@@ -12956,7 +13436,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl<R>
      From<
          ::aws_smithy_runtime_api::client::result::SdkError<
-@@ -604,6 +1813,7 @@
+@@ -652,6 +1902,7 @@
          }
      }
  }
@@ -12964,7 +13444,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl From<crate::operation::create_email_identity_policy::CreateEmailIdentityPolicyError> for Error {
      fn from(err: crate::operation::create_email_identity_policy::CreateEmailIdentityPolicyError) -> Self {
          match err {
-@@ -626,6 +1836,7 @@
+@@ -674,6 +1925,7 @@
          }
      }
  }
@@ -12972,7 +13452,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl<R>
      From<
          ::aws_smithy_runtime_api::client::result::SdkError<
-@@ -651,6 +1862,7 @@
+@@ -699,6 +1951,7 @@
          }
      }
  }
@@ -12980,7 +13460,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl From<crate::operation::create_email_template::CreateEmailTemplateError> for Error {
      fn from(err: crate::operation::create_email_template::CreateEmailTemplateError) -> Self {
          match err {
-@@ -672,6 +1884,7 @@
+@@ -720,6 +1973,7 @@
          }
      }
  }
@@ -12988,7 +13468,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl<R>
      From<
          ::aws_smithy_runtime_api::client::result::SdkError<
-@@ -697,6 +1910,7 @@
+@@ -745,6 +1999,7 @@
          }
      }
  }
@@ -12996,7 +13476,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl From<crate::operation::create_export_job::CreateExportJobError> for Error {
      fn from(err: crate::operation::create_export_job::CreateExportJobError) -> Self {
          match err {
-@@ -716,6 +1930,7 @@
+@@ -764,6 +2019,7 @@
          }
      }
  }
@@ -13004,7 +13484,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl<R>
      From<
          ::aws_smithy_runtime_api::client::result::SdkError<
-@@ -741,6 +1956,7 @@
+@@ -789,6 +2045,7 @@
          }
      }
  }
@@ -13012,7 +13492,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl From<crate::operation::create_import_job::CreateImportJobError> for Error {
      fn from(err: crate::operation::create_import_job::CreateImportJobError) -> Self {
          match err {
-@@ -757,6 +1973,7 @@
+@@ -805,6 +2062,7 @@
          }
      }
  }
@@ -13020,7 +13500,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl<R>
      From<
          ::aws_smithy_runtime_api::client::result::SdkError<
-@@ -782,6 +1999,7 @@
+@@ -830,6 +2088,7 @@
          }
      }
  }
@@ -13028,7 +13508,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl From<crate::operation::create_multi_region_endpoint::CreateMultiRegionEndpointError> for Error {
      fn from(err: crate::operation::create_multi_region_endpoint::CreateMultiRegionEndpointError) -> Self {
          match err {
-@@ -801,6 +2019,7 @@
+@@ -849,6 +2108,7 @@
          }
      }
  }
@@ -13036,7 +13516,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl<R> From<::aws_smithy_runtime_api::client::result::SdkError<crate::operation::create_tenant::CreateTenantError, R>>
      for Error
  where
-@@ -818,6 +2037,7 @@
+@@ -866,6 +2126,7 @@
          }
      }
  }
@@ -13044,7 +13524,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl From<crate::operation::create_tenant::CreateTenantError> for Error {
      fn from(err: crate::operation::create_tenant::CreateTenantError) -> Self {
          match err {
-@@ -837,6 +2057,7 @@
+@@ -885,6 +2146,7 @@
          }
      }
  }
@@ -13052,7 +13532,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl<R>
      From<
          ::aws_smithy_runtime_api::client::result::SdkError<
-@@ -862,6 +2083,7 @@
+@@ -910,6 +2172,7 @@
          }
      }
  }
@@ -13060,7 +13540,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl From<crate::operation::create_tenant_resource_association::CreateTenantResourceAssociationError> for Error {
      fn from(err: crate::operation::create_tenant_resource_association::CreateTenantResourceAssociationError) -> Self {
          match err {
-@@ -881,6 +2103,7 @@
+@@ -929,6 +2192,7 @@
          }
      }
  }
@@ -13068,7 +13548,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl<R>
      From<
          ::aws_smithy_runtime_api::client::result::SdkError<
-@@ -906,6 +2129,7 @@
+@@ -954,6 +2218,7 @@
          }
      }
  }
@@ -13076,7 +13556,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl From<crate::operation::delete_configuration_set::DeleteConfigurationSetError> for Error {
      fn from(err: crate::operation::delete_configuration_set::DeleteConfigurationSetError) -> Self {
          match err {
-@@ -921,6 +2145,7 @@
+@@ -969,6 +2234,7 @@
          }
      }
  }
@@ -13084,7 +13564,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl<R>
      From<
          ::aws_smithy_runtime_api::client::result::SdkError<
-@@ -946,6 +2171,7 @@
+@@ -994,6 +2260,7 @@
          }
      }
  }
@@ -13092,7 +13572,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl From<crate::operation::delete_configuration_set_event_destination::DeleteConfigurationSetEventDestinationError>
      for Error
  {
-@@ -968,6 +2194,7 @@
+@@ -1016,6 +2283,7 @@
          }
      }
  }
@@ -13100,7 +13580,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl<R>
      From<::aws_smithy_runtime_api::client::result::SdkError<crate::operation::delete_contact::DeleteContactError, R>>
      for Error
-@@ -989,6 +2216,7 @@
+@@ -1037,6 +2305,7 @@
          }
      }
  }
@@ -13108,7 +13588,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl From<crate::operation::delete_contact::DeleteContactError> for Error {
      fn from(err: crate::operation::delete_contact::DeleteContactError) -> Self {
          match err {
-@@ -1005,6 +2233,7 @@
+@@ -1053,6 +2322,7 @@
          }
      }
  }
@@ -13116,7 +13596,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl<R>
      From<
          ::aws_smithy_runtime_api::client::result::SdkError<
-@@ -1030,6 +2259,7 @@
+@@ -1078,6 +2348,7 @@
          }
      }
  }
@@ -13124,7 +13604,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl From<crate::operation::delete_contact_list::DeleteContactListError> for Error {
      fn from(err: crate::operation::delete_contact_list::DeleteContactListError) -> Self {
          match err {
-@@ -1049,6 +2279,7 @@
+@@ -1097,6 +2368,7 @@
          }
      }
  }
@@ -13132,7 +13612,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl<R>
      From<
          ::aws_smithy_runtime_api::client::result::SdkError<
-@@ -1074,6 +2305,7 @@
+@@ -1122,6 +2394,7 @@
          }
      }
  }
@@ -13140,7 +13620,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl From<crate::operation::delete_custom_verification_email_template::DeleteCustomVerificationEmailTemplateError>
      for Error
  {
-@@ -1096,6 +2328,7 @@
+@@ -1144,6 +2417,7 @@
          }
      }
  }
@@ -13148,7 +13628,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl<R>
      From<
          ::aws_smithy_runtime_api::client::result::SdkError<
-@@ -1121,6 +2354,7 @@
+@@ -1169,6 +2443,7 @@
          }
      }
  }
@@ -13156,7 +13636,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl From<crate::operation::delete_dedicated_ip_pool::DeleteDedicatedIpPoolError> for Error {
      fn from(err: crate::operation::delete_dedicated_ip_pool::DeleteDedicatedIpPoolError) -> Self {
          match err {
-@@ -1142,6 +2376,7 @@
+@@ -1190,6 +2465,7 @@
          }
      }
  }
@@ -13164,7 +13644,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl<R>
      From<
          ::aws_smithy_runtime_api::client::result::SdkError<
-@@ -1167,6 +2402,7 @@
+@@ -1215,6 +2491,7 @@
          }
      }
  }
@@ -13172,7 +13652,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl From<crate::operation::delete_email_identity::DeleteEmailIdentityError> for Error {
      fn from(err: crate::operation::delete_email_identity::DeleteEmailIdentityError) -> Self {
          match err {
-@@ -1188,6 +2424,7 @@
+@@ -1236,6 +2513,7 @@
          }
      }
  }
@@ -13180,7 +13660,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl<R>
      From<
          ::aws_smithy_runtime_api::client::result::SdkError<
-@@ -1213,6 +2450,7 @@
+@@ -1261,6 +2539,7 @@
          }
      }
  }
@@ -13188,7 +13668,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl From<crate::operation::delete_email_identity_policy::DeleteEmailIdentityPolicyError> for Error {
      fn from(err: crate::operation::delete_email_identity_policy::DeleteEmailIdentityPolicyError) -> Self {
          match err {
-@@ -1229,6 +2467,7 @@
+@@ -1277,6 +2556,7 @@
          }
      }
  }
@@ -13196,7 +13676,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl<R>
      From<
          ::aws_smithy_runtime_api::client::result::SdkError<
-@@ -1254,6 +2493,7 @@
+@@ -1302,6 +2582,7 @@
          }
      }
  }
@@ -13204,7 +13684,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl From<crate::operation::delete_email_template::DeleteEmailTemplateError> for Error {
      fn from(err: crate::operation::delete_email_template::DeleteEmailTemplateError) -> Self {
          match err {
-@@ -1272,6 +2512,7 @@
+@@ -1320,6 +2601,7 @@
          }
      }
  }
@@ -13212,7 +13692,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl<R>
      From<
          ::aws_smithy_runtime_api::client::result::SdkError<
-@@ -1297,6 +2538,7 @@
+@@ -1345,6 +2627,7 @@
          }
      }
  }
@@ -13220,7 +13700,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl From<crate::operation::delete_multi_region_endpoint::DeleteMultiRegionEndpointError> for Error {
      fn from(err: crate::operation::delete_multi_region_endpoint::DeleteMultiRegionEndpointError) -> Self {
          match err {
-@@ -1316,6 +2558,7 @@
+@@ -1364,6 +2647,7 @@
          }
      }
  }
@@ -13228,7 +13708,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl<R>
      From<
          ::aws_smithy_runtime_api::client::result::SdkError<
-@@ -1341,6 +2584,7 @@
+@@ -1389,6 +2673,7 @@
          }
      }
  }
@@ -13236,7 +13716,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl From<crate::operation::delete_suppressed_destination::DeleteSuppressedDestinationError> for Error {
      fn from(err: crate::operation::delete_suppressed_destination::DeleteSuppressedDestinationError) -> Self {
          match err {
-@@ -1357,6 +2601,7 @@
+@@ -1405,6 +2690,7 @@
          }
      }
  }
@@ -13244,7 +13724,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl<R> From<::aws_smithy_runtime_api::client::result::SdkError<crate::operation::delete_tenant::DeleteTenantError, R>>
      for Error
  where
-@@ -1374,6 +2619,7 @@
+@@ -1422,6 +2708,7 @@
          }
      }
  }
@@ -13252,7 +13732,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl From<crate::operation::delete_tenant::DeleteTenantError> for Error {
      fn from(err: crate::operation::delete_tenant::DeleteTenantError) -> Self {
          match err {
-@@ -1390,6 +2636,7 @@
+@@ -1438,6 +2725,7 @@
          }
      }
  }
@@ -13260,7 +13740,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl<R>
      From<
          ::aws_smithy_runtime_api::client::result::SdkError<
-@@ -1415,6 +2662,7 @@
+@@ -1463,6 +2751,7 @@
          }
      }
  }
@@ -13268,7 +13748,23 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl From<crate::operation::delete_tenant_resource_association::DeleteTenantResourceAssociationError> for Error {
      fn from(err: crate::operation::delete_tenant_resource_association::DeleteTenantResourceAssociationError) -> Self {
          match err {
-@@ -1431,6 +2679,7 @@
+@@ -1479,6 +2768,7 @@
+         }
+     }
+ }
++#[cfg(feature = "op_disassociate_email_identity_certificate")]
+ impl<R>
+     From<
+         ::aws_smithy_runtime_api::client::result::SdkError<
+@@ -1504,6 +2794,7 @@
+         }
+     }
+ }
++#[cfg(feature = "op_disassociate_email_identity_certificate")]
+ impl From<crate::operation::disassociate_email_identity_certificate::DisassociateEmailIdentityCertificateError>
+     for Error
+ {
+@@ -1526,6 +2817,7 @@
          }
      }
  }
@@ -13276,7 +13772,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl<R> From<::aws_smithy_runtime_api::client::result::SdkError<crate::operation::get_account::GetAccountError, R>>
      for Error
  where
-@@ -1448,6 +2697,7 @@
+@@ -1543,6 +2835,7 @@
          }
      }
  }
@@ -13284,7 +13780,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl From<crate::operation::get_account::GetAccountError> for Error {
      fn from(err: crate::operation::get_account::GetAccountError) -> Self {
          match err {
-@@ -1461,6 +2711,7 @@
+@@ -1556,6 +2849,7 @@
          }
      }
  }
@@ -13292,7 +13788,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl<R>
      From<
          ::aws_smithy_runtime_api::client::result::SdkError<
-@@ -1486,6 +2737,7 @@
+@@ -1581,6 +2875,7 @@
          }
      }
  }
@@ -13300,7 +13796,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl From<crate::operation::get_blacklist_reports::GetBlacklistReportsError> for Error {
      fn from(err: crate::operation::get_blacklist_reports::GetBlacklistReportsError) -> Self {
          match err {
-@@ -1504,6 +2756,7 @@
+@@ -1599,6 +2894,7 @@
          }
      }
  }
@@ -13308,7 +13804,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl<R>
      From<
          ::aws_smithy_runtime_api::client::result::SdkError<
-@@ -1529,6 +2782,7 @@
+@@ -1624,6 +2920,7 @@
          }
      }
  }
@@ -13316,7 +13812,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl From<crate::operation::get_configuration_set::GetConfigurationSetError> for Error {
      fn from(err: crate::operation::get_configuration_set::GetConfigurationSetError) -> Self {
          match err {
-@@ -1547,6 +2801,7 @@
+@@ -1642,6 +2939,7 @@
          }
      }
  }
@@ -13324,7 +13820,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl<R>
      From<
          ::aws_smithy_runtime_api::client::result::SdkError<
-@@ -1572,6 +2827,7 @@
+@@ -1667,6 +2965,7 @@
          }
      }
  }
@@ -13332,7 +13828,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl From<crate::operation::get_configuration_set_event_destinations::GetConfigurationSetEventDestinationsError>
      for Error
  {
-@@ -1594,6 +2850,7 @@
+@@ -1689,6 +2988,7 @@
          }
      }
  }
@@ -13340,7 +13836,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl<R> From<::aws_smithy_runtime_api::client::result::SdkError<crate::operation::get_contact::GetContactError, R>>
      for Error
  where
-@@ -1611,6 +2868,7 @@
+@@ -1706,6 +3006,7 @@
          }
      }
  }
@@ -13348,7 +13844,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl From<crate::operation::get_contact::GetContactError> for Error {
      fn from(err: crate::operation::get_contact::GetContactError) -> Self {
          match err {
-@@ -1625,6 +2883,7 @@
+@@ -1720,6 +3021,7 @@
          }
      }
  }
@@ -13356,7 +13852,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl<R>
      From<::aws_smithy_runtime_api::client::result::SdkError<crate::operation::get_contact_list::GetContactListError, R>>
      for Error
-@@ -1646,6 +2905,7 @@
+@@ -1741,6 +3043,7 @@
          }
      }
  }
@@ -13364,7 +13860,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl From<crate::operation::get_contact_list::GetContactListError> for Error {
      fn from(err: crate::operation::get_contact_list::GetContactListError) -> Self {
          match err {
-@@ -1662,6 +2922,7 @@
+@@ -1757,6 +3060,7 @@
          }
      }
  }
@@ -13372,7 +13868,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl<R>
      From<
          ::aws_smithy_runtime_api::client::result::SdkError<
-@@ -1687,6 +2948,7 @@
+@@ -1782,6 +3086,7 @@
          }
      }
  }
@@ -13380,7 +13876,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl From<crate::operation::get_custom_verification_email_template::GetCustomVerificationEmailTemplateError> for Error {
      fn from(
          err: crate::operation::get_custom_verification_email_template::GetCustomVerificationEmailTemplateError,
-@@ -1707,6 +2969,7 @@
+@@ -1802,6 +3107,7 @@
          }
      }
  }
@@ -13388,7 +13884,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl<R>
      From<::aws_smithy_runtime_api::client::result::SdkError<crate::operation::get_dedicated_ip::GetDedicatedIpError, R>>
      for Error
-@@ -1728,6 +2991,7 @@
+@@ -1823,6 +3129,7 @@
          }
      }
  }
@@ -13396,7 +13892,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl From<crate::operation::get_dedicated_ip::GetDedicatedIpError> for Error {
      fn from(err: crate::operation::get_dedicated_ip::GetDedicatedIpError) -> Self {
          match err {
-@@ -1744,6 +3008,7 @@
+@@ -1839,6 +3146,7 @@
          }
      }
  }
@@ -13404,7 +13900,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl<R>
      From<
          ::aws_smithy_runtime_api::client::result::SdkError<
-@@ -1769,6 +3034,7 @@
+@@ -1864,6 +3172,7 @@
          }
      }
  }
@@ -13412,7 +13908,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl From<crate::operation::get_dedicated_ip_pool::GetDedicatedIpPoolError> for Error {
      fn from(err: crate::operation::get_dedicated_ip_pool::GetDedicatedIpPoolError) -> Self {
          match err {
-@@ -1787,6 +3053,7 @@
+@@ -1882,6 +3191,7 @@
          }
      }
  }
@@ -13420,7 +13916,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl<R>
      From<
          ::aws_smithy_runtime_api::client::result::SdkError<
-@@ -1812,6 +3079,7 @@
+@@ -1907,6 +3217,7 @@
          }
      }
  }
@@ -13428,7 +13924,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl From<crate::operation::get_dedicated_ips::GetDedicatedIpsError> for Error {
      fn from(err: crate::operation::get_dedicated_ips::GetDedicatedIpsError) -> Self {
          match err {
-@@ -1828,6 +3096,7 @@
+@@ -1923,6 +3234,7 @@
          }
      }
  }
@@ -13436,7 +13932,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl<R>
      From<
          ::aws_smithy_runtime_api::client::result::SdkError<
-@@ -1853,6 +3122,7 @@
+@@ -1948,6 +3260,7 @@
          }
      }
  }
@@ -13444,7 +13940,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl From<crate::operation::get_deliverability_dashboard_options::GetDeliverabilityDashboardOptionsError> for Error {
      fn from(
          err: crate::operation::get_deliverability_dashboard_options::GetDeliverabilityDashboardOptionsError,
-@@ -1873,6 +3143,7 @@
+@@ -1968,6 +3281,7 @@
          }
      }
  }
@@ -13452,7 +13948,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl<R>
      From<
          ::aws_smithy_runtime_api::client::result::SdkError<
-@@ -1898,6 +3169,7 @@
+@@ -1993,6 +3307,7 @@
          }
      }
  }
@@ -13460,7 +13956,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl From<crate::operation::get_deliverability_test_report::GetDeliverabilityTestReportError> for Error {
      fn from(err: crate::operation::get_deliverability_test_report::GetDeliverabilityTestReportError) -> Self {
          match err {
-@@ -1914,6 +3186,7 @@
+@@ -2009,6 +3324,7 @@
          }
      }
  }
@@ -13468,7 +13964,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl<R>
      From<
          ::aws_smithy_runtime_api::client::result::SdkError<
-@@ -1939,6 +3212,7 @@
+@@ -2034,6 +3350,7 @@
          }
      }
  }
@@ -13476,7 +13972,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl From<crate::operation::get_domain_deliverability_campaign::GetDomainDeliverabilityCampaignError> for Error {
      fn from(err: crate::operation::get_domain_deliverability_campaign::GetDomainDeliverabilityCampaignError) -> Self {
          match err {
-@@ -1955,6 +3229,7 @@
+@@ -2050,6 +3367,7 @@
          }
      }
  }
@@ -13484,7 +13980,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl<R>
      From<
          ::aws_smithy_runtime_api::client::result::SdkError<
-@@ -1980,6 +3255,7 @@
+@@ -2075,6 +3393,7 @@
          }
      }
  }
@@ -13492,7 +13988,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl From<crate::operation::get_domain_statistics_report::GetDomainStatisticsReportError> for Error {
      fn from(err: crate::operation::get_domain_statistics_report::GetDomainStatisticsReportError) -> Self {
          match err {
-@@ -1996,6 +3272,7 @@
+@@ -2091,6 +3410,7 @@
          }
      }
  }
@@ -13500,7 +13996,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl<R>
      From<
          ::aws_smithy_runtime_api::client::result::SdkError<
-@@ -2021,6 +3298,7 @@
+@@ -2116,6 +3436,7 @@
          }
      }
  }
@@ -13508,7 +14004,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl From<crate::operation::get_email_address_insights::GetEmailAddressInsightsError> for Error {
      fn from(err: crate::operation::get_email_address_insights::GetEmailAddressInsightsError) -> Self {
          match err {
-@@ -2036,6 +3314,7 @@
+@@ -2131,6 +3452,7 @@
          }
      }
  }
@@ -13516,7 +14012,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl<R>
      From<
          ::aws_smithy_runtime_api::client::result::SdkError<
-@@ -2061,6 +3340,7 @@
+@@ -2156,6 +3478,7 @@
          }
      }
  }
@@ -13524,7 +14020,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl From<crate::operation::get_email_identity::GetEmailIdentityError> for Error {
      fn from(err: crate::operation::get_email_identity::GetEmailIdentityError) -> Self {
          match err {
-@@ -2077,6 +3357,7 @@
+@@ -2172,6 +3495,7 @@
          }
      }
  }
@@ -13532,7 +14028,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl<R>
      From<
          ::aws_smithy_runtime_api::client::result::SdkError<
-@@ -2102,6 +3383,7 @@
+@@ -2197,6 +3521,7 @@
          }
      }
  }
@@ -13540,7 +14036,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl From<crate::operation::get_email_identity_policies::GetEmailIdentityPoliciesError> for Error {
      fn from(err: crate::operation::get_email_identity_policies::GetEmailIdentityPoliciesError) -> Self {
          match err {
-@@ -2120,6 +3402,7 @@
+@@ -2215,6 +3540,7 @@
          }
      }
  }
@@ -13548,7 +14044,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl<R>
      From<
          ::aws_smithy_runtime_api::client::result::SdkError<
-@@ -2145,6 +3428,7 @@
+@@ -2240,6 +3566,7 @@
          }
      }
  }
@@ -13556,7 +14052,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl From<crate::operation::get_email_template::GetEmailTemplateError> for Error {
      fn from(err: crate::operation::get_email_template::GetEmailTemplateError) -> Self {
          match err {
-@@ -2161,6 +3445,7 @@
+@@ -2256,6 +3583,7 @@
          }
      }
  }
@@ -13564,7 +14060,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl<R> From<::aws_smithy_runtime_api::client::result::SdkError<crate::operation::get_export_job::GetExportJobError, R>>
      for Error
  where
-@@ -2178,6 +3463,7 @@
+@@ -2273,6 +3601,7 @@
          }
      }
  }
@@ -13572,7 +14068,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl From<crate::operation::get_export_job::GetExportJobError> for Error {
      fn from(err: crate::operation::get_export_job::GetExportJobError) -> Self {
          match err {
-@@ -2194,6 +3480,7 @@
+@@ -2289,6 +3618,7 @@
          }
      }
  }
@@ -13580,7 +14076,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl<R> From<::aws_smithy_runtime_api::client::result::SdkError<crate::operation::get_import_job::GetImportJobError, R>>
      for Error
  where
-@@ -2211,6 +3498,7 @@
+@@ -2306,6 +3636,7 @@
          }
      }
  }
@@ -13588,7 +14084,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl From<crate::operation::get_import_job::GetImportJobError> for Error {
      fn from(err: crate::operation::get_import_job::GetImportJobError) -> Self {
          match err {
-@@ -2227,6 +3515,7 @@
+@@ -2322,6 +3653,7 @@
          }
      }
  }
@@ -13596,7 +14092,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl<R>
      From<
          ::aws_smithy_runtime_api::client::result::SdkError<
-@@ -2252,6 +3541,7 @@
+@@ -2347,6 +3679,7 @@
          }
      }
  }
@@ -13604,7 +14100,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl From<crate::operation::get_message_insights::GetMessageInsightsError> for Error {
      fn from(err: crate::operation::get_message_insights::GetMessageInsightsError) -> Self {
          match err {
-@@ -2270,6 +3560,7 @@
+@@ -2365,6 +3698,7 @@
          }
      }
  }
@@ -13612,7 +14108,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl<R>
      From<
          ::aws_smithy_runtime_api::client::result::SdkError<
-@@ -2295,6 +3586,7 @@
+@@ -2390,6 +3724,7 @@
          }
      }
  }
@@ -13620,7 +14116,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl From<crate::operation::get_multi_region_endpoint::GetMultiRegionEndpointError> for Error {
      fn from(err: crate::operation::get_multi_region_endpoint::GetMultiRegionEndpointError) -> Self {
          match err {
-@@ -2313,6 +3605,7 @@
+@@ -2408,6 +3743,7 @@
          }
      }
  }
@@ -13628,7 +14124,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl<R>
      From<
          ::aws_smithy_runtime_api::client::result::SdkError<
-@@ -2338,6 +3631,7 @@
+@@ -2433,6 +3769,7 @@
          }
      }
  }
@@ -13636,7 +14132,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl From<crate::operation::get_reputation_entity::GetReputationEntityError> for Error {
      fn from(err: crate::operation::get_reputation_entity::GetReputationEntityError) -> Self {
          match err {
-@@ -2356,6 +3650,7 @@
+@@ -2451,6 +3788,7 @@
          }
      }
  }
@@ -13644,7 +14140,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl<R>
      From<
          ::aws_smithy_runtime_api::client::result::SdkError<
-@@ -2381,6 +3676,7 @@
+@@ -2476,6 +3814,7 @@
          }
      }
  }
@@ -13652,7 +14148,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl From<crate::operation::get_suppressed_destination::GetSuppressedDestinationError> for Error {
      fn from(err: crate::operation::get_suppressed_destination::GetSuppressedDestinationError) -> Self {
          match err {
-@@ -2399,6 +3695,7 @@
+@@ -2494,6 +3833,7 @@
          }
      }
  }
@@ -13660,7 +14156,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl<R> From<::aws_smithy_runtime_api::client::result::SdkError<crate::operation::get_tenant::GetTenantError, R>>
      for Error
  where
-@@ -2416,6 +3713,7 @@
+@@ -2511,6 +3851,7 @@
          }
      }
  }
@@ -13668,7 +14164,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl From<crate::operation::get_tenant::GetTenantError> for Error {
      fn from(err: crate::operation::get_tenant::GetTenantError) -> Self {
          match err {
-@@ -2430,6 +3728,7 @@
+@@ -2525,6 +3866,7 @@
          }
      }
  }
@@ -13676,7 +14172,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl<R>
      From<
          ::aws_smithy_runtime_api::client::result::SdkError<
-@@ -2455,6 +3754,7 @@
+@@ -2550,6 +3892,7 @@
          }
      }
  }
@@ -13684,7 +14180,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl From<crate::operation::list_configuration_sets::ListConfigurationSetsError> for Error {
      fn from(err: crate::operation::list_configuration_sets::ListConfigurationSetsError) -> Self {
          match err {
-@@ -2470,6 +3770,7 @@
+@@ -2565,6 +3908,7 @@
          }
      }
  }
@@ -13692,7 +14188,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl<R>
      From<
          ::aws_smithy_runtime_api::client::result::SdkError<
-@@ -2495,6 +3796,7 @@
+@@ -2590,6 +3934,7 @@
          }
      }
  }
@@ -13700,7 +14196,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl From<crate::operation::list_contact_lists::ListContactListsError> for Error {
      fn from(err: crate::operation::list_contact_lists::ListContactListsError) -> Self {
          match err {
-@@ -2508,6 +3810,7 @@
+@@ -2603,6 +3948,7 @@
          }
      }
  }
@@ -13708,7 +14204,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl<R> From<::aws_smithy_runtime_api::client::result::SdkError<crate::operation::list_contacts::ListContactsError, R>>
      for Error
  where
-@@ -2525,6 +3828,7 @@
+@@ -2620,6 +3966,7 @@
          }
      }
  }
@@ -13716,7 +14212,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl From<crate::operation::list_contacts::ListContactsError> for Error {
      fn from(err: crate::operation::list_contacts::ListContactsError) -> Self {
          match err {
-@@ -2541,6 +3845,7 @@
+@@ -2636,6 +3983,7 @@
          }
      }
  }
@@ -13724,7 +14220,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl<R>
      From<
          ::aws_smithy_runtime_api::client::result::SdkError<
-@@ -2566,6 +3871,7 @@
+@@ -2661,6 +4009,7 @@
          }
      }
  }
@@ -13732,7 +14228,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl From<crate::operation::list_custom_verification_email_templates::ListCustomVerificationEmailTemplatesError>
      for Error
  {
-@@ -2585,6 +3891,7 @@
+@@ -2680,6 +4029,7 @@
          }
      }
  }
@@ -13740,7 +14236,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl<R>
      From<
          ::aws_smithy_runtime_api::client::result::SdkError<
-@@ -2610,6 +3917,7 @@
+@@ -2705,6 +4055,7 @@
          }
      }
  }
@@ -13748,7 +14244,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl From<crate::operation::list_dedicated_ip_pools::ListDedicatedIpPoolsError> for Error {
      fn from(err: crate::operation::list_dedicated_ip_pools::ListDedicatedIpPoolsError) -> Self {
          match err {
-@@ -2625,6 +3933,7 @@
+@@ -2720,6 +4071,7 @@
          }
      }
  }
@@ -13756,7 +14252,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl<R>
      From<
          ::aws_smithy_runtime_api::client::result::SdkError<
-@@ -2650,6 +3959,7 @@
+@@ -2745,6 +4097,7 @@
          }
      }
  }
@@ -13764,7 +14260,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl From<crate::operation::list_deliverability_test_reports::ListDeliverabilityTestReportsError> for Error {
      fn from(err: crate::operation::list_deliverability_test_reports::ListDeliverabilityTestReportsError) -> Self {
          match err {
-@@ -2666,6 +3976,7 @@
+@@ -2761,6 +4114,7 @@
          }
      }
  }
@@ -13772,7 +14268,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl<R>
      From<
          ::aws_smithy_runtime_api::client::result::SdkError<
-@@ -2691,6 +4002,7 @@
+@@ -2786,6 +4140,7 @@
          }
      }
  }
@@ -13780,7 +14276,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl From<crate::operation::list_domain_deliverability_campaigns::ListDomainDeliverabilityCampaignsError> for Error {
      fn from(
          err: crate::operation::list_domain_deliverability_campaigns::ListDomainDeliverabilityCampaignsError,
-@@ -2711,6 +4023,7 @@
+@@ -2806,6 +4161,7 @@
          }
      }
  }
@@ -13788,7 +14284,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl<R>
      From<
          ::aws_smithy_runtime_api::client::result::SdkError<
-@@ -2736,6 +4049,7 @@
+@@ -2831,6 +4187,7 @@
          }
      }
  }
@@ -13796,7 +14292,23 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl From<crate::operation::list_email_identities::ListEmailIdentitiesError> for Error {
      fn from(err: crate::operation::list_email_identities::ListEmailIdentitiesError) -> Self {
          match err {
-@@ -2751,6 +4065,7 @@
+@@ -2846,6 +4203,7 @@
+         }
+     }
+ }
++#[cfg(feature = "op_list_email_identity_certificates")]
+ impl<R>
+     From<
+         ::aws_smithy_runtime_api::client::result::SdkError<
+@@ -2871,6 +4229,7 @@
+         }
+     }
+ }
++#[cfg(feature = "op_list_email_identity_certificates")]
+ impl From<crate::operation::list_email_identity_certificates::ListEmailIdentityCertificatesError> for Error {
+     fn from(err: crate::operation::list_email_identity_certificates::ListEmailIdentityCertificatesError) -> Self {
+         match err {
+@@ -2887,6 +4246,7 @@
          }
      }
  }
@@ -13804,7 +14316,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl<R>
      From<
          ::aws_smithy_runtime_api::client::result::SdkError<
-@@ -2776,6 +4091,7 @@
+@@ -2912,6 +4272,7 @@
          }
      }
  }
@@ -13812,7 +14324,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl From<crate::operation::list_email_templates::ListEmailTemplatesError> for Error {
      fn from(err: crate::operation::list_email_templates::ListEmailTemplatesError) -> Self {
          match err {
-@@ -2791,6 +4107,7 @@
+@@ -2927,6 +4288,7 @@
          }
      }
  }
@@ -13820,7 +14332,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl<R>
      From<::aws_smithy_runtime_api::client::result::SdkError<crate::operation::list_export_jobs::ListExportJobsError, R>>
      for Error
-@@ -2812,6 +4129,7 @@
+@@ -2948,6 +4310,7 @@
          }
      }
  }
@@ -13828,7 +14340,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl From<crate::operation::list_export_jobs::ListExportJobsError> for Error {
      fn from(err: crate::operation::list_export_jobs::ListExportJobsError) -> Self {
          match err {
-@@ -2825,6 +4143,7 @@
+@@ -2961,6 +4324,7 @@
          }
      }
  }
@@ -13836,7 +14348,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl<R>
      From<::aws_smithy_runtime_api::client::result::SdkError<crate::operation::list_import_jobs::ListImportJobsError, R>>
      for Error
-@@ -2846,6 +4165,7 @@
+@@ -2982,6 +4346,7 @@
          }
      }
  }
@@ -13844,7 +14356,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl From<crate::operation::list_import_jobs::ListImportJobsError> for Error {
      fn from(err: crate::operation::list_import_jobs::ListImportJobsError) -> Self {
          match err {
-@@ -2859,6 +4179,7 @@
+@@ -2995,6 +4360,7 @@
          }
      }
  }
@@ -13852,7 +14364,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl<R>
      From<
          ::aws_smithy_runtime_api::client::result::SdkError<
-@@ -2884,6 +4205,7 @@
+@@ -3020,6 +4386,7 @@
          }
      }
  }
@@ -13860,7 +14372,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl From<crate::operation::list_multi_region_endpoints::ListMultiRegionEndpointsError> for Error {
      fn from(err: crate::operation::list_multi_region_endpoints::ListMultiRegionEndpointsError) -> Self {
          match err {
-@@ -2899,6 +4221,7 @@
+@@ -3035,6 +4402,7 @@
          }
      }
  }
@@ -13868,7 +14380,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl<R>
      From<
          ::aws_smithy_runtime_api::client::result::SdkError<
-@@ -2924,6 +4247,7 @@
+@@ -3060,6 +4428,7 @@
          }
      }
  }
@@ -13876,7 +14388,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl From<crate::operation::list_recommendations::ListRecommendationsError> for Error {
      fn from(err: crate::operation::list_recommendations::ListRecommendationsError) -> Self {
          match err {
-@@ -2942,6 +4266,7 @@
+@@ -3078,6 +4447,7 @@
          }
      }
  }
@@ -13884,7 +14396,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl<R>
      From<
          ::aws_smithy_runtime_api::client::result::SdkError<
-@@ -2967,6 +4292,7 @@
+@@ -3103,6 +4473,7 @@
          }
      }
  }
@@ -13892,7 +14404,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl From<crate::operation::list_reputation_entities::ListReputationEntitiesError> for Error {
      fn from(err: crate::operation::list_reputation_entities::ListReputationEntitiesError) -> Self {
          match err {
-@@ -2982,6 +4308,7 @@
+@@ -3118,6 +4489,7 @@
          }
      }
  }
@@ -13900,7 +14412,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl<R>
      From<
          ::aws_smithy_runtime_api::client::result::SdkError<
-@@ -3007,6 +4334,7 @@
+@@ -3143,6 +4515,7 @@
          }
      }
  }
@@ -13908,7 +14420,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl From<crate::operation::list_resource_tenants::ListResourceTenantsError> for Error {
      fn from(err: crate::operation::list_resource_tenants::ListResourceTenantsError) -> Self {
          match err {
-@@ -3025,6 +4353,7 @@
+@@ -3161,6 +4534,7 @@
          }
      }
  }
@@ -13916,7 +14428,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl<R>
      From<
          ::aws_smithy_runtime_api::client::result::SdkError<
-@@ -3050,6 +4379,7 @@
+@@ -3186,6 +4560,7 @@
          }
      }
  }
@@ -13924,7 +14436,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl From<crate::operation::list_suppressed_destinations::ListSuppressedDestinationsError> for Error {
      fn from(err: crate::operation::list_suppressed_destinations::ListSuppressedDestinationsError) -> Self {
          match err {
-@@ -3069,6 +4399,7 @@
+@@ -3205,6 +4580,7 @@
          }
      }
  }
@@ -13932,7 +14444,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl<R>
      From<
          ::aws_smithy_runtime_api::client::result::SdkError<
-@@ -3094,6 +4425,7 @@
+@@ -3230,6 +4606,7 @@
          }
      }
  }
@@ -13940,7 +14452,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl From<crate::operation::list_tags_for_resource::ListTagsForResourceError> for Error {
      fn from(err: crate::operation::list_tags_for_resource::ListTagsForResourceError) -> Self {
          match err {
-@@ -3112,6 +4444,7 @@
+@@ -3248,6 +4625,7 @@
          }
      }
  }
@@ -13948,7 +14460,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl<R>
      From<
          ::aws_smithy_runtime_api::client::result::SdkError<
-@@ -3137,6 +4470,7 @@
+@@ -3273,6 +4651,7 @@
          }
      }
  }
@@ -13956,7 +14468,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl From<crate::operation::list_tenant_resources::ListTenantResourcesError> for Error {
      fn from(err: crate::operation::list_tenant_resources::ListTenantResourcesError) -> Self {
          match err {
-@@ -3155,6 +4489,7 @@
+@@ -3291,6 +4670,7 @@
          }
      }
  }
@@ -13964,7 +14476,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl<R> From<::aws_smithy_runtime_api::client::result::SdkError<crate::operation::list_tenants::ListTenantsError, R>>
      for Error
  where
-@@ -3172,6 +4507,7 @@
+@@ -3308,6 +4688,7 @@
          }
      }
  }
@@ -13972,7 +14484,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl From<crate::operation::list_tenants::ListTenantsError> for Error {
      fn from(err: crate::operation::list_tenants::ListTenantsError) -> Self {
          match err {
-@@ -3185,6 +4521,7 @@
+@@ -3321,6 +4702,7 @@
          }
      }
  }
@@ -13980,7 +14492,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl<R>
      From<
          ::aws_smithy_runtime_api::client::result::SdkError<
-@@ -3210,6 +4547,7 @@
+@@ -3346,6 +4728,7 @@
          }
      }
  }
@@ -13988,7 +14500,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl From<crate::operation::put_account_dedicated_ip_warmup_attributes::PutAccountDedicatedIpWarmupAttributesError>
      for Error
  {
-@@ -3229,6 +4567,7 @@
+@@ -3365,6 +4748,7 @@
          }
      }
  }
@@ -13996,7 +14508,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl<R>
      From<
          ::aws_smithy_runtime_api::client::result::SdkError<
-@@ -3254,6 +4593,7 @@
+@@ -3390,6 +4774,7 @@
          }
      }
  }
@@ -14004,7 +14516,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl From<crate::operation::put_account_details::PutAccountDetailsError> for Error {
      fn from(err: crate::operation::put_account_details::PutAccountDetailsError) -> Self {
          match err {
-@@ -3270,6 +4610,7 @@
+@@ -3406,6 +4791,7 @@
          }
      }
  }
@@ -14012,7 +14524,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl<R>
      From<
          ::aws_smithy_runtime_api::client::result::SdkError<
-@@ -3295,6 +4636,7 @@
+@@ -3431,6 +4817,7 @@
          }
      }
  }
@@ -14020,7 +14532,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl From<crate::operation::put_account_pricing_attributes::PutAccountPricingAttributesError> for Error {
      fn from(err: crate::operation::put_account_pricing_attributes::PutAccountPricingAttributesError) -> Self {
          match err {
-@@ -3311,6 +4653,7 @@
+@@ -3447,6 +4834,7 @@
          }
      }
  }
@@ -14028,7 +14540,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl<R>
      From<
          ::aws_smithy_runtime_api::client::result::SdkError<
-@@ -3336,6 +4679,7 @@
+@@ -3472,6 +4860,7 @@
          }
      }
  }
@@ -14036,7 +14548,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl From<crate::operation::put_account_sending_attributes::PutAccountSendingAttributesError> for Error {
      fn from(err: crate::operation::put_account_sending_attributes::PutAccountSendingAttributesError) -> Self {
          match err {
-@@ -3349,6 +4693,7 @@
+@@ -3485,6 +4874,7 @@
          }
      }
  }
@@ -14044,7 +14556,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl<R>
      From<
          ::aws_smithy_runtime_api::client::result::SdkError<
-@@ -3374,6 +4719,7 @@
+@@ -3510,6 +4900,7 @@
          }
      }
  }
@@ -14052,7 +14564,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl From<crate::operation::put_account_suppression_attributes::PutAccountSuppressionAttributesError> for Error {
      fn from(err: crate::operation::put_account_suppression_attributes::PutAccountSuppressionAttributesError) -> Self {
          match err {
-@@ -3387,6 +4733,7 @@
+@@ -3523,6 +4914,7 @@
          }
      }
  }
@@ -14060,7 +14572,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl<R>
      From<
          ::aws_smithy_runtime_api::client::result::SdkError<
-@@ -3412,6 +4759,7 @@
+@@ -3548,6 +4940,7 @@
          }
      }
  }
@@ -14068,7 +14580,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl From<crate::operation::put_account_vdm_attributes::PutAccountVdmAttributesError> for Error {
      fn from(err: crate::operation::put_account_vdm_attributes::PutAccountVdmAttributesError) -> Self {
          match err {
-@@ -3427,6 +4775,7 @@
+@@ -3563,6 +4956,7 @@
          }
      }
  }
@@ -14076,7 +14588,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl<R>
      From<
          ::aws_smithy_runtime_api::client::result::SdkError<
-@@ -3452,6 +4801,7 @@
+@@ -3588,6 +4982,7 @@
          }
      }
  }
@@ -14084,7 +14596,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl From<crate::operation::put_configuration_set_archiving_options::PutConfigurationSetArchivingOptionsError>
      for Error
  {
-@@ -3474,6 +4824,7 @@
+@@ -3610,6 +5005,7 @@
          }
      }
  }
@@ -14092,7 +14604,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl<R>
      From<
          ::aws_smithy_runtime_api::client::result::SdkError<
-@@ -3499,6 +4850,7 @@
+@@ -3635,6 +5031,7 @@
          }
      }
  }
@@ -14100,7 +14612,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl From<crate::operation::put_configuration_set_delivery_options::PutConfigurationSetDeliveryOptionsError> for Error {
      fn from(
          err: crate::operation::put_configuration_set_delivery_options::PutConfigurationSetDeliveryOptionsError,
-@@ -3519,6 +4871,7 @@
+@@ -3655,6 +5052,7 @@
          }
      }
  }
@@ -14108,7 +14620,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl<R>
      From<
          ::aws_smithy_runtime_api::client::result::SdkError<
-@@ -3544,6 +4897,7 @@
+@@ -3680,6 +5078,7 @@
          }
      }
  }
@@ -14116,7 +14628,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl From<crate::operation::put_configuration_set_reputation_options::PutConfigurationSetReputationOptionsError>
      for Error
  {
-@@ -3566,6 +4920,7 @@
+@@ -3702,6 +5101,7 @@
          }
      }
  }
@@ -14124,7 +14636,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl<R>
      From<
          ::aws_smithy_runtime_api::client::result::SdkError<
-@@ -3591,6 +4946,7 @@
+@@ -3727,6 +5127,7 @@
          }
      }
  }
@@ -14132,7 +14644,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl From<crate::operation::put_configuration_set_sending_options::PutConfigurationSetSendingOptionsError> for Error {
      fn from(
          err: crate::operation::put_configuration_set_sending_options::PutConfigurationSetSendingOptionsError,
-@@ -3611,6 +4967,7 @@
+@@ -3747,6 +5148,7 @@
          }
      }
  }
@@ -14140,7 +14652,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl<R>
      From<
          ::aws_smithy_runtime_api::client::result::SdkError<
-@@ -3636,6 +4993,7 @@
+@@ -3772,6 +5174,7 @@
          }
      }
  }
@@ -14148,7 +14660,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl From<crate::operation::put_configuration_set_suppression_options::PutConfigurationSetSuppressionOptionsError>
      for Error
  {
-@@ -3658,6 +5016,7 @@
+@@ -3794,6 +5197,7 @@
          }
      }
  }
@@ -14156,7 +14668,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl<R>
      From<
          ::aws_smithy_runtime_api::client::result::SdkError<
-@@ -3683,6 +5042,7 @@
+@@ -3819,6 +5223,7 @@
          }
      }
  }
@@ -14164,7 +14676,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl From<crate::operation::put_configuration_set_tracking_options::PutConfigurationSetTrackingOptionsError> for Error {
      fn from(
          err: crate::operation::put_configuration_set_tracking_options::PutConfigurationSetTrackingOptionsError,
-@@ -3703,6 +5063,7 @@
+@@ -3839,6 +5244,7 @@
          }
      }
  }
@@ -14172,7 +14684,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl<R>
      From<
          ::aws_smithy_runtime_api::client::result::SdkError<
-@@ -3728,6 +5089,7 @@
+@@ -3864,6 +5270,7 @@
          }
      }
  }
@@ -14180,7 +14692,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl From<crate::operation::put_configuration_set_vdm_options::PutConfigurationSetVdmOptionsError> for Error {
      fn from(err: crate::operation::put_configuration_set_vdm_options::PutConfigurationSetVdmOptionsError) -> Self {
          match err {
-@@ -3744,6 +5106,7 @@
+@@ -3880,6 +5287,7 @@
          }
      }
  }
@@ -14188,7 +14700,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl<R>
      From<
          ::aws_smithy_runtime_api::client::result::SdkError<
-@@ -3769,6 +5132,7 @@
+@@ -3905,6 +5313,7 @@
          }
      }
  }
@@ -14196,7 +14708,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl From<crate::operation::put_dedicated_ip_in_pool::PutDedicatedIpInPoolError> for Error {
      fn from(err: crate::operation::put_dedicated_ip_in_pool::PutDedicatedIpInPoolError) -> Self {
          match err {
-@@ -3787,6 +5151,7 @@
+@@ -3923,6 +5332,7 @@
          }
      }
  }
@@ -14204,7 +14716,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl<R>
      From<
          ::aws_smithy_runtime_api::client::result::SdkError<
-@@ -3812,6 +5177,7 @@
+@@ -3948,6 +5358,7 @@
          }
      }
  }
@@ -14212,7 +14724,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl From<crate::operation::put_dedicated_ip_pool_scaling_attributes::PutDedicatedIpPoolScalingAttributesError>
      for Error
  {
-@@ -3837,6 +5203,7 @@
+@@ -3973,6 +5384,7 @@
          }
      }
  }
@@ -14220,7 +14732,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl<R>
      From<
          ::aws_smithy_runtime_api::client::result::SdkError<
-@@ -3862,6 +5229,7 @@
+@@ -3998,6 +5410,7 @@
          }
      }
  }
@@ -14228,7 +14740,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl From<crate::operation::put_dedicated_ip_warmup_attributes::PutDedicatedIpWarmupAttributesError> for Error {
      fn from(err: crate::operation::put_dedicated_ip_warmup_attributes::PutDedicatedIpWarmupAttributesError) -> Self {
          match err {
-@@ -3878,6 +5246,7 @@
+@@ -4014,6 +5427,7 @@
          }
      }
  }
@@ -14236,7 +14748,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl<R>
      From<
          ::aws_smithy_runtime_api::client::result::SdkError<
-@@ -3903,6 +5272,7 @@
+@@ -4039,6 +5453,7 @@
          }
      }
  }
@@ -14244,7 +14756,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl From<crate::operation::put_deliverability_dashboard_option::PutDeliverabilityDashboardOptionError> for Error {
      fn from(err: crate::operation::put_deliverability_dashboard_option::PutDeliverabilityDashboardOptionError) -> Self {
          match err {
-@@ -3925,6 +5295,7 @@
+@@ -4061,6 +5476,7 @@
          }
      }
  }
@@ -14252,7 +14764,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl<R>
      From<
          ::aws_smithy_runtime_api::client::result::SdkError<
-@@ -3950,6 +5321,7 @@
+@@ -4086,6 +5502,7 @@
          }
      }
  }
@@ -14260,7 +14772,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl From<crate::operation::put_email_identity_configuration_set_attributes::PutEmailIdentityConfigurationSetAttributesError> for Error {
      fn from(err: crate::operation::put_email_identity_configuration_set_attributes::PutEmailIdentityConfigurationSetAttributesError) -> Self {
          match err {
-@@ -3960,6 +5332,7 @@
+@@ -4096,6 +5513,7 @@
          }
      }
  }
@@ -14268,7 +14780,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl<R>
      From<
          ::aws_smithy_runtime_api::client::result::SdkError<
-@@ -3985,6 +5358,7 @@
+@@ -4121,6 +5539,7 @@
          }
      }
  }
@@ -14276,7 +14788,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl From<crate::operation::put_email_identity_dkim_attributes::PutEmailIdentityDkimAttributesError> for Error {
      fn from(err: crate::operation::put_email_identity_dkim_attributes::PutEmailIdentityDkimAttributesError) -> Self {
          match err {
-@@ -4001,6 +5375,7 @@
+@@ -4137,6 +5556,7 @@
          }
      }
  }
@@ -14284,7 +14796,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl<R>
      From<
          ::aws_smithy_runtime_api::client::result::SdkError<
-@@ -4026,6 +5401,7 @@
+@@ -4162,6 +5582,7 @@
          }
      }
  }
@@ -14292,7 +14804,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl From<crate::operation::put_email_identity_dkim_signing_attributes::PutEmailIdentityDkimSigningAttributesError>
      for Error
  {
-@@ -4048,6 +5424,7 @@
+@@ -4184,6 +5605,7 @@
          }
      }
  }
@@ -14300,7 +14812,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl<R>
      From<
          ::aws_smithy_runtime_api::client::result::SdkError<
-@@ -4073,6 +5450,7 @@
+@@ -4209,6 +5631,7 @@
          }
      }
  }
@@ -14308,7 +14820,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl From<crate::operation::put_email_identity_feedback_attributes::PutEmailIdentityFeedbackAttributesError> for Error {
      fn from(
          err: crate::operation::put_email_identity_feedback_attributes::PutEmailIdentityFeedbackAttributesError,
-@@ -4093,6 +5471,7 @@
+@@ -4229,6 +5652,7 @@
          }
      }
  }
@@ -14316,7 +14828,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl<R>
      From<
          ::aws_smithy_runtime_api::client::result::SdkError<
-@@ -4118,6 +5497,7 @@
+@@ -4254,6 +5678,7 @@
          }
      }
  }
@@ -14324,7 +14836,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl From<crate::operation::put_email_identity_mail_from_attributes::PutEmailIdentityMailFromAttributesError>
      for Error
  {
-@@ -4140,6 +5520,7 @@
+@@ -4276,6 +5701,7 @@
          }
      }
  }
@@ -14332,7 +14844,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl<R>
      From<
          ::aws_smithy_runtime_api::client::result::SdkError<
-@@ -4165,6 +5546,7 @@
+@@ -4301,6 +5727,7 @@
          }
      }
  }
@@ -14340,7 +14852,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl From<crate::operation::put_suppressed_destination::PutSuppressedDestinationError> for Error {
      fn from(err: crate::operation::put_suppressed_destination::PutSuppressedDestinationError) -> Self {
          match err {
-@@ -4183,6 +5565,7 @@
+@@ -4319,6 +5746,7 @@
          }
      }
  }
@@ -14348,7 +14860,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl<R>
      From<
          ::aws_smithy_runtime_api::client::result::SdkError<
-@@ -4208,6 +5591,7 @@
+@@ -4344,6 +5772,7 @@
          }
      }
  }
@@ -14356,7 +14868,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl From<crate::operation::put_tenant_suppression_attributes::PutTenantSuppressionAttributesError> for Error {
      fn from(err: crate::operation::put_tenant_suppression_attributes::PutTenantSuppressionAttributesError) -> Self {
          match err {
-@@ -4224,6 +5608,7 @@
+@@ -4360,6 +5789,7 @@
          }
      }
  }
@@ -14364,7 +14876,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl<R>
      From<::aws_smithy_runtime_api::client::result::SdkError<crate::operation::send_bulk_email::SendBulkEmailError, R>>
      for Error
-@@ -4245,6 +5630,7 @@
+@@ -4381,6 +5811,7 @@
          }
      }
  }
@@ -14372,7 +14884,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl From<crate::operation::send_bulk_email::SendBulkEmailError> for Error {
      fn from(err: crate::operation::send_bulk_email::SendBulkEmailError) -> Self {
          match err {
-@@ -4276,6 +5662,7 @@
+@@ -4412,6 +5843,7 @@
          }
      }
  }
@@ -14380,7 +14892,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl<R>
      From<
          ::aws_smithy_runtime_api::client::result::SdkError<
-@@ -4301,6 +5688,7 @@
+@@ -4437,6 +5869,7 @@
          }
      }
  }
@@ -14388,7 +14900,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl From<crate::operation::send_custom_verification_email::SendCustomVerificationEmailError> for Error {
      fn from(err: crate::operation::send_custom_verification_email::SendCustomVerificationEmailError) -> Self {
          match err {
-@@ -4329,6 +5717,7 @@
+@@ -4465,6 +5898,7 @@
          }
      }
  }
@@ -14396,7 +14908,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl<R> From<::aws_smithy_runtime_api::client::result::SdkError<crate::operation::send_email::SendEmailError, R>>
      for Error
  where
-@@ -4346,6 +5735,7 @@
+@@ -4482,6 +5916,7 @@
          }
      }
  }
@@ -14404,7 +14916,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl From<crate::operation::send_email::SendEmailError> for Error {
      fn from(err: crate::operation::send_email::SendEmailError) -> Self {
          match err {
-@@ -4373,6 +5763,7 @@
+@@ -4509,6 +5944,7 @@
          }
      }
  }
@@ -14412,7 +14924,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl<R> From<::aws_smithy_runtime_api::client::result::SdkError<crate::operation::tag_resource::TagResourceError, R>>
      for Error
  where
-@@ -4390,6 +5781,7 @@
+@@ -4526,6 +5962,7 @@
          }
      }
  }
@@ -14420,7 +14932,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl From<crate::operation::tag_resource::TagResourceError> for Error {
      fn from(err: crate::operation::tag_resource::TagResourceError) -> Self {
          match err {
-@@ -4409,6 +5801,7 @@
+@@ -4545,6 +5982,7 @@
          }
      }
  }
@@ -14428,7 +14940,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl<R>
      From<
          ::aws_smithy_runtime_api::client::result::SdkError<
-@@ -4434,6 +5827,7 @@
+@@ -4570,6 +6008,7 @@
          }
      }
  }
@@ -14436,7 +14948,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl From<crate::operation::test_render_email_template::TestRenderEmailTemplateError> for Error {
      fn from(err: crate::operation::test_render_email_template::TestRenderEmailTemplateError) -> Self {
          match err {
-@@ -4452,6 +5846,7 @@
+@@ -4588,6 +6027,7 @@
          }
      }
  }
@@ -14444,7 +14956,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl<R>
      From<::aws_smithy_runtime_api::client::result::SdkError<crate::operation::untag_resource::UntagResourceError, R>>
      for Error
-@@ -4473,6 +5868,7 @@
+@@ -4609,6 +6049,7 @@
          }
      }
  }
@@ -14452,7 +14964,23 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl From<crate::operation::untag_resource::UntagResourceError> for Error {
      fn from(err: crate::operation::untag_resource::UntagResourceError) -> Self {
          match err {
-@@ -4492,6 +5888,7 @@
+@@ -4628,6 +6069,7 @@
+         }
+     }
+ }
++#[cfg(feature = "op_update_configuration_set")]
+ impl<R>
+     From<
+         ::aws_smithy_runtime_api::client::result::SdkError<
+@@ -4653,6 +6095,7 @@
+         }
+     }
+ }
++#[cfg(feature = "op_update_configuration_set")]
+ impl From<crate::operation::update_configuration_set::UpdateConfigurationSetError> for Error {
+     fn from(err: crate::operation::update_configuration_set::UpdateConfigurationSetError) -> Self {
+         match err {
+@@ -4671,6 +6114,7 @@
          }
      }
  }
@@ -14460,7 +14988,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl<R>
      From<
          ::aws_smithy_runtime_api::client::result::SdkError<
-@@ -4517,6 +5914,7 @@
+@@ -4696,6 +6140,7 @@
          }
      }
  }
@@ -14468,7 +14996,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl From<crate::operation::update_configuration_set_event_destination::UpdateConfigurationSetEventDestinationError>
      for Error
  {
-@@ -4539,6 +5937,7 @@
+@@ -4718,6 +6163,7 @@
          }
      }
  }
@@ -14476,7 +15004,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl<R>
      From<::aws_smithy_runtime_api::client::result::SdkError<crate::operation::update_contact::UpdateContactError, R>>
      for Error
-@@ -4560,6 +5959,7 @@
+@@ -4739,6 +6185,7 @@
          }
      }
  }
@@ -14484,7 +15012,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl From<crate::operation::update_contact::UpdateContactError> for Error {
      fn from(err: crate::operation::update_contact::UpdateContactError) -> Self {
          match err {
-@@ -4579,6 +5979,7 @@
+@@ -4758,6 +6205,7 @@
          }
      }
  }
@@ -14492,7 +15020,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl<R>
      From<
          ::aws_smithy_runtime_api::client::result::SdkError<
-@@ -4604,6 +6005,7 @@
+@@ -4783,6 +6231,7 @@
          }
      }
  }
@@ -14500,7 +15028,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl From<crate::operation::update_contact_list::UpdateContactListError> for Error {
      fn from(err: crate::operation::update_contact_list::UpdateContactListError) -> Self {
          match err {
-@@ -4623,6 +6025,7 @@
+@@ -4802,6 +6251,7 @@
          }
      }
  }
@@ -14508,7 +15036,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl<R>
      From<
          ::aws_smithy_runtime_api::client::result::SdkError<
-@@ -4648,6 +6051,7 @@
+@@ -4827,6 +6277,7 @@
          }
      }
  }
@@ -14516,7 +15044,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl From<crate::operation::update_custom_verification_email_template::UpdateCustomVerificationEmailTemplateError>
      for Error
  {
-@@ -4670,6 +6074,7 @@
+@@ -4849,6 +6300,7 @@
          }
      }
  }
@@ -14524,7 +15052,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl<R>
      From<
          ::aws_smithy_runtime_api::client::result::SdkError<
-@@ -4695,6 +6100,7 @@
+@@ -4874,6 +6326,7 @@
          }
      }
  }
@@ -14532,7 +15060,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl From<crate::operation::update_email_identity_policy::UpdateEmailIdentityPolicyError> for Error {
      fn from(err: crate::operation::update_email_identity_policy::UpdateEmailIdentityPolicyError) -> Self {
          match err {
-@@ -4711,6 +6117,7 @@
+@@ -4890,6 +6343,7 @@
          }
      }
  }
@@ -14540,7 +15068,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl<R>
      From<
          ::aws_smithy_runtime_api::client::result::SdkError<
-@@ -4736,6 +6143,7 @@
+@@ -4915,6 +6369,7 @@
          }
      }
  }
@@ -14548,7 +15076,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl From<crate::operation::update_email_template::UpdateEmailTemplateError> for Error {
      fn from(err: crate::operation::update_email_template::UpdateEmailTemplateError) -> Self {
          match err {
-@@ -4754,6 +6162,7 @@
+@@ -4933,6 +6388,7 @@
          }
      }
  }
@@ -14556,7 +15084,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl<R>
      From<
          ::aws_smithy_runtime_api::client::result::SdkError<
-@@ -4779,6 +6188,7 @@
+@@ -4958,6 +6414,7 @@
          }
      }
  }
@@ -14564,7 +15092,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl From<crate::operation::update_reputation_entity_customer_managed_status::UpdateReputationEntityCustomerManagedStatusError> for Error {
      fn from(err: crate::operation::update_reputation_entity_customer_managed_status::UpdateReputationEntityCustomerManagedStatusError) -> Self {
          match err {
-@@ -4789,6 +6199,7 @@
+@@ -4968,6 +6425,7 @@
          }
      }
  }
@@ -14572,7 +15100,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl<R>
      From<
          ::aws_smithy_runtime_api::client::result::SdkError<
-@@ -4814,6 +6225,7 @@
+@@ -4993,6 +6451,7 @@
          }
      }
  }
@@ -14580,7 +15108,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl From<crate::operation::update_reputation_entity_policy::UpdateReputationEntityPolicyError> for Error {
      fn from(err: crate::operation::update_reputation_entity_policy::UpdateReputationEntityPolicyError) -> Self {
          match err {
-@@ -4833,18 +6245,414 @@
+@@ -5012,18 +6471,427 @@
  impl ::std::error::Error for Error {
      fn source(&self) -> std::option::Option<&(dyn ::std::error::Error + 'static)> {
          match self {
@@ -14591,6 +15119,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
 +            ))]
              Error::AccountSuspendedException(inner) => inner.source(),
 +            #[cfg(any(
++                feature = "op_associate_email_identity_certificate",
 +                feature = "op_create_configuration_set",
 +                feature = "op_create_configuration_set_event_destination",
 +                feature = "op_create_contact",
@@ -14607,6 +15136,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
 +            ))]
              Error::AlreadyExistsException(inner) => inner.source(),
 +            #[cfg(any(
++                feature = "op_associate_email_identity_certificate",
 +                feature = "op_batch_get_metric_data",
 +                feature = "op_cancel_export_job",
 +                feature = "op_create_configuration_set",
@@ -14637,6 +15167,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
 +                feature = "op_delete_suppressed_destination",
 +                feature = "op_delete_tenant",
 +                feature = "op_delete_tenant_resource_association",
++                feature = "op_disassociate_email_identity_certificate",
 +                feature = "op_get_account",
 +                feature = "op_get_blacklist_reports",
 +                feature = "op_get_configuration_set",
@@ -14670,6 +15201,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
 +                feature = "op_list_deliverability_test_reports",
 +                feature = "op_list_domain_deliverability_campaigns",
 +                feature = "op_list_email_identities",
++                feature = "op_list_email_identity_certificates",
 +                feature = "op_list_email_templates",
 +                feature = "op_list_export_jobs",
 +                feature = "op_list_import_jobs",
@@ -14711,6 +15243,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
 +                feature = "op_tag_resource",
 +                feature = "op_test_render_email_template",
 +                feature = "op_untag_resource",
++                feature = "op_update_configuration_set",
 +                feature = "op_update_configuration_set_event_destination",
 +                feature = "op_update_contact",
 +                feature = "op_update_contact_list",
@@ -14785,6 +15318,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
 +            ))]
              Error::MessageRejected(inner) => inner.source(),
 +            #[cfg(any(
++                feature = "op_associate_email_identity_certificate",
 +                feature = "op_batch_get_metric_data",
 +                feature = "op_cancel_export_job",
 +                feature = "op_create_configuration_set",
@@ -14809,6 +15343,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
 +                feature = "op_delete_suppressed_destination",
 +                feature = "op_delete_tenant",
 +                feature = "op_delete_tenant_resource_association",
++                feature = "op_disassociate_email_identity_certificate",
 +                feature = "op_get_blacklist_reports",
 +                feature = "op_get_configuration_set",
 +                feature = "op_get_configuration_set_event_destinations",
@@ -14834,6 +15369,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
 +                feature = "op_list_contacts",
 +                feature = "op_list_deliverability_test_reports",
 +                feature = "op_list_domain_deliverability_campaigns",
++                feature = "op_list_email_identity_certificates",
 +                feature = "op_list_recommendations",
 +                feature = "op_list_resource_tenants",
 +                feature = "op_list_suppressed_destinations",
@@ -14863,6 +15399,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
 +                feature = "op_tag_resource",
 +                feature = "op_test_render_email_template",
 +                feature = "op_untag_resource",
++                feature = "op_update_configuration_set",
 +                feature = "op_update_configuration_set_event_destination",
 +                feature = "op_update_contact",
 +                feature = "op_update_contact_list",
@@ -14879,6 +15416,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
 +            ))]
              Error::SendingPausedException(inner) => inner.source(),
 +            #[cfg(any(
++                feature = "op_associate_email_identity_certificate",
 +                feature = "op_batch_get_metric_data",
 +                feature = "op_cancel_export_job",
 +                feature = "op_create_configuration_set",
@@ -14909,6 +15447,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
 +                feature = "op_delete_suppressed_destination",
 +                feature = "op_delete_tenant",
 +                feature = "op_delete_tenant_resource_association",
++                feature = "op_disassociate_email_identity_certificate",
 +                feature = "op_get_account",
 +                feature = "op_get_blacklist_reports",
 +                feature = "op_get_configuration_set",
@@ -14942,6 +15481,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
 +                feature = "op_list_deliverability_test_reports",
 +                feature = "op_list_domain_deliverability_campaigns",
 +                feature = "op_list_email_identities",
++                feature = "op_list_email_identity_certificates",
 +                feature = "op_list_email_templates",
 +                feature = "op_list_export_jobs",
 +                feature = "op_list_import_jobs",
@@ -14983,6 +15523,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
 +                feature = "op_tag_resource",
 +                feature = "op_test_render_email_template",
 +                feature = "op_untag_resource",
++                feature = "op_update_configuration_set",
 +                feature = "op_update_configuration_set_event_destination",
 +                feature = "op_update_contact",
 +                feature = "op_update_contact_list",
@@ -14995,7 +15536,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
              Error::TooManyRequestsException(inner) => inner.source(),
              Error::Unhandled(inner) => ::std::option::Option::Some(&*inner.source),
          }
-@@ -4853,18 +6661,414 @@
+@@ -5032,18 +6900,427 @@
  impl ::aws_types::request_id::RequestId for Error {
      fn request_id(&self) -> Option<&str> {
          match self {
@@ -15006,6 +15547,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
 +            ))]
              Self::AccountSuspendedException(e) => e.request_id(),
 +            #[cfg(any(
++                feature = "op_associate_email_identity_certificate",
 +                feature = "op_create_configuration_set",
 +                feature = "op_create_configuration_set_event_destination",
 +                feature = "op_create_contact",
@@ -15022,6 +15564,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
 +            ))]
              Self::AlreadyExistsException(e) => e.request_id(),
 +            #[cfg(any(
++                feature = "op_associate_email_identity_certificate",
 +                feature = "op_batch_get_metric_data",
 +                feature = "op_cancel_export_job",
 +                feature = "op_create_configuration_set",
@@ -15052,6 +15595,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
 +                feature = "op_delete_suppressed_destination",
 +                feature = "op_delete_tenant",
 +                feature = "op_delete_tenant_resource_association",
++                feature = "op_disassociate_email_identity_certificate",
 +                feature = "op_get_account",
 +                feature = "op_get_blacklist_reports",
 +                feature = "op_get_configuration_set",
@@ -15085,6 +15629,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
 +                feature = "op_list_deliverability_test_reports",
 +                feature = "op_list_domain_deliverability_campaigns",
 +                feature = "op_list_email_identities",
++                feature = "op_list_email_identity_certificates",
 +                feature = "op_list_email_templates",
 +                feature = "op_list_export_jobs",
 +                feature = "op_list_import_jobs",
@@ -15126,6 +15671,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
 +                feature = "op_tag_resource",
 +                feature = "op_test_render_email_template",
 +                feature = "op_untag_resource",
++                feature = "op_update_configuration_set",
 +                feature = "op_update_configuration_set_event_destination",
 +                feature = "op_update_contact",
 +                feature = "op_update_contact_list",
@@ -15200,6 +15746,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
 +            ))]
              Self::MessageRejected(e) => e.request_id(),
 +            #[cfg(any(
++                feature = "op_associate_email_identity_certificate",
 +                feature = "op_batch_get_metric_data",
 +                feature = "op_cancel_export_job",
 +                feature = "op_create_configuration_set",
@@ -15224,6 +15771,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
 +                feature = "op_delete_suppressed_destination",
 +                feature = "op_delete_tenant",
 +                feature = "op_delete_tenant_resource_association",
++                feature = "op_disassociate_email_identity_certificate",
 +                feature = "op_get_blacklist_reports",
 +                feature = "op_get_configuration_set",
 +                feature = "op_get_configuration_set_event_destinations",
@@ -15249,6 +15797,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
 +                feature = "op_list_contacts",
 +                feature = "op_list_deliverability_test_reports",
 +                feature = "op_list_domain_deliverability_campaigns",
++                feature = "op_list_email_identity_certificates",
 +                feature = "op_list_recommendations",
 +                feature = "op_list_resource_tenants",
 +                feature = "op_list_suppressed_destinations",
@@ -15278,6 +15827,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
 +                feature = "op_tag_resource",
 +                feature = "op_test_render_email_template",
 +                feature = "op_untag_resource",
++                feature = "op_update_configuration_set",
 +                feature = "op_update_configuration_set_event_destination",
 +                feature = "op_update_contact",
 +                feature = "op_update_contact_list",
@@ -15294,6 +15844,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
 +            ))]
              Self::SendingPausedException(e) => e.request_id(),
 +            #[cfg(any(
++                feature = "op_associate_email_identity_certificate",
 +                feature = "op_batch_get_metric_data",
 +                feature = "op_cancel_export_job",
 +                feature = "op_create_configuration_set",
@@ -15324,6 +15875,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
 +                feature = "op_delete_suppressed_destination",
 +                feature = "op_delete_tenant",
 +                feature = "op_delete_tenant_resource_association",
++                feature = "op_disassociate_email_identity_certificate",
 +                feature = "op_get_account",
 +                feature = "op_get_blacklist_reports",
 +                feature = "op_get_configuration_set",
@@ -15357,6 +15909,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
 +                feature = "op_list_deliverability_test_reports",
 +                feature = "op_list_domain_deliverability_campaigns",
 +                feature = "op_list_email_identities",
++                feature = "op_list_email_identity_certificates",
 +                feature = "op_list_email_templates",
 +                feature = "op_list_export_jobs",
 +                feature = "op_list_import_jobs",
@@ -15398,6 +15951,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
 +                feature = "op_tag_resource",
 +                feature = "op_test_render_email_template",
 +                feature = "op_untag_resource",
++                feature = "op_update_configuration_set",
 +                feature = "op_update_configuration_set_event_destination",
 +                feature = "op_update_contact",
 +                feature = "op_update_contact_list",
@@ -15487,11 +16041,19 @@ diff --git a/src/lens.rs b/src/lens.rs
      ::std::option::Option::Some(input)
  }
 
++#[cfg(feature = "op_list_email_identity_certificates")]
+ pub(crate) fn reflens_list_email_identity_certificates_output_output_next_token(
+     input: &crate::operation::list_email_identity_certificates::ListEmailIdentityCertificatesOutput,
+ ) -> ::std::option::Option<&::std::string::String> {
+@@ -99,6 +109,7 @@
+     ::std::option::Option::Some(input)
+ }
+
 +#[cfg(feature = "op_list_email_templates")]
  pub(crate) fn reflens_list_email_templates_output_output_next_token(
      input: &crate::operation::list_email_templates::ListEmailTemplatesOutput,
  ) -> ::std::option::Option<&::std::string::String> {
-@@ -99,6 +109,7 @@
+@@ -109,6 +120,7 @@
      ::std::option::Option::Some(input)
  }
 
@@ -15499,7 +16061,7 @@ diff --git a/src/lens.rs b/src/lens.rs
  pub(crate) fn reflens_list_export_jobs_output_output_next_token(
      input: &crate::operation::list_export_jobs::ListExportJobsOutput,
  ) -> ::std::option::Option<&::std::string::String> {
-@@ -109,6 +120,7 @@
+@@ -119,6 +131,7 @@
      ::std::option::Option::Some(input)
  }
 
@@ -15507,7 +16069,7 @@ diff --git a/src/lens.rs b/src/lens.rs
  pub(crate) fn reflens_list_import_jobs_output_output_next_token(
      input: &crate::operation::list_import_jobs::ListImportJobsOutput,
  ) -> ::std::option::Option<&::std::string::String> {
-@@ -119,6 +131,7 @@
+@@ -129,6 +142,7 @@
      ::std::option::Option::Some(input)
  }
 
@@ -15515,7 +16077,7 @@ diff --git a/src/lens.rs b/src/lens.rs
  pub(crate) fn reflens_list_multi_region_endpoints_output_output_next_token(
      input: &crate::operation::list_multi_region_endpoints::ListMultiRegionEndpointsOutput,
  ) -> ::std::option::Option<&::std::string::String> {
-@@ -129,6 +142,7 @@
+@@ -139,6 +153,7 @@
      ::std::option::Option::Some(input)
  }
 
@@ -15523,7 +16085,7 @@ diff --git a/src/lens.rs b/src/lens.rs
  pub(crate) fn reflens_list_recommendations_output_output_next_token(
      input: &crate::operation::list_recommendations::ListRecommendationsOutput,
  ) -> ::std::option::Option<&::std::string::String> {
-@@ -139,6 +153,7 @@
+@@ -149,6 +164,7 @@
      ::std::option::Option::Some(input)
  }
 
@@ -15531,7 +16093,7 @@ diff --git a/src/lens.rs b/src/lens.rs
  pub(crate) fn reflens_list_reputation_entities_output_output_next_token(
      input: &crate::operation::list_reputation_entities::ListReputationEntitiesOutput,
  ) -> ::std::option::Option<&::std::string::String> {
-@@ -149,6 +164,7 @@
+@@ -159,6 +175,7 @@
      ::std::option::Option::Some(input)
  }
 
@@ -15539,7 +16101,7 @@ diff --git a/src/lens.rs b/src/lens.rs
  pub(crate) fn reflens_list_resource_tenants_output_output_next_token(
      input: &crate::operation::list_resource_tenants::ListResourceTenantsOutput,
  ) -> ::std::option::Option<&::std::string::String> {
-@@ -159,6 +175,7 @@
+@@ -169,6 +186,7 @@
      ::std::option::Option::Some(input)
  }
 
@@ -15547,7 +16109,7 @@ diff --git a/src/lens.rs b/src/lens.rs
  pub(crate) fn reflens_list_suppressed_destinations_output_output_next_token(
      input: &crate::operation::list_suppressed_destinations::ListSuppressedDestinationsOutput,
  ) -> ::std::option::Option<&::std::string::String> {
-@@ -169,6 +186,7 @@
+@@ -179,6 +197,7 @@
      ::std::option::Option::Some(input)
  }
 
@@ -15555,7 +16117,7 @@ diff --git a/src/lens.rs b/src/lens.rs
  pub(crate) fn reflens_list_tenant_resources_output_output_next_token(
      input: &crate::operation::list_tenant_resources::ListTenantResourcesOutput,
  ) -> ::std::option::Option<&::std::string::String> {
-@@ -179,6 +197,7 @@
+@@ -189,6 +208,7 @@
      ::std::option::Option::Some(input)
  }
 
@@ -15563,7 +16125,15 @@ diff --git a/src/lens.rs b/src/lens.rs
  pub(crate) fn reflens_list_tenants_output_output_next_token(
      input: &crate::operation::list_tenants::ListTenantsOutput,
  ) -> ::std::option::Option<&::std::string::String> {
-@@ -189,6 +208,7 @@
+@@ -199,6 +219,7 @@
+     ::std::option::Option::Some(input)
+ }
+
++#[cfg(feature = "op_list_email_identity_certificates")]
+ pub(crate) fn lens_list_email_identity_certificates_output_output_certificates(
+     input: crate::operation::list_email_identity_certificates::ListEmailIdentityCertificatesOutput,
+ ) -> ::std::option::Option<::std::vec::Vec<crate::types::IdentityCertificate>> {
+@@ -206,6 +227,7 @@
      ::std::option::Option::Some(input)
  }
 
@@ -15571,7 +16141,7 @@ diff --git a/src/lens.rs b/src/lens.rs
  pub(crate) fn lens_list_multi_region_endpoints_output_output_multi_region_endpoints(
      input: crate::operation::list_multi_region_endpoints::ListMultiRegionEndpointsOutput,
  ) -> ::std::option::Option<::std::vec::Vec<crate::types::MultiRegionEndpoint>> {
-@@ -196,6 +216,7 @@
+@@ -213,6 +235,7 @@
      ::std::option::Option::Some(input)
  }
 
@@ -15579,7 +16149,7 @@ diff --git a/src/lens.rs b/src/lens.rs
  pub(crate) fn lens_list_reputation_entities_output_output_reputation_entities(
      input: crate::operation::list_reputation_entities::ListReputationEntitiesOutput,
  ) -> ::std::option::Option<::std::vec::Vec<crate::types::ReputationEntity>> {
-@@ -203,6 +224,7 @@
+@@ -220,6 +243,7 @@
      ::std::option::Option::Some(input)
  }
 
@@ -15587,7 +16157,7 @@ diff --git a/src/lens.rs b/src/lens.rs
  pub(crate) fn lens_list_resource_tenants_output_output_resource_tenants(
      input: crate::operation::list_resource_tenants::ListResourceTenantsOutput,
  ) -> ::std::option::Option<::std::vec::Vec<crate::types::ResourceTenantMetadata>> {
-@@ -210,6 +232,7 @@
+@@ -227,6 +251,7 @@
      ::std::option::Option::Some(input)
  }
 
@@ -15595,7 +16165,7 @@ diff --git a/src/lens.rs b/src/lens.rs
  pub(crate) fn lens_list_tenant_resources_output_output_tenant_resources(
      input: crate::operation::list_tenant_resources::ListTenantResourcesOutput,
  ) -> ::std::option::Option<::std::vec::Vec<crate::types::TenantResource>> {
-@@ -217,6 +240,7 @@
+@@ -234,6 +259,7 @@
      ::std::option::Option::Some(input)
  }
 
@@ -15606,9 +16176,13 @@ diff --git a/src/lens.rs b/src/lens.rs
 diff --git a/src/operation.rs b/src/operation.rs
 --- a/src/operation.rs
 +++ b/src/operation.rs
-@@ -1,338 +1,450 @@
+@@ -1,350 +1,466 @@
  // Code generated by software.amazon.smithy.rust.codegen.smithy-rs. DO NOT EDIT.
  pub use ::aws_types::request_id::RequestId;
+
++#[cfg(feature = "op_associate_email_identity_certificate")]
+ /// Types for the `AssociateEmailIdentityCertificate` operation.
+ pub mod associate_email_identity_certificate;
 
 +#[cfg(feature = "op_batch_get_metric_data")]
  /// Types for the `BatchGetMetricData` operation.
@@ -15729,6 +16303,10 @@ diff --git a/src/operation.rs b/src/operation.rs
 +#[cfg(feature = "op_delete_tenant_resource_association")]
  /// Types for the `DeleteTenantResourceAssociation` operation.
  pub mod delete_tenant_resource_association;
+
++#[cfg(feature = "op_disassociate_email_identity_certificate")]
+ /// Types for the `DisassociateEmailIdentityCertificate` operation.
+ pub mod disassociate_email_identity_certificate;
 
 +#[cfg(feature = "op_get_account")]
  /// Types for the `GetAccount` operation.
@@ -15861,6 +16439,10 @@ diff --git a/src/operation.rs b/src/operation.rs
 +#[cfg(feature = "op_list_email_identities")]
  /// Types for the `ListEmailIdentities` operation.
  pub mod list_email_identities;
+
++#[cfg(feature = "op_list_email_identity_certificates")]
+ /// Types for the `ListEmailIdentityCertificates` operation.
+ pub mod list_email_identity_certificates;
 
 +#[cfg(feature = "op_list_email_templates")]
  /// Types for the `ListEmailTemplates` operation.
@@ -16026,6 +16608,10 @@ diff --git a/src/operation.rs b/src/operation.rs
  /// Types for the `UntagResource` operation.
  pub mod untag_resource;
 
++#[cfg(feature = "op_update_configuration_set")]
+ /// Types for the `UpdateConfigurationSet` operation.
+ pub mod update_configuration_set;
+
 +#[cfg(feature = "op_update_configuration_set_event_destination")]
  /// Types for the `UpdateConfigurationSetEventDestination` operation.
  pub mod update_configuration_set_event_destination;
@@ -16060,9 +16646,10 @@ diff --git a/src/operation.rs b/src/operation.rs
 diff --git a/src/protocol_serde.rs b/src/protocol_serde.rs
 --- a/src/protocol_serde.rs
 +++ b/src/protocol_serde.rs
-@@ -1,4 +1,118 @@
+@@ -1,4 +1,122 @@
  // Code generated by software.amazon.smithy.rust.codegen.smithy-rs. DO NOT EDIT.
 +#[cfg(any(
++    feature = "op_associate_email_identity_certificate",
 +    feature = "op_batch_get_metric_data",
 +    feature = "op_cancel_export_job",
 +    feature = "op_create_configuration_set",
@@ -16093,6 +16680,7 @@ diff --git a/src/protocol_serde.rs b/src/protocol_serde.rs
 +    feature = "op_delete_suppressed_destination",
 +    feature = "op_delete_tenant",
 +    feature = "op_delete_tenant_resource_association",
++    feature = "op_disassociate_email_identity_certificate",
 +    feature = "op_get_account",
 +    feature = "op_get_blacklist_reports",
 +    feature = "op_get_configuration_set",
@@ -16126,6 +16714,7 @@ diff --git a/src/protocol_serde.rs b/src/protocol_serde.rs
 +    feature = "op_list_deliverability_test_reports",
 +    feature = "op_list_domain_deliverability_campaigns",
 +    feature = "op_list_email_identities",
++    feature = "op_list_email_identity_certificates",
 +    feature = "op_list_email_templates",
 +    feature = "op_list_export_jobs",
 +    feature = "op_list_import_jobs",
@@ -16167,6 +16756,7 @@ diff --git a/src/protocol_serde.rs b/src/protocol_serde.rs
 +    feature = "op_tag_resource",
 +    feature = "op_test_render_email_template",
 +    feature = "op_untag_resource",
++    feature = "op_update_configuration_set",
 +    feature = "op_update_configuration_set_event_destination",
 +    feature = "op_update_contact",
 +    feature = "op_update_contact_list",
@@ -16179,11 +16769,12 @@ diff --git a/src/protocol_serde.rs b/src/protocol_serde.rs
  pub(crate) fn type_erase_result<O, E>(
      result: ::std::result::Result<O, E>,
  ) -> ::std::result::Result<
-@@ -17,6 +131,120 @@
+@@ -17,6 +135,124 @@
          .map_err(::std::convert::Into::into)
  }
 
 +#[cfg(any(
++    feature = "op_associate_email_identity_certificate",
 +    feature = "op_batch_get_metric_data",
 +    feature = "op_cancel_export_job",
 +    feature = "op_create_configuration_set",
@@ -16214,6 +16805,7 @@ diff --git a/src/protocol_serde.rs b/src/protocol_serde.rs
 +    feature = "op_delete_suppressed_destination",
 +    feature = "op_delete_tenant",
 +    feature = "op_delete_tenant_resource_association",
++    feature = "op_disassociate_email_identity_certificate",
 +    feature = "op_get_account",
 +    feature = "op_get_blacklist_reports",
 +    feature = "op_get_configuration_set",
@@ -16247,6 +16839,7 @@ diff --git a/src/protocol_serde.rs b/src/protocol_serde.rs
 +    feature = "op_list_deliverability_test_reports",
 +    feature = "op_list_domain_deliverability_campaigns",
 +    feature = "op_list_email_identities",
++    feature = "op_list_email_identity_certificates",
 +    feature = "op_list_email_templates",
 +    feature = "op_list_export_jobs",
 +    feature = "op_list_import_jobs",
@@ -16288,6 +16881,7 @@ diff --git a/src/protocol_serde.rs b/src/protocol_serde.rs
 +    feature = "op_tag_resource",
 +    feature = "op_test_render_email_template",
 +    feature = "op_untag_resource",
++    feature = "op_update_configuration_set",
 +    feature = "op_update_configuration_set_event_destination",
 +    feature = "op_update_contact",
 +    feature = "op_update_contact_list",
@@ -16300,9 +16894,12 @@ diff --git a/src/protocol_serde.rs b/src/protocol_serde.rs
  pub fn parse_http_error_metadata(
      _response_status: u16,
      response_headers: &::aws_smithy_runtime_api::http::Headers,
-@@ -28,230 +256,456 @@
+@@ -28,238 +264,472 @@
      crate::json_errors::parse_error_metadata(response_body, response_headers)
  }
+
++#[cfg(feature = "op_associate_email_identity_certificate")]
+ pub(crate) mod shape_associate_email_identity_certificate;
 
 +#[cfg(feature = "op_batch_get_metric_data")]
  pub(crate) mod shape_batch_get_metric_data;
@@ -16393,6 +16990,9 @@ diff --git a/src/protocol_serde.rs b/src/protocol_serde.rs
 
 +#[cfg(feature = "op_delete_tenant_resource_association")]
  pub(crate) mod shape_delete_tenant_resource_association;
+
++#[cfg(feature = "op_disassociate_email_identity_certificate")]
+ pub(crate) mod shape_disassociate_email_identity_certificate;
 
 +#[cfg(feature = "op_get_account")]
  pub(crate) mod shape_get_account;
@@ -16492,6 +17092,9 @@ diff --git a/src/protocol_serde.rs b/src/protocol_serde.rs
 
 +#[cfg(feature = "op_list_email_identities")]
  pub(crate) mod shape_list_email_identities;
+
++#[cfg(feature = "op_list_email_identity_certificates")]
+ pub(crate) mod shape_list_email_identity_certificates;
 
 +#[cfg(feature = "op_list_email_templates")]
  pub(crate) mod shape_list_email_templates;
@@ -16616,6 +17219,9 @@ diff --git a/src/protocol_serde.rs b/src/protocol_serde.rs
 +#[cfg(feature = "op_untag_resource")]
  pub(crate) mod shape_untag_resource;
 
++#[cfg(feature = "op_update_configuration_set")]
+ pub(crate) mod shape_update_configuration_set;
+
 +#[cfg(feature = "op_update_configuration_set_event_destination")]
  pub(crate) mod shape_update_configuration_set_event_destination;
 
@@ -16641,6 +17247,7 @@ diff --git a/src/protocol_serde.rs b/src/protocol_serde.rs
  pub(crate) mod shape_update_reputation_entity_policy;
 
 +#[cfg(any(
++    feature = "op_associate_email_identity_certificate",
 +    feature = "op_batch_get_metric_data",
 +    feature = "op_cancel_export_job",
 +    feature = "op_create_configuration_set",
@@ -16671,6 +17278,7 @@ diff --git a/src/protocol_serde.rs b/src/protocol_serde.rs
 +    feature = "op_delete_suppressed_destination",
 +    feature = "op_delete_tenant",
 +    feature = "op_delete_tenant_resource_association",
++    feature = "op_disassociate_email_identity_certificate",
 +    feature = "op_get_account",
 +    feature = "op_get_blacklist_reports",
 +    feature = "op_get_configuration_set",
@@ -16704,6 +17312,7 @@ diff --git a/src/protocol_serde.rs b/src/protocol_serde.rs
 +    feature = "op_list_deliverability_test_reports",
 +    feature = "op_list_domain_deliverability_campaigns",
 +    feature = "op_list_email_identities",
++    feature = "op_list_email_identity_certificates",
 +    feature = "op_list_email_templates",
 +    feature = "op_list_export_jobs",
 +    feature = "op_list_import_jobs",
@@ -16745,6 +17354,7 @@ diff --git a/src/protocol_serde.rs b/src/protocol_serde.rs
 +    feature = "op_tag_resource",
 +    feature = "op_test_render_email_template",
 +    feature = "op_untag_resource",
++    feature = "op_update_configuration_set",
 +    feature = "op_update_configuration_set_event_destination",
 +    feature = "op_update_contact",
 +    feature = "op_update_contact_list",
@@ -16757,7 +17367,7 @@ diff --git a/src/protocol_serde.rs b/src/protocol_serde.rs
  pub(crate) fn or_empty_doc(data: &[u8]) -> &[u8] {
      if data.is_empty() {
          b"{}"
-@@ -260,502 +714,1305 @@
+@@ -268,522 +738,1364 @@
      }
  }
 
@@ -16769,6 +17379,7 @@ diff --git a/src/protocol_serde.rs b/src/protocol_serde.rs
  pub(crate) mod shape_account_suspended_exception;
 
 +#[cfg(any(
++    feature = "op_associate_email_identity_certificate",
 +    feature = "op_create_configuration_set",
 +    feature = "op_create_configuration_set_event_destination",
 +    feature = "op_create_contact",
@@ -16785,7 +17396,11 @@ diff --git a/src/protocol_serde.rs b/src/protocol_serde.rs
 +))]
  pub(crate) mod shape_already_exists_exception;
 
++#[cfg(feature = "op_associate_email_identity_certificate")]
+ pub(crate) mod shape_associate_email_identity_certificate_input;
+
 +#[cfg(any(
++    feature = "op_associate_email_identity_certificate",
 +    feature = "op_batch_get_metric_data",
 +    feature = "op_cancel_export_job",
 +    feature = "op_create_configuration_set",
@@ -16816,6 +17431,7 @@ diff --git a/src/protocol_serde.rs b/src/protocol_serde.rs
 +    feature = "op_delete_suppressed_destination",
 +    feature = "op_delete_tenant",
 +    feature = "op_delete_tenant_resource_association",
++    feature = "op_disassociate_email_identity_certificate",
 +    feature = "op_get_account",
 +    feature = "op_get_blacklist_reports",
 +    feature = "op_get_configuration_set",
@@ -16849,6 +17465,7 @@ diff --git a/src/protocol_serde.rs b/src/protocol_serde.rs
 +    feature = "op_list_deliverability_test_reports",
 +    feature = "op_list_domain_deliverability_campaigns",
 +    feature = "op_list_email_identities",
++    feature = "op_list_email_identity_certificates",
 +    feature = "op_list_email_templates",
 +    feature = "op_list_export_jobs",
 +    feature = "op_list_import_jobs",
@@ -16890,6 +17507,7 @@ diff --git a/src/protocol_serde.rs b/src/protocol_serde.rs
 +    feature = "op_tag_resource",
 +    feature = "op_test_render_email_template",
 +    feature = "op_untag_resource",
++    feature = "op_update_configuration_set",
 +    feature = "op_update_configuration_set_event_destination",
 +    feature = "op_update_contact",
 +    feature = "op_update_contact_list",
@@ -16981,6 +17599,9 @@ diff --git a/src/protocol_serde.rs b/src/protocol_serde.rs
 +#[cfg(feature = "op_delete_tenant_resource_association")]
  pub(crate) mod shape_delete_tenant_resource_association_input;
 
++#[cfg(feature = "op_disassociate_email_identity_certificate")]
+ pub(crate) mod shape_disassociate_email_identity_certificate_input;
+
 +#[cfg(feature = "op_get_email_address_insights")]
  pub(crate) mod shape_get_email_address_insights_input;
 
@@ -17017,6 +17638,9 @@ diff --git a/src/protocol_serde.rs b/src/protocol_serde.rs
 
 +#[cfg(feature = "op_list_contacts")]
  pub(crate) mod shape_list_contacts_input;
+
++#[cfg(feature = "op_list_email_identity_certificates")]
+ pub(crate) mod shape_list_email_identity_certificates_input;
 
 +#[cfg(feature = "op_list_export_jobs")]
  pub(crate) mod shape_list_export_jobs_input;
@@ -17056,6 +17680,7 @@ diff --git a/src/protocol_serde.rs b/src/protocol_serde.rs
  pub(crate) mod shape_message_rejected;
 
 +#[cfg(any(
++    feature = "op_associate_email_identity_certificate",
 +    feature = "op_batch_get_metric_data",
 +    feature = "op_cancel_export_job",
 +    feature = "op_create_configuration_set",
@@ -17080,6 +17705,7 @@ diff --git a/src/protocol_serde.rs b/src/protocol_serde.rs
 +    feature = "op_delete_suppressed_destination",
 +    feature = "op_delete_tenant",
 +    feature = "op_delete_tenant_resource_association",
++    feature = "op_disassociate_email_identity_certificate",
 +    feature = "op_get_blacklist_reports",
 +    feature = "op_get_configuration_set",
 +    feature = "op_get_configuration_set_event_destinations",
@@ -17105,6 +17731,7 @@ diff --git a/src/protocol_serde.rs b/src/protocol_serde.rs
 +    feature = "op_list_contacts",
 +    feature = "op_list_deliverability_test_reports",
 +    feature = "op_list_domain_deliverability_campaigns",
++    feature = "op_list_email_identity_certificates",
 +    feature = "op_list_recommendations",
 +    feature = "op_list_resource_tenants",
 +    feature = "op_list_suppressed_destinations",
@@ -17134,6 +17761,7 @@ diff --git a/src/protocol_serde.rs b/src/protocol_serde.rs
 +    feature = "op_tag_resource",
 +    feature = "op_test_render_email_template",
 +    feature = "op_untag_resource",
++    feature = "op_update_configuration_set",
 +    feature = "op_update_configuration_set_event_destination",
 +    feature = "op_update_contact",
 +    feature = "op_update_contact_list",
@@ -17239,6 +17867,7 @@ diff --git a/src/protocol_serde.rs b/src/protocol_serde.rs
  pub(crate) mod shape_test_render_email_template_input;
 
 +#[cfg(any(
++    feature = "op_associate_email_identity_certificate",
 +    feature = "op_batch_get_metric_data",
 +    feature = "op_cancel_export_job",
 +    feature = "op_create_configuration_set",
@@ -17269,6 +17898,7 @@ diff --git a/src/protocol_serde.rs b/src/protocol_serde.rs
 +    feature = "op_delete_suppressed_destination",
 +    feature = "op_delete_tenant",
 +    feature = "op_delete_tenant_resource_association",
++    feature = "op_disassociate_email_identity_certificate",
 +    feature = "op_get_account",
 +    feature = "op_get_blacklist_reports",
 +    feature = "op_get_configuration_set",
@@ -17302,6 +17932,7 @@ diff --git a/src/protocol_serde.rs b/src/protocol_serde.rs
 +    feature = "op_list_deliverability_test_reports",
 +    feature = "op_list_domain_deliverability_campaigns",
 +    feature = "op_list_email_identities",
++    feature = "op_list_email_identity_certificates",
 +    feature = "op_list_email_templates",
 +    feature = "op_list_export_jobs",
 +    feature = "op_list_import_jobs",
@@ -17343,6 +17974,7 @@ diff --git a/src/protocol_serde.rs b/src/protocol_serde.rs
 +    feature = "op_tag_resource",
 +    feature = "op_test_render_email_template",
 +    feature = "op_untag_resource",
++    feature = "op_update_configuration_set",
 +    feature = "op_update_configuration_set_event_destination",
 +    feature = "op_update_contact",
 +    feature = "op_update_contact_list",
@@ -17356,6 +17988,9 @@ diff --git a/src/protocol_serde.rs b/src/protocol_serde.rs
 
 +#[cfg(feature = "op_update_configuration_set_event_destination")]
  pub(crate) mod shape_update_configuration_set_event_destination_input;
+
++#[cfg(feature = "op_update_configuration_set")]
+ pub(crate) mod shape_update_configuration_set_input;
 
 +#[cfg(feature = "op_update_contact")]
  pub(crate) mod shape_update_contact_input;
@@ -17515,6 +18150,9 @@ diff --git a/src/protocol_serde.rs b/src/protocol_serde.rs
 +#[cfg(any(feature = "op_get_export_job", feature = "op_get_import_job"))]
  pub(crate) mod shape_failure_info;
 
++#[cfg(feature = "op_list_email_identity_certificates")]
+ pub(crate) mod shape_identity_certificate_list;
+
 +#[cfg(feature = "op_list_email_identities")]
  pub(crate) mod shape_identity_info_list;
 
@@ -17554,6 +18192,13 @@ diff --git a/src/protocol_serde.rs b/src/protocol_serde.rs
 
 +#[cfg(feature = "op_get_email_address_insights")]
  pub(crate) mod shape_mailbox_validation;
+
++#[cfg(any(
++    feature = "op_create_configuration_set",
++    feature = "op_get_configuration_set",
++    feature = "op_update_configuration_set"
++))]
+ pub(crate) mod shape_message_security_options;
 
 +#[cfg(any(
 +    feature = "op_get_message_insights",
@@ -17805,6 +18450,9 @@ diff --git a/src/protocol_serde.rs b/src/protocol_serde.rs
 +))]
  pub(crate) mod shape_guardian_options;
 
++#[cfg(feature = "op_list_email_identity_certificates")]
+ pub(crate) mod shape_identity_certificate;
+
 +#[cfg(feature = "op_list_email_identities")]
  pub(crate) mod shape_identity_info;
 
@@ -17885,6 +18533,13 @@ diff --git a/src/protocol_serde.rs b/src/protocol_serde.rs
 
 +#[cfg(feature = "op_create_multi_region_endpoint")]
  pub(crate) mod shape_route_details;
+
++#[cfg(any(
++    feature = "op_create_configuration_set",
++    feature = "op_get_configuration_set",
++    feature = "op_update_configuration_set"
++))]
+ pub(crate) mod shape_signing_scheme;
 
 +#[cfg(any(
 +    feature = "op_create_configuration_set_event_destination",
@@ -17975,6 +18630,13 @@ diff --git a/src/protocol_serde.rs b/src/protocol_serde.rs
 +#[cfg(any(feature = "op_create_deliverability_test_report", feature = "op_send_email"))]
  pub(crate) mod shape_content;
 
++#[cfg(any(
++    feature = "op_create_configuration_set",
++    feature = "op_get_configuration_set",
++    feature = "op_update_configuration_set"
++))]
+ pub(crate) mod shape_default_signing_scheme;
+
 +#[cfg(feature = "op_get_domain_statistics_report")]
  pub(crate) mod shape_domain_isp_placement;
 
@@ -18004,6 +18666,13 @@ diff --git a/src/protocol_serde.rs b/src/protocol_serde.rs
 
 +#[cfg(feature = "op_send_bulk_email")]
  pub(crate) mod shape_replacement_template;
+
++#[cfg(any(
++    feature = "op_create_configuration_set",
++    feature = "op_get_configuration_set",
++    feature = "op_update_configuration_set"
++))]
+ pub(crate) mod shape_smime_signing_scheme;
 
 +#[cfg(any(
 +    feature = "op_create_configuration_set",
@@ -18471,7 +19140,7 @@ diff --git a/src/serde_util.rs b/src/serde_util.rs
 diff --git a/src/types.rs b/src/types.rs
 --- a/src/types.rs
 +++ b/src/types.rs
-@@ -1,678 +1,1572 @@
+@@ -1,706 +1,1654 @@
  // Code generated by software.amazon.smithy.rust.codegen.smithy-rs. DO NOT EDIT.
 +#[cfg(any(feature = "op_create_configuration_set", feature = "op_get_configuration_set"))]
  pub use crate::types::_tracking_options::TrackingOptions;
@@ -18497,6 +19166,13 @@ diff --git a/src/types.rs b/src/types.rs
 
 +#[cfg(any(feature = "op_create_configuration_set", feature = "op_get_configuration_set"))]
  pub use crate::types::_archiving_options::ArchivingOptions;
+
++#[cfg(any(
++    feature = "op_create_configuration_set",
++    feature = "op_get_configuration_set",
++    feature = "op_update_configuration_set"
++))]
+ pub use crate::types::_message_security_options::MessageSecurityOptions;
 
 +#[cfg(any(
 +    feature = "op_create_configuration_set_event_destination",
@@ -18816,6 +19492,13 @@ diff --git a/src/types.rs b/src/types.rs
  pub use crate::types::_guardian_options::GuardianOptions;
 
 +#[cfg(any(
++    feature = "op_create_configuration_set",
++    feature = "op_get_configuration_set",
++    feature = "op_update_configuration_set"
++))]
+ pub use crate::types::_signing_scheme::SigningScheme;
+
++#[cfg(any(
 +    feature = "op_create_configuration_set_event_destination",
 +    feature = "op_get_configuration_set_event_destinations",
 +    feature = "op_update_configuration_set_event_destination"
@@ -19023,6 +19706,9 @@ diff --git a/src/types.rs b/src/types.rs
 +#[cfg(feature = "op_list_email_identities")]
  pub use crate::types::_identity_info::IdentityInfo;
 
++#[cfg(feature = "op_list_email_identity_certificates")]
+ pub use crate::types::_identity_certificate::IdentityCertificate;
+
 +#[cfg(feature = "op_list_email_templates")]
  pub use crate::types::_email_template_metadata::EmailTemplateMetadata;
 
@@ -19095,6 +19781,20 @@ diff --git a/src/types.rs b/src/types.rs
  pub use crate::types::_query_error_code::QueryErrorCode;
 
 +#[cfg(any(
++    feature = "op_create_configuration_set",
++    feature = "op_get_configuration_set",
++    feature = "op_update_configuration_set"
++))]
+ pub use crate::types::_default_signing_scheme::DefaultSigningScheme;
+
++#[cfg(any(
++    feature = "op_create_configuration_set",
++    feature = "op_get_configuration_set",
++    feature = "op_update_configuration_set"
++))]
+ pub use crate::types::_smime_signing_scheme::SmimeSigningScheme;
+
++#[cfg(any(
 +    feature = "op_create_configuration_set_event_destination",
 +    feature = "op_get_configuration_set_event_destinations",
 +    feature = "op_get_message_insights",
@@ -19146,6 +19846,9 @@ diff --git a/src/types.rs b/src/types.rs
 +#[cfg(feature = "op_get_email_address_insights")]
  pub use crate::types::_email_address_insights_confidence_verdict::EmailAddressInsightsConfidenceVerdict;
 
++#[cfg(feature = "op_list_email_identity_certificates")]
+ pub use crate::types::_identity_certificate_status::IdentityCertificateStatus;
+
 +#[cfg(feature = "op_list_recommendations")]
  pub use crate::types::_recommendation_type::RecommendationType;
 
@@ -19176,6 +19879,13 @@ diff --git a/src/types.rs b/src/types.rs
 +    feature = "op_get_export_job"
 +))]
  pub use crate::types::_metric_dimension_name::MetricDimensionName;
+
++#[cfg(any(
++    feature = "op_create_configuration_set",
++    feature = "op_get_configuration_set",
++    feature = "op_update_configuration_set"
++))]
+ pub use crate::types::_signature_format::SignatureFormat;
 
 +#[cfg(any(
 +    feature = "op_create_configuration_set_event_destination",
@@ -19394,6 +20104,13 @@ diff --git a/src/types.rs b/src/types.rs
 +#[cfg(feature = "op_get_dedicated_ip_pool")]
  mod _dedicated_ip_pool;
 
++#[cfg(any(
++    feature = "op_create_configuration_set",
++    feature = "op_get_configuration_set",
++    feature = "op_update_configuration_set"
++))]
+ mod _default_signing_scheme;
+
 +#[cfg(feature = "op_get_deliverability_dashboard_options")]
  mod _deliverability_dashboard_account_status;
 
@@ -19583,6 +20300,12 @@ diff --git a/src/types.rs b/src/types.rs
 +))]
  mod _https_policy;
 
++#[cfg(feature = "op_list_email_identity_certificates")]
+ mod _identity_certificate;
+
++#[cfg(feature = "op_list_email_identity_certificates")]
+ mod _identity_certificate_status;
+
 +#[cfg(feature = "op_list_email_identities")]
  mod _identity_info;
 
@@ -19675,6 +20398,13 @@ diff --git a/src/types.rs b/src/types.rs
 
 +#[cfg(any(feature = "op_create_export_job", feature = "op_get_export_job"))]
  mod _message_insights_filters;
+
++#[cfg(any(
++    feature = "op_create_configuration_set",
++    feature = "op_get_configuration_set",
++    feature = "op_update_configuration_set"
++))]
+ mod _message_security_options;
 
 +#[cfg(any(
 +    feature = "op_get_message_insights",
@@ -19822,6 +20552,27 @@ diff --git a/src/types.rs b/src/types.rs
 +    feature = "op_update_reputation_entity_customer_managed_status"
 +))]
  mod _sending_status;
+
++#[cfg(any(
++    feature = "op_create_configuration_set",
++    feature = "op_get_configuration_set",
++    feature = "op_update_configuration_set"
++))]
+ mod _signature_format;
+
++#[cfg(any(
++    feature = "op_create_configuration_set",
++    feature = "op_get_configuration_set",
++    feature = "op_update_configuration_set"
++))]
+ mod _signing_scheme;
+
++#[cfg(any(
++    feature = "op_create_configuration_set",
++    feature = "op_get_configuration_set",
++    feature = "op_update_configuration_set"
++))]
+ mod _smime_signing_scheme;
 
 +#[cfg(any(
 +    feature = "op_create_configuration_set_event_destination",
@@ -20047,7 +20798,7 @@ diff --git a/src/types.rs b/src/types.rs
 diff --git a/src/types/builders.rs b/src/types/builders.rs
 --- a/src/types/builders.rs
 +++ b/src/types/builders.rs
-@@ -1,232 +1,481 @@
+@@ -1,240 +1,505 @@
  // Code generated by software.amazon.smithy.rust.codegen.smithy-rs. DO NOT EDIT.
 +#[cfg(any(feature = "op_create_configuration_set", feature = "op_get_configuration_set"))]
  pub use crate::types::_tracking_options::TrackingOptionsBuilder;
@@ -20073,6 +20824,13 @@ diff --git a/src/types/builders.rs b/src/types/builders.rs
 
 +#[cfg(any(feature = "op_create_configuration_set", feature = "op_get_configuration_set"))]
  pub use crate::types::_archiving_options::ArchivingOptionsBuilder;
+
++#[cfg(any(
++    feature = "op_create_configuration_set",
++    feature = "op_get_configuration_set",
++    feature = "op_update_configuration_set"
++))]
+ pub use crate::types::_message_security_options::MessageSecurityOptionsBuilder;
 
 +#[cfg(any(
 +    feature = "op_create_configuration_set_event_destination",
@@ -20410,6 +21168,9 @@ diff --git a/src/types/builders.rs b/src/types/builders.rs
 +#[cfg(feature = "op_list_email_identities")]
  pub use crate::types::_identity_info::IdentityInfoBuilder;
 
++#[cfg(feature = "op_list_email_identity_certificates")]
+ pub use crate::types::_identity_certificate::IdentityCertificateBuilder;
+
 +#[cfg(feature = "op_list_email_templates")]
  pub use crate::types::_email_template_metadata::EmailTemplateMetadataBuilder;
 
@@ -20454,6 +21215,20 @@ diff --git a/src/types/builders.rs b/src/types/builders.rs
 
 +#[cfg(feature = "op_send_bulk_email")]
  pub use crate::types::_bulk_email_entry_result::BulkEmailEntryResultBuilder;
+
++#[cfg(any(
++    feature = "op_create_configuration_set",
++    feature = "op_get_configuration_set",
++    feature = "op_update_configuration_set"
++))]
+ pub use crate::types::_default_signing_scheme::DefaultSigningSchemeBuilder;
+
++#[cfg(any(
++    feature = "op_create_configuration_set",
++    feature = "op_get_configuration_set",
++    feature = "op_update_configuration_set"
++))]
+ pub use crate::types::_smime_signing_scheme::SmimeSigningSchemeBuilder;
 
 +#[cfg(any(feature = "op_create_deliverability_test_report", feature = "op_send_email"))]
  pub use crate::types::_content::ContentBuilder;
@@ -20532,332 +21307,10 @@ diff --git a/src/types/builders.rs b/src/types/builders.rs
 diff --git a/src/types/error.rs b/src/types/error.rs
 --- a/src/types/error.rs
 +++ b/src/types/error.rs
-@@ -1,54 +1,846 @@
+@@ -1,54 +1,872 @@
  // Code generated by software.amazon.smithy.rust.codegen.smithy-rs. DO NOT EDIT.
 +#[cfg(any(
-+    feature = "op_batch_get_metric_data",
-+    feature = "op_cancel_export_job",
-+    feature = "op_create_configuration_set",
-+    feature = "op_create_configuration_set_event_destination",
-+    feature = "op_create_contact",
-+    feature = "op_create_contact_list",
-+    feature = "op_create_custom_verification_email_template",
-+    feature = "op_create_dedicated_ip_pool",
-+    feature = "op_create_deliverability_test_report",
-+    feature = "op_create_email_identity",
-+    feature = "op_create_email_identity_policy",
-+    feature = "op_create_email_template",
-+    feature = "op_create_export_job",
-+    feature = "op_create_import_job",
-+    feature = "op_create_multi_region_endpoint",
-+    feature = "op_create_tenant",
-+    feature = "op_create_tenant_resource_association",
-+    feature = "op_delete_configuration_set",
-+    feature = "op_delete_configuration_set_event_destination",
-+    feature = "op_delete_contact",
-+    feature = "op_delete_contact_list",
-+    feature = "op_delete_custom_verification_email_template",
-+    feature = "op_delete_dedicated_ip_pool",
-+    feature = "op_delete_email_identity",
-+    feature = "op_delete_email_identity_policy",
-+    feature = "op_delete_email_template",
-+    feature = "op_delete_multi_region_endpoint",
-+    feature = "op_delete_suppressed_destination",
-+    feature = "op_delete_tenant",
-+    feature = "op_delete_tenant_resource_association",
-+    feature = "op_get_account",
-+    feature = "op_get_blacklist_reports",
-+    feature = "op_get_configuration_set",
-+    feature = "op_get_configuration_set_event_destinations",
-+    feature = "op_get_contact",
-+    feature = "op_get_contact_list",
-+    feature = "op_get_custom_verification_email_template",
-+    feature = "op_get_dedicated_ip",
-+    feature = "op_get_dedicated_ip_pool",
-+    feature = "op_get_dedicated_ips",
-+    feature = "op_get_deliverability_dashboard_options",
-+    feature = "op_get_deliverability_test_report",
-+    feature = "op_get_domain_deliverability_campaign",
-+    feature = "op_get_domain_statistics_report",
-+    feature = "op_get_email_address_insights",
-+    feature = "op_get_email_identity",
-+    feature = "op_get_email_identity_policies",
-+    feature = "op_get_email_template",
-+    feature = "op_get_export_job",
-+    feature = "op_get_import_job",
-+    feature = "op_get_message_insights",
-+    feature = "op_get_multi_region_endpoint",
-+    feature = "op_get_reputation_entity",
-+    feature = "op_get_suppressed_destination",
-+    feature = "op_get_tenant",
-+    feature = "op_list_configuration_sets",
-+    feature = "op_list_contact_lists",
-+    feature = "op_list_contacts",
-+    feature = "op_list_custom_verification_email_templates",
-+    feature = "op_list_dedicated_ip_pools",
-+    feature = "op_list_deliverability_test_reports",
-+    feature = "op_list_domain_deliverability_campaigns",
-+    feature = "op_list_email_identities",
-+    feature = "op_list_email_templates",
-+    feature = "op_list_export_jobs",
-+    feature = "op_list_import_jobs",
-+    feature = "op_list_multi_region_endpoints",
-+    feature = "op_list_recommendations",
-+    feature = "op_list_reputation_entities",
-+    feature = "op_list_resource_tenants",
-+    feature = "op_list_suppressed_destinations",
-+    feature = "op_list_tags_for_resource",
-+    feature = "op_list_tenant_resources",
-+    feature = "op_list_tenants",
-+    feature = "op_put_account_dedicated_ip_warmup_attributes",
-+    feature = "op_put_account_details",
-+    feature = "op_put_account_pricing_attributes",
-+    feature = "op_put_account_sending_attributes",
-+    feature = "op_put_account_suppression_attributes",
-+    feature = "op_put_account_vdm_attributes",
-+    feature = "op_put_configuration_set_archiving_options",
-+    feature = "op_put_configuration_set_delivery_options",
-+    feature = "op_put_configuration_set_reputation_options",
-+    feature = "op_put_configuration_set_sending_options",
-+    feature = "op_put_configuration_set_suppression_options",
-+    feature = "op_put_configuration_set_tracking_options",
-+    feature = "op_put_configuration_set_vdm_options",
-+    feature = "op_put_dedicated_ip_in_pool",
-+    feature = "op_put_dedicated_ip_pool_scaling_attributes",
-+    feature = "op_put_dedicated_ip_warmup_attributes",
-+    feature = "op_put_deliverability_dashboard_option",
-+    feature = "op_put_email_identity_configuration_set_attributes",
-+    feature = "op_put_email_identity_dkim_attributes",
-+    feature = "op_put_email_identity_dkim_signing_attributes",
-+    feature = "op_put_email_identity_feedback_attributes",
-+    feature = "op_put_email_identity_mail_from_attributes",
-+    feature = "op_put_suppressed_destination",
-+    feature = "op_put_tenant_suppression_attributes",
-+    feature = "op_send_bulk_email",
-+    feature = "op_send_custom_verification_email",
-+    feature = "op_send_email",
-+    feature = "op_tag_resource",
-+    feature = "op_test_render_email_template",
-+    feature = "op_untag_resource",
-+    feature = "op_update_configuration_set_event_destination",
-+    feature = "op_update_contact",
-+    feature = "op_update_contact_list",
-+    feature = "op_update_custom_verification_email_template",
-+    feature = "op_update_email_identity_policy",
-+    feature = "op_update_email_template",
-+    feature = "op_update_reputation_entity_customer_managed_status",
-+    feature = "op_update_reputation_entity_policy"
-+))]
- pub use crate::types::error::_bad_request_exception::BadRequestException;
-
-+#[cfg(feature = "op_batch_get_metric_data")]
- pub use crate::types::error::_internal_service_error_exception::InternalServiceErrorException;
-
-+#[cfg(any(
-+    feature = "op_batch_get_metric_data",
-+    feature = "op_cancel_export_job",
-+    feature = "op_create_configuration_set",
-+    feature = "op_create_configuration_set_event_destination",
-+    feature = "op_create_contact",
-+    feature = "op_create_custom_verification_email_template",
-+    feature = "op_create_deliverability_test_report",
-+    feature = "op_create_email_identity",
-+    feature = "op_create_email_identity_policy",
-+    feature = "op_create_export_job",
-+    feature = "op_create_tenant_resource_association",
-+    feature = "op_delete_configuration_set",
-+    feature = "op_delete_configuration_set_event_destination",
-+    feature = "op_delete_contact",
-+    feature = "op_delete_contact_list",
-+    feature = "op_delete_custom_verification_email_template",
-+    feature = "op_delete_dedicated_ip_pool",
-+    feature = "op_delete_email_identity",
-+    feature = "op_delete_email_identity_policy",
-+    feature = "op_delete_email_template",
-+    feature = "op_delete_multi_region_endpoint",
-+    feature = "op_delete_suppressed_destination",
-+    feature = "op_delete_tenant",
-+    feature = "op_delete_tenant_resource_association",
-+    feature = "op_get_blacklist_reports",
-+    feature = "op_get_configuration_set",
-+    feature = "op_get_configuration_set_event_destinations",
-+    feature = "op_get_contact",
-+    feature = "op_get_contact_list",
-+    feature = "op_get_custom_verification_email_template",
-+    feature = "op_get_dedicated_ip",
-+    feature = "op_get_dedicated_ip_pool",
-+    feature = "op_get_dedicated_ips",
-+    feature = "op_get_deliverability_test_report",
-+    feature = "op_get_domain_deliverability_campaign",
-+    feature = "op_get_domain_statistics_report",
-+    feature = "op_get_email_identity",
-+    feature = "op_get_email_identity_policies",
-+    feature = "op_get_email_template",
-+    feature = "op_get_export_job",
-+    feature = "op_get_import_job",
-+    feature = "op_get_message_insights",
-+    feature = "op_get_multi_region_endpoint",
-+    feature = "op_get_reputation_entity",
-+    feature = "op_get_suppressed_destination",
-+    feature = "op_get_tenant",
-+    feature = "op_list_contacts",
-+    feature = "op_list_deliverability_test_reports",
-+    feature = "op_list_domain_deliverability_campaigns",
-+    feature = "op_list_recommendations",
-+    feature = "op_list_resource_tenants",
-+    feature = "op_list_suppressed_destinations",
-+    feature = "op_list_tags_for_resource",
-+    feature = "op_list_tenant_resources",
-+    feature = "op_put_configuration_set_archiving_options",
-+    feature = "op_put_configuration_set_delivery_options",
-+    feature = "op_put_configuration_set_reputation_options",
-+    feature = "op_put_configuration_set_sending_options",
-+    feature = "op_put_configuration_set_suppression_options",
-+    feature = "op_put_configuration_set_tracking_options",
-+    feature = "op_put_configuration_set_vdm_options",
-+    feature = "op_put_dedicated_ip_in_pool",
-+    feature = "op_put_dedicated_ip_pool_scaling_attributes",
-+    feature = "op_put_dedicated_ip_warmup_attributes",
-+    feature = "op_put_deliverability_dashboard_option",
-+    feature = "op_put_email_identity_configuration_set_attributes",
-+    feature = "op_put_email_identity_dkim_attributes",
-+    feature = "op_put_email_identity_dkim_signing_attributes",
-+    feature = "op_put_email_identity_feedback_attributes",
-+    feature = "op_put_email_identity_mail_from_attributes",
-+    feature = "op_put_suppressed_destination",
-+    feature = "op_put_tenant_suppression_attributes",
-+    feature = "op_send_bulk_email",
-+    feature = "op_send_custom_verification_email",
-+    feature = "op_send_email",
-+    feature = "op_tag_resource",
-+    feature = "op_test_render_email_template",
-+    feature = "op_untag_resource",
-+    feature = "op_update_configuration_set_event_destination",
-+    feature = "op_update_contact",
-+    feature = "op_update_contact_list",
-+    feature = "op_update_custom_verification_email_template",
-+    feature = "op_update_email_identity_policy",
-+    feature = "op_update_email_template"
-+))]
- pub use crate::types::error::_not_found_exception::NotFoundException;
-
-+#[cfg(any(
-+    feature = "op_batch_get_metric_data",
-+    feature = "op_cancel_export_job",
-+    feature = "op_create_configuration_set",
-+    feature = "op_create_configuration_set_event_destination",
-+    feature = "op_create_contact",
-+    feature = "op_create_contact_list",
-+    feature = "op_create_custom_verification_email_template",
-+    feature = "op_create_dedicated_ip_pool",
-+    feature = "op_create_deliverability_test_report",
-+    feature = "op_create_email_identity",
-+    feature = "op_create_email_identity_policy",
-+    feature = "op_create_email_template",
-+    feature = "op_create_export_job",
-+    feature = "op_create_import_job",
-+    feature = "op_create_multi_region_endpoint",
-+    feature = "op_create_tenant",
-+    feature = "op_create_tenant_resource_association",
-+    feature = "op_delete_configuration_set",
-+    feature = "op_delete_configuration_set_event_destination",
-+    feature = "op_delete_contact",
-+    feature = "op_delete_contact_list",
-+    feature = "op_delete_custom_verification_email_template",
-+    feature = "op_delete_dedicated_ip_pool",
-+    feature = "op_delete_email_identity",
-+    feature = "op_delete_email_identity_policy",
-+    feature = "op_delete_email_template",
-+    feature = "op_delete_multi_region_endpoint",
-+    feature = "op_delete_suppressed_destination",
-+    feature = "op_delete_tenant",
-+    feature = "op_delete_tenant_resource_association",
-+    feature = "op_get_account",
-+    feature = "op_get_blacklist_reports",
-+    feature = "op_get_configuration_set",
-+    feature = "op_get_configuration_set_event_destinations",
-+    feature = "op_get_contact",
-+    feature = "op_get_contact_list",
-+    feature = "op_get_custom_verification_email_template",
-+    feature = "op_get_dedicated_ip",
-+    feature = "op_get_dedicated_ip_pool",
-+    feature = "op_get_dedicated_ips",
-+    feature = "op_get_deliverability_dashboard_options",
-+    feature = "op_get_deliverability_test_report",
-+    feature = "op_get_domain_deliverability_campaign",
-+    feature = "op_get_domain_statistics_report",
-+    feature = "op_get_email_address_insights",
-+    feature = "op_get_email_identity",
-+    feature = "op_get_email_identity_policies",
-+    feature = "op_get_email_template",
-+    feature = "op_get_export_job",
-+    feature = "op_get_import_job",
-+    feature = "op_get_message_insights",
-+    feature = "op_get_multi_region_endpoint",
-+    feature = "op_get_reputation_entity",
-+    feature = "op_get_suppressed_destination",
-+    feature = "op_get_tenant",
-+    feature = "op_list_configuration_sets",
-+    feature = "op_list_contact_lists",
-+    feature = "op_list_contacts",
-+    feature = "op_list_custom_verification_email_templates",
-+    feature = "op_list_dedicated_ip_pools",
-+    feature = "op_list_deliverability_test_reports",
-+    feature = "op_list_domain_deliverability_campaigns",
-+    feature = "op_list_email_identities",
-+    feature = "op_list_email_templates",
-+    feature = "op_list_export_jobs",
-+    feature = "op_list_import_jobs",
-+    feature = "op_list_multi_region_endpoints",
-+    feature = "op_list_recommendations",
-+    feature = "op_list_reputation_entities",
-+    feature = "op_list_resource_tenants",
-+    feature = "op_list_suppressed_destinations",
-+    feature = "op_list_tags_for_resource",
-+    feature = "op_list_tenant_resources",
-+    feature = "op_list_tenants",
-+    feature = "op_put_account_dedicated_ip_warmup_attributes",
-+    feature = "op_put_account_details",
-+    feature = "op_put_account_pricing_attributes",
-+    feature = "op_put_account_sending_attributes",
-+    feature = "op_put_account_suppression_attributes",
-+    feature = "op_put_account_vdm_attributes",
-+    feature = "op_put_configuration_set_archiving_options",
-+    feature = "op_put_configuration_set_delivery_options",
-+    feature = "op_put_configuration_set_reputation_options",
-+    feature = "op_put_configuration_set_sending_options",
-+    feature = "op_put_configuration_set_suppression_options",
-+    feature = "op_put_configuration_set_tracking_options",
-+    feature = "op_put_configuration_set_vdm_options",
-+    feature = "op_put_dedicated_ip_in_pool",
-+    feature = "op_put_dedicated_ip_pool_scaling_attributes",
-+    feature = "op_put_dedicated_ip_warmup_attributes",
-+    feature = "op_put_deliverability_dashboard_option",
-+    feature = "op_put_email_identity_configuration_set_attributes",
-+    feature = "op_put_email_identity_dkim_attributes",
-+    feature = "op_put_email_identity_dkim_signing_attributes",
-+    feature = "op_put_email_identity_feedback_attributes",
-+    feature = "op_put_email_identity_mail_from_attributes",
-+    feature = "op_put_suppressed_destination",
-+    feature = "op_put_tenant_suppression_attributes",
-+    feature = "op_send_bulk_email",
-+    feature = "op_send_custom_verification_email",
-+    feature = "op_send_email",
-+    feature = "op_tag_resource",
-+    feature = "op_test_render_email_template",
-+    feature = "op_untag_resource",
-+    feature = "op_update_configuration_set_event_destination",
-+    feature = "op_update_contact",
-+    feature = "op_update_contact_list",
-+    feature = "op_update_custom_verification_email_template",
-+    feature = "op_update_email_identity_policy",
-+    feature = "op_update_email_template",
-+    feature = "op_update_reputation_entity_customer_managed_status",
-+    feature = "op_update_reputation_entity_policy"
-+))]
- pub use crate::types::error::_too_many_requests_exception::TooManyRequestsException;
-
-+#[cfg(any(
++    feature = "op_associate_email_identity_certificate",
 +    feature = "op_create_configuration_set",
 +    feature = "op_create_configuration_set_event_destination",
 +    feature = "op_create_contact",
@@ -20873,6 +21326,341 @@ diff --git a/src/types/error.rs b/src/types/error.rs
 +    feature = "op_put_deliverability_dashboard_option"
 +))]
  pub use crate::types::error::_already_exists_exception::AlreadyExistsException;
+
++#[cfg(any(
++    feature = "op_associate_email_identity_certificate",
++    feature = "op_batch_get_metric_data",
++    feature = "op_cancel_export_job",
++    feature = "op_create_configuration_set",
++    feature = "op_create_configuration_set_event_destination",
++    feature = "op_create_contact",
++    feature = "op_create_contact_list",
++    feature = "op_create_custom_verification_email_template",
++    feature = "op_create_dedicated_ip_pool",
++    feature = "op_create_deliverability_test_report",
++    feature = "op_create_email_identity",
++    feature = "op_create_email_identity_policy",
++    feature = "op_create_email_template",
++    feature = "op_create_export_job",
++    feature = "op_create_import_job",
++    feature = "op_create_multi_region_endpoint",
++    feature = "op_create_tenant",
++    feature = "op_create_tenant_resource_association",
++    feature = "op_delete_configuration_set",
++    feature = "op_delete_configuration_set_event_destination",
++    feature = "op_delete_contact",
++    feature = "op_delete_contact_list",
++    feature = "op_delete_custom_verification_email_template",
++    feature = "op_delete_dedicated_ip_pool",
++    feature = "op_delete_email_identity",
++    feature = "op_delete_email_identity_policy",
++    feature = "op_delete_email_template",
++    feature = "op_delete_multi_region_endpoint",
++    feature = "op_delete_suppressed_destination",
++    feature = "op_delete_tenant",
++    feature = "op_delete_tenant_resource_association",
++    feature = "op_disassociate_email_identity_certificate",
++    feature = "op_get_account",
++    feature = "op_get_blacklist_reports",
++    feature = "op_get_configuration_set",
++    feature = "op_get_configuration_set_event_destinations",
++    feature = "op_get_contact",
++    feature = "op_get_contact_list",
++    feature = "op_get_custom_verification_email_template",
++    feature = "op_get_dedicated_ip",
++    feature = "op_get_dedicated_ip_pool",
++    feature = "op_get_dedicated_ips",
++    feature = "op_get_deliverability_dashboard_options",
++    feature = "op_get_deliverability_test_report",
++    feature = "op_get_domain_deliverability_campaign",
++    feature = "op_get_domain_statistics_report",
++    feature = "op_get_email_address_insights",
++    feature = "op_get_email_identity",
++    feature = "op_get_email_identity_policies",
++    feature = "op_get_email_template",
++    feature = "op_get_export_job",
++    feature = "op_get_import_job",
++    feature = "op_get_message_insights",
++    feature = "op_get_multi_region_endpoint",
++    feature = "op_get_reputation_entity",
++    feature = "op_get_suppressed_destination",
++    feature = "op_get_tenant",
++    feature = "op_list_configuration_sets",
++    feature = "op_list_contact_lists",
++    feature = "op_list_contacts",
++    feature = "op_list_custom_verification_email_templates",
++    feature = "op_list_dedicated_ip_pools",
++    feature = "op_list_deliverability_test_reports",
++    feature = "op_list_domain_deliverability_campaigns",
++    feature = "op_list_email_identities",
++    feature = "op_list_email_identity_certificates",
++    feature = "op_list_email_templates",
++    feature = "op_list_export_jobs",
++    feature = "op_list_import_jobs",
++    feature = "op_list_multi_region_endpoints",
++    feature = "op_list_recommendations",
++    feature = "op_list_reputation_entities",
++    feature = "op_list_resource_tenants",
++    feature = "op_list_suppressed_destinations",
++    feature = "op_list_tags_for_resource",
++    feature = "op_list_tenant_resources",
++    feature = "op_list_tenants",
++    feature = "op_put_account_dedicated_ip_warmup_attributes",
++    feature = "op_put_account_details",
++    feature = "op_put_account_pricing_attributes",
++    feature = "op_put_account_sending_attributes",
++    feature = "op_put_account_suppression_attributes",
++    feature = "op_put_account_vdm_attributes",
++    feature = "op_put_configuration_set_archiving_options",
++    feature = "op_put_configuration_set_delivery_options",
++    feature = "op_put_configuration_set_reputation_options",
++    feature = "op_put_configuration_set_sending_options",
++    feature = "op_put_configuration_set_suppression_options",
++    feature = "op_put_configuration_set_tracking_options",
++    feature = "op_put_configuration_set_vdm_options",
++    feature = "op_put_dedicated_ip_in_pool",
++    feature = "op_put_dedicated_ip_pool_scaling_attributes",
++    feature = "op_put_dedicated_ip_warmup_attributes",
++    feature = "op_put_deliverability_dashboard_option",
++    feature = "op_put_email_identity_configuration_set_attributes",
++    feature = "op_put_email_identity_dkim_attributes",
++    feature = "op_put_email_identity_dkim_signing_attributes",
++    feature = "op_put_email_identity_feedback_attributes",
++    feature = "op_put_email_identity_mail_from_attributes",
++    feature = "op_put_suppressed_destination",
++    feature = "op_put_tenant_suppression_attributes",
++    feature = "op_send_bulk_email",
++    feature = "op_send_custom_verification_email",
++    feature = "op_send_email",
++    feature = "op_tag_resource",
++    feature = "op_test_render_email_template",
++    feature = "op_untag_resource",
++    feature = "op_update_configuration_set",
++    feature = "op_update_configuration_set_event_destination",
++    feature = "op_update_contact",
++    feature = "op_update_contact_list",
++    feature = "op_update_custom_verification_email_template",
++    feature = "op_update_email_identity_policy",
++    feature = "op_update_email_template",
++    feature = "op_update_reputation_entity_customer_managed_status",
++    feature = "op_update_reputation_entity_policy"
++))]
+ pub use crate::types::error::_bad_request_exception::BadRequestException;
+
++#[cfg(any(
++    feature = "op_associate_email_identity_certificate",
++    feature = "op_batch_get_metric_data",
++    feature = "op_cancel_export_job",
++    feature = "op_create_configuration_set",
++    feature = "op_create_configuration_set_event_destination",
++    feature = "op_create_contact",
++    feature = "op_create_custom_verification_email_template",
++    feature = "op_create_deliverability_test_report",
++    feature = "op_create_email_identity",
++    feature = "op_create_email_identity_policy",
++    feature = "op_create_export_job",
++    feature = "op_create_tenant_resource_association",
++    feature = "op_delete_configuration_set",
++    feature = "op_delete_configuration_set_event_destination",
++    feature = "op_delete_contact",
++    feature = "op_delete_contact_list",
++    feature = "op_delete_custom_verification_email_template",
++    feature = "op_delete_dedicated_ip_pool",
++    feature = "op_delete_email_identity",
++    feature = "op_delete_email_identity_policy",
++    feature = "op_delete_email_template",
++    feature = "op_delete_multi_region_endpoint",
++    feature = "op_delete_suppressed_destination",
++    feature = "op_delete_tenant",
++    feature = "op_delete_tenant_resource_association",
++    feature = "op_disassociate_email_identity_certificate",
++    feature = "op_get_blacklist_reports",
++    feature = "op_get_configuration_set",
++    feature = "op_get_configuration_set_event_destinations",
++    feature = "op_get_contact",
++    feature = "op_get_contact_list",
++    feature = "op_get_custom_verification_email_template",
++    feature = "op_get_dedicated_ip",
++    feature = "op_get_dedicated_ip_pool",
++    feature = "op_get_dedicated_ips",
++    feature = "op_get_deliverability_test_report",
++    feature = "op_get_domain_deliverability_campaign",
++    feature = "op_get_domain_statistics_report",
++    feature = "op_get_email_identity",
++    feature = "op_get_email_identity_policies",
++    feature = "op_get_email_template",
++    feature = "op_get_export_job",
++    feature = "op_get_import_job",
++    feature = "op_get_message_insights",
++    feature = "op_get_multi_region_endpoint",
++    feature = "op_get_reputation_entity",
++    feature = "op_get_suppressed_destination",
++    feature = "op_get_tenant",
++    feature = "op_list_contacts",
++    feature = "op_list_deliverability_test_reports",
++    feature = "op_list_domain_deliverability_campaigns",
++    feature = "op_list_email_identity_certificates",
++    feature = "op_list_recommendations",
++    feature = "op_list_resource_tenants",
++    feature = "op_list_suppressed_destinations",
++    feature = "op_list_tags_for_resource",
++    feature = "op_list_tenant_resources",
++    feature = "op_put_configuration_set_archiving_options",
++    feature = "op_put_configuration_set_delivery_options",
++    feature = "op_put_configuration_set_reputation_options",
++    feature = "op_put_configuration_set_sending_options",
++    feature = "op_put_configuration_set_suppression_options",
++    feature = "op_put_configuration_set_tracking_options",
++    feature = "op_put_configuration_set_vdm_options",
++    feature = "op_put_dedicated_ip_in_pool",
++    feature = "op_put_dedicated_ip_pool_scaling_attributes",
++    feature = "op_put_dedicated_ip_warmup_attributes",
++    feature = "op_put_deliverability_dashboard_option",
++    feature = "op_put_email_identity_configuration_set_attributes",
++    feature = "op_put_email_identity_dkim_attributes",
++    feature = "op_put_email_identity_dkim_signing_attributes",
++    feature = "op_put_email_identity_feedback_attributes",
++    feature = "op_put_email_identity_mail_from_attributes",
++    feature = "op_put_suppressed_destination",
++    feature = "op_put_tenant_suppression_attributes",
++    feature = "op_send_bulk_email",
++    feature = "op_send_custom_verification_email",
++    feature = "op_send_email",
++    feature = "op_tag_resource",
++    feature = "op_test_render_email_template",
++    feature = "op_untag_resource",
++    feature = "op_update_configuration_set",
++    feature = "op_update_configuration_set_event_destination",
++    feature = "op_update_contact",
++    feature = "op_update_contact_list",
++    feature = "op_update_custom_verification_email_template",
++    feature = "op_update_email_identity_policy",
++    feature = "op_update_email_template"
++))]
+ pub use crate::types::error::_not_found_exception::NotFoundException;
+
++#[cfg(any(
++    feature = "op_associate_email_identity_certificate",
++    feature = "op_batch_get_metric_data",
++    feature = "op_cancel_export_job",
++    feature = "op_create_configuration_set",
++    feature = "op_create_configuration_set_event_destination",
++    feature = "op_create_contact",
++    feature = "op_create_contact_list",
++    feature = "op_create_custom_verification_email_template",
++    feature = "op_create_dedicated_ip_pool",
++    feature = "op_create_deliverability_test_report",
++    feature = "op_create_email_identity",
++    feature = "op_create_email_identity_policy",
++    feature = "op_create_email_template",
++    feature = "op_create_export_job",
++    feature = "op_create_import_job",
++    feature = "op_create_multi_region_endpoint",
++    feature = "op_create_tenant",
++    feature = "op_create_tenant_resource_association",
++    feature = "op_delete_configuration_set",
++    feature = "op_delete_configuration_set_event_destination",
++    feature = "op_delete_contact",
++    feature = "op_delete_contact_list",
++    feature = "op_delete_custom_verification_email_template",
++    feature = "op_delete_dedicated_ip_pool",
++    feature = "op_delete_email_identity",
++    feature = "op_delete_email_identity_policy",
++    feature = "op_delete_email_template",
++    feature = "op_delete_multi_region_endpoint",
++    feature = "op_delete_suppressed_destination",
++    feature = "op_delete_tenant",
++    feature = "op_delete_tenant_resource_association",
++    feature = "op_disassociate_email_identity_certificate",
++    feature = "op_get_account",
++    feature = "op_get_blacklist_reports",
++    feature = "op_get_configuration_set",
++    feature = "op_get_configuration_set_event_destinations",
++    feature = "op_get_contact",
++    feature = "op_get_contact_list",
++    feature = "op_get_custom_verification_email_template",
++    feature = "op_get_dedicated_ip",
++    feature = "op_get_dedicated_ip_pool",
++    feature = "op_get_dedicated_ips",
++    feature = "op_get_deliverability_dashboard_options",
++    feature = "op_get_deliverability_test_report",
++    feature = "op_get_domain_deliverability_campaign",
++    feature = "op_get_domain_statistics_report",
++    feature = "op_get_email_address_insights",
++    feature = "op_get_email_identity",
++    feature = "op_get_email_identity_policies",
++    feature = "op_get_email_template",
++    feature = "op_get_export_job",
++    feature = "op_get_import_job",
++    feature = "op_get_message_insights",
++    feature = "op_get_multi_region_endpoint",
++    feature = "op_get_reputation_entity",
++    feature = "op_get_suppressed_destination",
++    feature = "op_get_tenant",
++    feature = "op_list_configuration_sets",
++    feature = "op_list_contact_lists",
++    feature = "op_list_contacts",
++    feature = "op_list_custom_verification_email_templates",
++    feature = "op_list_dedicated_ip_pools",
++    feature = "op_list_deliverability_test_reports",
++    feature = "op_list_domain_deliverability_campaigns",
++    feature = "op_list_email_identities",
++    feature = "op_list_email_identity_certificates",
++    feature = "op_list_email_templates",
++    feature = "op_list_export_jobs",
++    feature = "op_list_import_jobs",
++    feature = "op_list_multi_region_endpoints",
++    feature = "op_list_recommendations",
++    feature = "op_list_reputation_entities",
++    feature = "op_list_resource_tenants",
++    feature = "op_list_suppressed_destinations",
++    feature = "op_list_tags_for_resource",
++    feature = "op_list_tenant_resources",
++    feature = "op_list_tenants",
++    feature = "op_put_account_dedicated_ip_warmup_attributes",
++    feature = "op_put_account_details",
++    feature = "op_put_account_pricing_attributes",
++    feature = "op_put_account_sending_attributes",
++    feature = "op_put_account_suppression_attributes",
++    feature = "op_put_account_vdm_attributes",
++    feature = "op_put_configuration_set_archiving_options",
++    feature = "op_put_configuration_set_delivery_options",
++    feature = "op_put_configuration_set_reputation_options",
++    feature = "op_put_configuration_set_sending_options",
++    feature = "op_put_configuration_set_suppression_options",
++    feature = "op_put_configuration_set_tracking_options",
++    feature = "op_put_configuration_set_vdm_options",
++    feature = "op_put_dedicated_ip_in_pool",
++    feature = "op_put_dedicated_ip_pool_scaling_attributes",
++    feature = "op_put_dedicated_ip_warmup_attributes",
++    feature = "op_put_deliverability_dashboard_option",
++    feature = "op_put_email_identity_configuration_set_attributes",
++    feature = "op_put_email_identity_dkim_attributes",
++    feature = "op_put_email_identity_dkim_signing_attributes",
++    feature = "op_put_email_identity_feedback_attributes",
++    feature = "op_put_email_identity_mail_from_attributes",
++    feature = "op_put_suppressed_destination",
++    feature = "op_put_tenant_suppression_attributes",
++    feature = "op_send_bulk_email",
++    feature = "op_send_custom_verification_email",
++    feature = "op_send_email",
++    feature = "op_tag_resource",
++    feature = "op_test_render_email_template",
++    feature = "op_untag_resource",
++    feature = "op_update_configuration_set",
++    feature = "op_update_configuration_set_event_destination",
++    feature = "op_update_contact",
++    feature = "op_update_contact_list",
++    feature = "op_update_custom_verification_email_template",
++    feature = "op_update_email_identity_policy",
++    feature = "op_update_email_template",
++    feature = "op_update_reputation_entity_customer_managed_status",
++    feature = "op_update_reputation_entity_policy"
++))]
+ pub use crate::types::error::_too_many_requests_exception::TooManyRequestsException;
+
++#[cfg(feature = "op_batch_get_metric_data")]
+ pub use crate::types::error::_internal_service_error_exception::InternalServiceErrorException;
 
 +#[cfg(any(
 +    feature = "op_create_configuration_set",
@@ -20964,6 +21752,7 @@ diff --git a/src/types/error.rs b/src/types/error.rs
  mod _account_suspended_exception;
 
 +#[cfg(any(
++    feature = "op_associate_email_identity_certificate",
 +    feature = "op_create_configuration_set",
 +    feature = "op_create_configuration_set_event_destination",
 +    feature = "op_create_contact",
@@ -20981,6 +21770,7 @@ diff --git a/src/types/error.rs b/src/types/error.rs
  mod _already_exists_exception;
 
 +#[cfg(any(
++    feature = "op_associate_email_identity_certificate",
 +    feature = "op_batch_get_metric_data",
 +    feature = "op_cancel_export_job",
 +    feature = "op_create_configuration_set",
@@ -21011,6 +21801,7 @@ diff --git a/src/types/error.rs b/src/types/error.rs
 +    feature = "op_delete_suppressed_destination",
 +    feature = "op_delete_tenant",
 +    feature = "op_delete_tenant_resource_association",
++    feature = "op_disassociate_email_identity_certificate",
 +    feature = "op_get_account",
 +    feature = "op_get_blacklist_reports",
 +    feature = "op_get_configuration_set",
@@ -21044,6 +21835,7 @@ diff --git a/src/types/error.rs b/src/types/error.rs
 +    feature = "op_list_deliverability_test_reports",
 +    feature = "op_list_domain_deliverability_campaigns",
 +    feature = "op_list_email_identities",
++    feature = "op_list_email_identity_certificates",
 +    feature = "op_list_email_templates",
 +    feature = "op_list_export_jobs",
 +    feature = "op_list_import_jobs",
@@ -21085,6 +21877,7 @@ diff --git a/src/types/error.rs b/src/types/error.rs
 +    feature = "op_tag_resource",
 +    feature = "op_test_render_email_template",
 +    feature = "op_untag_resource",
++    feature = "op_update_configuration_set",
 +    feature = "op_update_configuration_set_event_destination",
 +    feature = "op_update_contact",
 +    feature = "op_update_contact_list",
@@ -21167,6 +21960,7 @@ diff --git a/src/types/error.rs b/src/types/error.rs
  mod _message_rejected;
 
 +#[cfg(any(
++    feature = "op_associate_email_identity_certificate",
 +    feature = "op_batch_get_metric_data",
 +    feature = "op_cancel_export_job",
 +    feature = "op_create_configuration_set",
@@ -21191,6 +21985,7 @@ diff --git a/src/types/error.rs b/src/types/error.rs
 +    feature = "op_delete_suppressed_destination",
 +    feature = "op_delete_tenant",
 +    feature = "op_delete_tenant_resource_association",
++    feature = "op_disassociate_email_identity_certificate",
 +    feature = "op_get_blacklist_reports",
 +    feature = "op_get_configuration_set",
 +    feature = "op_get_configuration_set_event_destinations",
@@ -21216,6 +22011,7 @@ diff --git a/src/types/error.rs b/src/types/error.rs
 +    feature = "op_list_contacts",
 +    feature = "op_list_deliverability_test_reports",
 +    feature = "op_list_domain_deliverability_campaigns",
++    feature = "op_list_email_identity_certificates",
 +    feature = "op_list_recommendations",
 +    feature = "op_list_resource_tenants",
 +    feature = "op_list_suppressed_destinations",
@@ -21245,6 +22041,7 @@ diff --git a/src/types/error.rs b/src/types/error.rs
 +    feature = "op_tag_resource",
 +    feature = "op_test_render_email_template",
 +    feature = "op_untag_resource",
++    feature = "op_update_configuration_set",
 +    feature = "op_update_configuration_set_event_destination",
 +    feature = "op_update_contact",
 +    feature = "op_update_contact_list",
@@ -21263,6 +22060,7 @@ diff --git a/src/types/error.rs b/src/types/error.rs
  mod _sending_paused_exception;
 
 +#[cfg(any(
++    feature = "op_associate_email_identity_certificate",
 +    feature = "op_batch_get_metric_data",
 +    feature = "op_cancel_export_job",
 +    feature = "op_create_configuration_set",
@@ -21293,6 +22091,7 @@ diff --git a/src/types/error.rs b/src/types/error.rs
 +    feature = "op_delete_suppressed_destination",
 +    feature = "op_delete_tenant",
 +    feature = "op_delete_tenant_resource_association",
++    feature = "op_disassociate_email_identity_certificate",
 +    feature = "op_get_account",
 +    feature = "op_get_blacklist_reports",
 +    feature = "op_get_configuration_set",
@@ -21326,6 +22125,7 @@ diff --git a/src/types/error.rs b/src/types/error.rs
 +    feature = "op_list_deliverability_test_reports",
 +    feature = "op_list_domain_deliverability_campaigns",
 +    feature = "op_list_email_identities",
++    feature = "op_list_email_identity_certificates",
 +    feature = "op_list_email_templates",
 +    feature = "op_list_export_jobs",
 +    feature = "op_list_import_jobs",
@@ -21367,6 +22167,7 @@ diff --git a/src/types/error.rs b/src/types/error.rs
 +    feature = "op_tag_resource",
 +    feature = "op_test_render_email_template",
 +    feature = "op_untag_resource",
++    feature = "op_update_configuration_set",
 +    feature = "op_update_configuration_set_event_destination",
 +    feature = "op_update_contact",
 +    feature = "op_update_contact_list",
@@ -21382,332 +22183,10 @@ diff --git a/src/types/error.rs b/src/types/error.rs
 diff --git a/src/types/error/builders.rs b/src/types/error/builders.rs
 --- a/src/types/error/builders.rs
 +++ b/src/types/error/builders.rs
-@@ -1,26 +1,422 @@
+@@ -1,26 +1,435 @@
  // Code generated by software.amazon.smithy.rust.codegen.smithy-rs. DO NOT EDIT.
 +#[cfg(any(
-+    feature = "op_batch_get_metric_data",
-+    feature = "op_cancel_export_job",
-+    feature = "op_create_configuration_set",
-+    feature = "op_create_configuration_set_event_destination",
-+    feature = "op_create_contact",
-+    feature = "op_create_contact_list",
-+    feature = "op_create_custom_verification_email_template",
-+    feature = "op_create_dedicated_ip_pool",
-+    feature = "op_create_deliverability_test_report",
-+    feature = "op_create_email_identity",
-+    feature = "op_create_email_identity_policy",
-+    feature = "op_create_email_template",
-+    feature = "op_create_export_job",
-+    feature = "op_create_import_job",
-+    feature = "op_create_multi_region_endpoint",
-+    feature = "op_create_tenant",
-+    feature = "op_create_tenant_resource_association",
-+    feature = "op_delete_configuration_set",
-+    feature = "op_delete_configuration_set_event_destination",
-+    feature = "op_delete_contact",
-+    feature = "op_delete_contact_list",
-+    feature = "op_delete_custom_verification_email_template",
-+    feature = "op_delete_dedicated_ip_pool",
-+    feature = "op_delete_email_identity",
-+    feature = "op_delete_email_identity_policy",
-+    feature = "op_delete_email_template",
-+    feature = "op_delete_multi_region_endpoint",
-+    feature = "op_delete_suppressed_destination",
-+    feature = "op_delete_tenant",
-+    feature = "op_delete_tenant_resource_association",
-+    feature = "op_get_account",
-+    feature = "op_get_blacklist_reports",
-+    feature = "op_get_configuration_set",
-+    feature = "op_get_configuration_set_event_destinations",
-+    feature = "op_get_contact",
-+    feature = "op_get_contact_list",
-+    feature = "op_get_custom_verification_email_template",
-+    feature = "op_get_dedicated_ip",
-+    feature = "op_get_dedicated_ip_pool",
-+    feature = "op_get_dedicated_ips",
-+    feature = "op_get_deliverability_dashboard_options",
-+    feature = "op_get_deliverability_test_report",
-+    feature = "op_get_domain_deliverability_campaign",
-+    feature = "op_get_domain_statistics_report",
-+    feature = "op_get_email_address_insights",
-+    feature = "op_get_email_identity",
-+    feature = "op_get_email_identity_policies",
-+    feature = "op_get_email_template",
-+    feature = "op_get_export_job",
-+    feature = "op_get_import_job",
-+    feature = "op_get_message_insights",
-+    feature = "op_get_multi_region_endpoint",
-+    feature = "op_get_reputation_entity",
-+    feature = "op_get_suppressed_destination",
-+    feature = "op_get_tenant",
-+    feature = "op_list_configuration_sets",
-+    feature = "op_list_contact_lists",
-+    feature = "op_list_contacts",
-+    feature = "op_list_custom_verification_email_templates",
-+    feature = "op_list_dedicated_ip_pools",
-+    feature = "op_list_deliverability_test_reports",
-+    feature = "op_list_domain_deliverability_campaigns",
-+    feature = "op_list_email_identities",
-+    feature = "op_list_email_templates",
-+    feature = "op_list_export_jobs",
-+    feature = "op_list_import_jobs",
-+    feature = "op_list_multi_region_endpoints",
-+    feature = "op_list_recommendations",
-+    feature = "op_list_reputation_entities",
-+    feature = "op_list_resource_tenants",
-+    feature = "op_list_suppressed_destinations",
-+    feature = "op_list_tags_for_resource",
-+    feature = "op_list_tenant_resources",
-+    feature = "op_list_tenants",
-+    feature = "op_put_account_dedicated_ip_warmup_attributes",
-+    feature = "op_put_account_details",
-+    feature = "op_put_account_pricing_attributes",
-+    feature = "op_put_account_sending_attributes",
-+    feature = "op_put_account_suppression_attributes",
-+    feature = "op_put_account_vdm_attributes",
-+    feature = "op_put_configuration_set_archiving_options",
-+    feature = "op_put_configuration_set_delivery_options",
-+    feature = "op_put_configuration_set_reputation_options",
-+    feature = "op_put_configuration_set_sending_options",
-+    feature = "op_put_configuration_set_suppression_options",
-+    feature = "op_put_configuration_set_tracking_options",
-+    feature = "op_put_configuration_set_vdm_options",
-+    feature = "op_put_dedicated_ip_in_pool",
-+    feature = "op_put_dedicated_ip_pool_scaling_attributes",
-+    feature = "op_put_dedicated_ip_warmup_attributes",
-+    feature = "op_put_deliverability_dashboard_option",
-+    feature = "op_put_email_identity_configuration_set_attributes",
-+    feature = "op_put_email_identity_dkim_attributes",
-+    feature = "op_put_email_identity_dkim_signing_attributes",
-+    feature = "op_put_email_identity_feedback_attributes",
-+    feature = "op_put_email_identity_mail_from_attributes",
-+    feature = "op_put_suppressed_destination",
-+    feature = "op_put_tenant_suppression_attributes",
-+    feature = "op_send_bulk_email",
-+    feature = "op_send_custom_verification_email",
-+    feature = "op_send_email",
-+    feature = "op_tag_resource",
-+    feature = "op_test_render_email_template",
-+    feature = "op_untag_resource",
-+    feature = "op_update_configuration_set_event_destination",
-+    feature = "op_update_contact",
-+    feature = "op_update_contact_list",
-+    feature = "op_update_custom_verification_email_template",
-+    feature = "op_update_email_identity_policy",
-+    feature = "op_update_email_template",
-+    feature = "op_update_reputation_entity_customer_managed_status",
-+    feature = "op_update_reputation_entity_policy"
-+))]
- pub use crate::types::error::_bad_request_exception::BadRequestExceptionBuilder;
-
-+#[cfg(feature = "op_batch_get_metric_data")]
- pub use crate::types::error::_internal_service_error_exception::InternalServiceErrorExceptionBuilder;
-
-+#[cfg(any(
-+    feature = "op_batch_get_metric_data",
-+    feature = "op_cancel_export_job",
-+    feature = "op_create_configuration_set",
-+    feature = "op_create_configuration_set_event_destination",
-+    feature = "op_create_contact",
-+    feature = "op_create_custom_verification_email_template",
-+    feature = "op_create_deliverability_test_report",
-+    feature = "op_create_email_identity",
-+    feature = "op_create_email_identity_policy",
-+    feature = "op_create_export_job",
-+    feature = "op_create_tenant_resource_association",
-+    feature = "op_delete_configuration_set",
-+    feature = "op_delete_configuration_set_event_destination",
-+    feature = "op_delete_contact",
-+    feature = "op_delete_contact_list",
-+    feature = "op_delete_custom_verification_email_template",
-+    feature = "op_delete_dedicated_ip_pool",
-+    feature = "op_delete_email_identity",
-+    feature = "op_delete_email_identity_policy",
-+    feature = "op_delete_email_template",
-+    feature = "op_delete_multi_region_endpoint",
-+    feature = "op_delete_suppressed_destination",
-+    feature = "op_delete_tenant",
-+    feature = "op_delete_tenant_resource_association",
-+    feature = "op_get_blacklist_reports",
-+    feature = "op_get_configuration_set",
-+    feature = "op_get_configuration_set_event_destinations",
-+    feature = "op_get_contact",
-+    feature = "op_get_contact_list",
-+    feature = "op_get_custom_verification_email_template",
-+    feature = "op_get_dedicated_ip",
-+    feature = "op_get_dedicated_ip_pool",
-+    feature = "op_get_dedicated_ips",
-+    feature = "op_get_deliverability_test_report",
-+    feature = "op_get_domain_deliverability_campaign",
-+    feature = "op_get_domain_statistics_report",
-+    feature = "op_get_email_identity",
-+    feature = "op_get_email_identity_policies",
-+    feature = "op_get_email_template",
-+    feature = "op_get_export_job",
-+    feature = "op_get_import_job",
-+    feature = "op_get_message_insights",
-+    feature = "op_get_multi_region_endpoint",
-+    feature = "op_get_reputation_entity",
-+    feature = "op_get_suppressed_destination",
-+    feature = "op_get_tenant",
-+    feature = "op_list_contacts",
-+    feature = "op_list_deliverability_test_reports",
-+    feature = "op_list_domain_deliverability_campaigns",
-+    feature = "op_list_recommendations",
-+    feature = "op_list_resource_tenants",
-+    feature = "op_list_suppressed_destinations",
-+    feature = "op_list_tags_for_resource",
-+    feature = "op_list_tenant_resources",
-+    feature = "op_put_configuration_set_archiving_options",
-+    feature = "op_put_configuration_set_delivery_options",
-+    feature = "op_put_configuration_set_reputation_options",
-+    feature = "op_put_configuration_set_sending_options",
-+    feature = "op_put_configuration_set_suppression_options",
-+    feature = "op_put_configuration_set_tracking_options",
-+    feature = "op_put_configuration_set_vdm_options",
-+    feature = "op_put_dedicated_ip_in_pool",
-+    feature = "op_put_dedicated_ip_pool_scaling_attributes",
-+    feature = "op_put_dedicated_ip_warmup_attributes",
-+    feature = "op_put_deliverability_dashboard_option",
-+    feature = "op_put_email_identity_configuration_set_attributes",
-+    feature = "op_put_email_identity_dkim_attributes",
-+    feature = "op_put_email_identity_dkim_signing_attributes",
-+    feature = "op_put_email_identity_feedback_attributes",
-+    feature = "op_put_email_identity_mail_from_attributes",
-+    feature = "op_put_suppressed_destination",
-+    feature = "op_put_tenant_suppression_attributes",
-+    feature = "op_send_bulk_email",
-+    feature = "op_send_custom_verification_email",
-+    feature = "op_send_email",
-+    feature = "op_tag_resource",
-+    feature = "op_test_render_email_template",
-+    feature = "op_untag_resource",
-+    feature = "op_update_configuration_set_event_destination",
-+    feature = "op_update_contact",
-+    feature = "op_update_contact_list",
-+    feature = "op_update_custom_verification_email_template",
-+    feature = "op_update_email_identity_policy",
-+    feature = "op_update_email_template"
-+))]
- pub use crate::types::error::_not_found_exception::NotFoundExceptionBuilder;
-
-+#[cfg(any(
-+    feature = "op_batch_get_metric_data",
-+    feature = "op_cancel_export_job",
-+    feature = "op_create_configuration_set",
-+    feature = "op_create_configuration_set_event_destination",
-+    feature = "op_create_contact",
-+    feature = "op_create_contact_list",
-+    feature = "op_create_custom_verification_email_template",
-+    feature = "op_create_dedicated_ip_pool",
-+    feature = "op_create_deliverability_test_report",
-+    feature = "op_create_email_identity",
-+    feature = "op_create_email_identity_policy",
-+    feature = "op_create_email_template",
-+    feature = "op_create_export_job",
-+    feature = "op_create_import_job",
-+    feature = "op_create_multi_region_endpoint",
-+    feature = "op_create_tenant",
-+    feature = "op_create_tenant_resource_association",
-+    feature = "op_delete_configuration_set",
-+    feature = "op_delete_configuration_set_event_destination",
-+    feature = "op_delete_contact",
-+    feature = "op_delete_contact_list",
-+    feature = "op_delete_custom_verification_email_template",
-+    feature = "op_delete_dedicated_ip_pool",
-+    feature = "op_delete_email_identity",
-+    feature = "op_delete_email_identity_policy",
-+    feature = "op_delete_email_template",
-+    feature = "op_delete_multi_region_endpoint",
-+    feature = "op_delete_suppressed_destination",
-+    feature = "op_delete_tenant",
-+    feature = "op_delete_tenant_resource_association",
-+    feature = "op_get_account",
-+    feature = "op_get_blacklist_reports",
-+    feature = "op_get_configuration_set",
-+    feature = "op_get_configuration_set_event_destinations",
-+    feature = "op_get_contact",
-+    feature = "op_get_contact_list",
-+    feature = "op_get_custom_verification_email_template",
-+    feature = "op_get_dedicated_ip",
-+    feature = "op_get_dedicated_ip_pool",
-+    feature = "op_get_dedicated_ips",
-+    feature = "op_get_deliverability_dashboard_options",
-+    feature = "op_get_deliverability_test_report",
-+    feature = "op_get_domain_deliverability_campaign",
-+    feature = "op_get_domain_statistics_report",
-+    feature = "op_get_email_address_insights",
-+    feature = "op_get_email_identity",
-+    feature = "op_get_email_identity_policies",
-+    feature = "op_get_email_template",
-+    feature = "op_get_export_job",
-+    feature = "op_get_import_job",
-+    feature = "op_get_message_insights",
-+    feature = "op_get_multi_region_endpoint",
-+    feature = "op_get_reputation_entity",
-+    feature = "op_get_suppressed_destination",
-+    feature = "op_get_tenant",
-+    feature = "op_list_configuration_sets",
-+    feature = "op_list_contact_lists",
-+    feature = "op_list_contacts",
-+    feature = "op_list_custom_verification_email_templates",
-+    feature = "op_list_dedicated_ip_pools",
-+    feature = "op_list_deliverability_test_reports",
-+    feature = "op_list_domain_deliverability_campaigns",
-+    feature = "op_list_email_identities",
-+    feature = "op_list_email_templates",
-+    feature = "op_list_export_jobs",
-+    feature = "op_list_import_jobs",
-+    feature = "op_list_multi_region_endpoints",
-+    feature = "op_list_recommendations",
-+    feature = "op_list_reputation_entities",
-+    feature = "op_list_resource_tenants",
-+    feature = "op_list_suppressed_destinations",
-+    feature = "op_list_tags_for_resource",
-+    feature = "op_list_tenant_resources",
-+    feature = "op_list_tenants",
-+    feature = "op_put_account_dedicated_ip_warmup_attributes",
-+    feature = "op_put_account_details",
-+    feature = "op_put_account_pricing_attributes",
-+    feature = "op_put_account_sending_attributes",
-+    feature = "op_put_account_suppression_attributes",
-+    feature = "op_put_account_vdm_attributes",
-+    feature = "op_put_configuration_set_archiving_options",
-+    feature = "op_put_configuration_set_delivery_options",
-+    feature = "op_put_configuration_set_reputation_options",
-+    feature = "op_put_configuration_set_sending_options",
-+    feature = "op_put_configuration_set_suppression_options",
-+    feature = "op_put_configuration_set_tracking_options",
-+    feature = "op_put_configuration_set_vdm_options",
-+    feature = "op_put_dedicated_ip_in_pool",
-+    feature = "op_put_dedicated_ip_pool_scaling_attributes",
-+    feature = "op_put_dedicated_ip_warmup_attributes",
-+    feature = "op_put_deliverability_dashboard_option",
-+    feature = "op_put_email_identity_configuration_set_attributes",
-+    feature = "op_put_email_identity_dkim_attributes",
-+    feature = "op_put_email_identity_dkim_signing_attributes",
-+    feature = "op_put_email_identity_feedback_attributes",
-+    feature = "op_put_email_identity_mail_from_attributes",
-+    feature = "op_put_suppressed_destination",
-+    feature = "op_put_tenant_suppression_attributes",
-+    feature = "op_send_bulk_email",
-+    feature = "op_send_custom_verification_email",
-+    feature = "op_send_email",
-+    feature = "op_tag_resource",
-+    feature = "op_test_render_email_template",
-+    feature = "op_untag_resource",
-+    feature = "op_update_configuration_set_event_destination",
-+    feature = "op_update_contact",
-+    feature = "op_update_contact_list",
-+    feature = "op_update_custom_verification_email_template",
-+    feature = "op_update_email_identity_policy",
-+    feature = "op_update_email_template",
-+    feature = "op_update_reputation_entity_customer_managed_status",
-+    feature = "op_update_reputation_entity_policy"
-+))]
- pub use crate::types::error::_too_many_requests_exception::TooManyRequestsExceptionBuilder;
-
-+#[cfg(any(
++    feature = "op_associate_email_identity_certificate",
 +    feature = "op_create_configuration_set",
 +    feature = "op_create_configuration_set_event_destination",
 +    feature = "op_create_contact",
@@ -21723,6 +22202,341 @@ diff --git a/src/types/error/builders.rs b/src/types/error/builders.rs
 +    feature = "op_put_deliverability_dashboard_option"
 +))]
  pub use crate::types::error::_already_exists_exception::AlreadyExistsExceptionBuilder;
+
++#[cfg(any(
++    feature = "op_associate_email_identity_certificate",
++    feature = "op_batch_get_metric_data",
++    feature = "op_cancel_export_job",
++    feature = "op_create_configuration_set",
++    feature = "op_create_configuration_set_event_destination",
++    feature = "op_create_contact",
++    feature = "op_create_contact_list",
++    feature = "op_create_custom_verification_email_template",
++    feature = "op_create_dedicated_ip_pool",
++    feature = "op_create_deliverability_test_report",
++    feature = "op_create_email_identity",
++    feature = "op_create_email_identity_policy",
++    feature = "op_create_email_template",
++    feature = "op_create_export_job",
++    feature = "op_create_import_job",
++    feature = "op_create_multi_region_endpoint",
++    feature = "op_create_tenant",
++    feature = "op_create_tenant_resource_association",
++    feature = "op_delete_configuration_set",
++    feature = "op_delete_configuration_set_event_destination",
++    feature = "op_delete_contact",
++    feature = "op_delete_contact_list",
++    feature = "op_delete_custom_verification_email_template",
++    feature = "op_delete_dedicated_ip_pool",
++    feature = "op_delete_email_identity",
++    feature = "op_delete_email_identity_policy",
++    feature = "op_delete_email_template",
++    feature = "op_delete_multi_region_endpoint",
++    feature = "op_delete_suppressed_destination",
++    feature = "op_delete_tenant",
++    feature = "op_delete_tenant_resource_association",
++    feature = "op_disassociate_email_identity_certificate",
++    feature = "op_get_account",
++    feature = "op_get_blacklist_reports",
++    feature = "op_get_configuration_set",
++    feature = "op_get_configuration_set_event_destinations",
++    feature = "op_get_contact",
++    feature = "op_get_contact_list",
++    feature = "op_get_custom_verification_email_template",
++    feature = "op_get_dedicated_ip",
++    feature = "op_get_dedicated_ip_pool",
++    feature = "op_get_dedicated_ips",
++    feature = "op_get_deliverability_dashboard_options",
++    feature = "op_get_deliverability_test_report",
++    feature = "op_get_domain_deliverability_campaign",
++    feature = "op_get_domain_statistics_report",
++    feature = "op_get_email_address_insights",
++    feature = "op_get_email_identity",
++    feature = "op_get_email_identity_policies",
++    feature = "op_get_email_template",
++    feature = "op_get_export_job",
++    feature = "op_get_import_job",
++    feature = "op_get_message_insights",
++    feature = "op_get_multi_region_endpoint",
++    feature = "op_get_reputation_entity",
++    feature = "op_get_suppressed_destination",
++    feature = "op_get_tenant",
++    feature = "op_list_configuration_sets",
++    feature = "op_list_contact_lists",
++    feature = "op_list_contacts",
++    feature = "op_list_custom_verification_email_templates",
++    feature = "op_list_dedicated_ip_pools",
++    feature = "op_list_deliverability_test_reports",
++    feature = "op_list_domain_deliverability_campaigns",
++    feature = "op_list_email_identities",
++    feature = "op_list_email_identity_certificates",
++    feature = "op_list_email_templates",
++    feature = "op_list_export_jobs",
++    feature = "op_list_import_jobs",
++    feature = "op_list_multi_region_endpoints",
++    feature = "op_list_recommendations",
++    feature = "op_list_reputation_entities",
++    feature = "op_list_resource_tenants",
++    feature = "op_list_suppressed_destinations",
++    feature = "op_list_tags_for_resource",
++    feature = "op_list_tenant_resources",
++    feature = "op_list_tenants",
++    feature = "op_put_account_dedicated_ip_warmup_attributes",
++    feature = "op_put_account_details",
++    feature = "op_put_account_pricing_attributes",
++    feature = "op_put_account_sending_attributes",
++    feature = "op_put_account_suppression_attributes",
++    feature = "op_put_account_vdm_attributes",
++    feature = "op_put_configuration_set_archiving_options",
++    feature = "op_put_configuration_set_delivery_options",
++    feature = "op_put_configuration_set_reputation_options",
++    feature = "op_put_configuration_set_sending_options",
++    feature = "op_put_configuration_set_suppression_options",
++    feature = "op_put_configuration_set_tracking_options",
++    feature = "op_put_configuration_set_vdm_options",
++    feature = "op_put_dedicated_ip_in_pool",
++    feature = "op_put_dedicated_ip_pool_scaling_attributes",
++    feature = "op_put_dedicated_ip_warmup_attributes",
++    feature = "op_put_deliverability_dashboard_option",
++    feature = "op_put_email_identity_configuration_set_attributes",
++    feature = "op_put_email_identity_dkim_attributes",
++    feature = "op_put_email_identity_dkim_signing_attributes",
++    feature = "op_put_email_identity_feedback_attributes",
++    feature = "op_put_email_identity_mail_from_attributes",
++    feature = "op_put_suppressed_destination",
++    feature = "op_put_tenant_suppression_attributes",
++    feature = "op_send_bulk_email",
++    feature = "op_send_custom_verification_email",
++    feature = "op_send_email",
++    feature = "op_tag_resource",
++    feature = "op_test_render_email_template",
++    feature = "op_untag_resource",
++    feature = "op_update_configuration_set",
++    feature = "op_update_configuration_set_event_destination",
++    feature = "op_update_contact",
++    feature = "op_update_contact_list",
++    feature = "op_update_custom_verification_email_template",
++    feature = "op_update_email_identity_policy",
++    feature = "op_update_email_template",
++    feature = "op_update_reputation_entity_customer_managed_status",
++    feature = "op_update_reputation_entity_policy"
++))]
+ pub use crate::types::error::_bad_request_exception::BadRequestExceptionBuilder;
+
++#[cfg(any(
++    feature = "op_associate_email_identity_certificate",
++    feature = "op_batch_get_metric_data",
++    feature = "op_cancel_export_job",
++    feature = "op_create_configuration_set",
++    feature = "op_create_configuration_set_event_destination",
++    feature = "op_create_contact",
++    feature = "op_create_custom_verification_email_template",
++    feature = "op_create_deliverability_test_report",
++    feature = "op_create_email_identity",
++    feature = "op_create_email_identity_policy",
++    feature = "op_create_export_job",
++    feature = "op_create_tenant_resource_association",
++    feature = "op_delete_configuration_set",
++    feature = "op_delete_configuration_set_event_destination",
++    feature = "op_delete_contact",
++    feature = "op_delete_contact_list",
++    feature = "op_delete_custom_verification_email_template",
++    feature = "op_delete_dedicated_ip_pool",
++    feature = "op_delete_email_identity",
++    feature = "op_delete_email_identity_policy",
++    feature = "op_delete_email_template",
++    feature = "op_delete_multi_region_endpoint",
++    feature = "op_delete_suppressed_destination",
++    feature = "op_delete_tenant",
++    feature = "op_delete_tenant_resource_association",
++    feature = "op_disassociate_email_identity_certificate",
++    feature = "op_get_blacklist_reports",
++    feature = "op_get_configuration_set",
++    feature = "op_get_configuration_set_event_destinations",
++    feature = "op_get_contact",
++    feature = "op_get_contact_list",
++    feature = "op_get_custom_verification_email_template",
++    feature = "op_get_dedicated_ip",
++    feature = "op_get_dedicated_ip_pool",
++    feature = "op_get_dedicated_ips",
++    feature = "op_get_deliverability_test_report",
++    feature = "op_get_domain_deliverability_campaign",
++    feature = "op_get_domain_statistics_report",
++    feature = "op_get_email_identity",
++    feature = "op_get_email_identity_policies",
++    feature = "op_get_email_template",
++    feature = "op_get_export_job",
++    feature = "op_get_import_job",
++    feature = "op_get_message_insights",
++    feature = "op_get_multi_region_endpoint",
++    feature = "op_get_reputation_entity",
++    feature = "op_get_suppressed_destination",
++    feature = "op_get_tenant",
++    feature = "op_list_contacts",
++    feature = "op_list_deliverability_test_reports",
++    feature = "op_list_domain_deliverability_campaigns",
++    feature = "op_list_email_identity_certificates",
++    feature = "op_list_recommendations",
++    feature = "op_list_resource_tenants",
++    feature = "op_list_suppressed_destinations",
++    feature = "op_list_tags_for_resource",
++    feature = "op_list_tenant_resources",
++    feature = "op_put_configuration_set_archiving_options",
++    feature = "op_put_configuration_set_delivery_options",
++    feature = "op_put_configuration_set_reputation_options",
++    feature = "op_put_configuration_set_sending_options",
++    feature = "op_put_configuration_set_suppression_options",
++    feature = "op_put_configuration_set_tracking_options",
++    feature = "op_put_configuration_set_vdm_options",
++    feature = "op_put_dedicated_ip_in_pool",
++    feature = "op_put_dedicated_ip_pool_scaling_attributes",
++    feature = "op_put_dedicated_ip_warmup_attributes",
++    feature = "op_put_deliverability_dashboard_option",
++    feature = "op_put_email_identity_configuration_set_attributes",
++    feature = "op_put_email_identity_dkim_attributes",
++    feature = "op_put_email_identity_dkim_signing_attributes",
++    feature = "op_put_email_identity_feedback_attributes",
++    feature = "op_put_email_identity_mail_from_attributes",
++    feature = "op_put_suppressed_destination",
++    feature = "op_put_tenant_suppression_attributes",
++    feature = "op_send_bulk_email",
++    feature = "op_send_custom_verification_email",
++    feature = "op_send_email",
++    feature = "op_tag_resource",
++    feature = "op_test_render_email_template",
++    feature = "op_untag_resource",
++    feature = "op_update_configuration_set",
++    feature = "op_update_configuration_set_event_destination",
++    feature = "op_update_contact",
++    feature = "op_update_contact_list",
++    feature = "op_update_custom_verification_email_template",
++    feature = "op_update_email_identity_policy",
++    feature = "op_update_email_template"
++))]
+ pub use crate::types::error::_not_found_exception::NotFoundExceptionBuilder;
+
++#[cfg(any(
++    feature = "op_associate_email_identity_certificate",
++    feature = "op_batch_get_metric_data",
++    feature = "op_cancel_export_job",
++    feature = "op_create_configuration_set",
++    feature = "op_create_configuration_set_event_destination",
++    feature = "op_create_contact",
++    feature = "op_create_contact_list",
++    feature = "op_create_custom_verification_email_template",
++    feature = "op_create_dedicated_ip_pool",
++    feature = "op_create_deliverability_test_report",
++    feature = "op_create_email_identity",
++    feature = "op_create_email_identity_policy",
++    feature = "op_create_email_template",
++    feature = "op_create_export_job",
++    feature = "op_create_import_job",
++    feature = "op_create_multi_region_endpoint",
++    feature = "op_create_tenant",
++    feature = "op_create_tenant_resource_association",
++    feature = "op_delete_configuration_set",
++    feature = "op_delete_configuration_set_event_destination",
++    feature = "op_delete_contact",
++    feature = "op_delete_contact_list",
++    feature = "op_delete_custom_verification_email_template",
++    feature = "op_delete_dedicated_ip_pool",
++    feature = "op_delete_email_identity",
++    feature = "op_delete_email_identity_policy",
++    feature = "op_delete_email_template",
++    feature = "op_delete_multi_region_endpoint",
++    feature = "op_delete_suppressed_destination",
++    feature = "op_delete_tenant",
++    feature = "op_delete_tenant_resource_association",
++    feature = "op_disassociate_email_identity_certificate",
++    feature = "op_get_account",
++    feature = "op_get_blacklist_reports",
++    feature = "op_get_configuration_set",
++    feature = "op_get_configuration_set_event_destinations",
++    feature = "op_get_contact",
++    feature = "op_get_contact_list",
++    feature = "op_get_custom_verification_email_template",
++    feature = "op_get_dedicated_ip",
++    feature = "op_get_dedicated_ip_pool",
++    feature = "op_get_dedicated_ips",
++    feature = "op_get_deliverability_dashboard_options",
++    feature = "op_get_deliverability_test_report",
++    feature = "op_get_domain_deliverability_campaign",
++    feature = "op_get_domain_statistics_report",
++    feature = "op_get_email_address_insights",
++    feature = "op_get_email_identity",
++    feature = "op_get_email_identity_policies",
++    feature = "op_get_email_template",
++    feature = "op_get_export_job",
++    feature = "op_get_import_job",
++    feature = "op_get_message_insights",
++    feature = "op_get_multi_region_endpoint",
++    feature = "op_get_reputation_entity",
++    feature = "op_get_suppressed_destination",
++    feature = "op_get_tenant",
++    feature = "op_list_configuration_sets",
++    feature = "op_list_contact_lists",
++    feature = "op_list_contacts",
++    feature = "op_list_custom_verification_email_templates",
++    feature = "op_list_dedicated_ip_pools",
++    feature = "op_list_deliverability_test_reports",
++    feature = "op_list_domain_deliverability_campaigns",
++    feature = "op_list_email_identities",
++    feature = "op_list_email_identity_certificates",
++    feature = "op_list_email_templates",
++    feature = "op_list_export_jobs",
++    feature = "op_list_import_jobs",
++    feature = "op_list_multi_region_endpoints",
++    feature = "op_list_recommendations",
++    feature = "op_list_reputation_entities",
++    feature = "op_list_resource_tenants",
++    feature = "op_list_suppressed_destinations",
++    feature = "op_list_tags_for_resource",
++    feature = "op_list_tenant_resources",
++    feature = "op_list_tenants",
++    feature = "op_put_account_dedicated_ip_warmup_attributes",
++    feature = "op_put_account_details",
++    feature = "op_put_account_pricing_attributes",
++    feature = "op_put_account_sending_attributes",
++    feature = "op_put_account_suppression_attributes",
++    feature = "op_put_account_vdm_attributes",
++    feature = "op_put_configuration_set_archiving_options",
++    feature = "op_put_configuration_set_delivery_options",
++    feature = "op_put_configuration_set_reputation_options",
++    feature = "op_put_configuration_set_sending_options",
++    feature = "op_put_configuration_set_suppression_options",
++    feature = "op_put_configuration_set_tracking_options",
++    feature = "op_put_configuration_set_vdm_options",
++    feature = "op_put_dedicated_ip_in_pool",
++    feature = "op_put_dedicated_ip_pool_scaling_attributes",
++    feature = "op_put_dedicated_ip_warmup_attributes",
++    feature = "op_put_deliverability_dashboard_option",
++    feature = "op_put_email_identity_configuration_set_attributes",
++    feature = "op_put_email_identity_dkim_attributes",
++    feature = "op_put_email_identity_dkim_signing_attributes",
++    feature = "op_put_email_identity_feedback_attributes",
++    feature = "op_put_email_identity_mail_from_attributes",
++    feature = "op_put_suppressed_destination",
++    feature = "op_put_tenant_suppression_attributes",
++    feature = "op_send_bulk_email",
++    feature = "op_send_custom_verification_email",
++    feature = "op_send_email",
++    feature = "op_tag_resource",
++    feature = "op_test_render_email_template",
++    feature = "op_untag_resource",
++    feature = "op_update_configuration_set",
++    feature = "op_update_configuration_set_event_destination",
++    feature = "op_update_contact",
++    feature = "op_update_contact_list",
++    feature = "op_update_custom_verification_email_template",
++    feature = "op_update_email_identity_policy",
++    feature = "op_update_email_template",
++    feature = "op_update_reputation_entity_customer_managed_status",
++    feature = "op_update_reputation_entity_policy"
++))]
+ pub use crate::types::error::_too_many_requests_exception::TooManyRequestsExceptionBuilder;
+
++#[cfg(feature = "op_batch_get_metric_data")]
+ pub use crate::types::error::_internal_service_error_exception::InternalServiceErrorExceptionBuilder;
 
 +#[cfg(any(
 +    feature = "op_create_configuration_set",

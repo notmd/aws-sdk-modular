@@ -25,6 +25,13 @@ pub use crate::types::_vdm_options::VdmOptionsBuilder;
 pub use crate::types::_archiving_options::ArchivingOptionsBuilder;
 
 #[cfg(any(
+    feature = "op_create_configuration_set",
+    feature = "op_get_configuration_set",
+    feature = "op_update_configuration_set"
+))]
+pub use crate::types::_message_security_options::MessageSecurityOptionsBuilder;
+
+#[cfg(any(
     feature = "op_create_configuration_set_event_destination",
     feature = "op_update_configuration_set_event_destination"
 ))]
@@ -360,6 +367,9 @@ pub use crate::types::_custom_verification_email_template_metadata::CustomVerifi
 #[cfg(feature = "op_list_email_identities")]
 pub use crate::types::_identity_info::IdentityInfoBuilder;
 
+#[cfg(feature = "op_list_email_identity_certificates")]
+pub use crate::types::_identity_certificate::IdentityCertificateBuilder;
+
 #[cfg(feature = "op_list_email_templates")]
 pub use crate::types::_email_template_metadata::EmailTemplateMetadataBuilder;
 
@@ -404,6 +414,20 @@ pub use crate::types::_tracking_configuration_overrides::TrackingConfigurationOv
 
 #[cfg(feature = "op_send_bulk_email")]
 pub use crate::types::_bulk_email_entry_result::BulkEmailEntryResultBuilder;
+
+#[cfg(any(
+    feature = "op_create_configuration_set",
+    feature = "op_get_configuration_set",
+    feature = "op_update_configuration_set"
+))]
+pub use crate::types::_default_signing_scheme::DefaultSigningSchemeBuilder;
+
+#[cfg(any(
+    feature = "op_create_configuration_set",
+    feature = "op_get_configuration_set",
+    feature = "op_update_configuration_set"
+))]
+pub use crate::types::_smime_signing_scheme::SmimeSigningSchemeBuilder;
 
 #[cfg(any(feature = "op_create_deliverability_test_report", feature = "op_send_email"))]
 pub use crate::types::_content::ContentBuilder;

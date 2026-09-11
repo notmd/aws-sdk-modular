@@ -17,6 +17,10 @@ pub fn ser_default_retention(
         let mut inner_writer = scope.start_el("Years").finish();
         inner_writer.data(::aws_smithy_types::primitive::Encoder::from(*var_3).encode());
     }
+    if let Some(var_4) = &input.default_event_hold {
+        let inner_writer = scope.start_el("DefaultEventHold");
+        crate::protocol_serde::shape_event_hold_duration::ser_event_hold_duration(var_4, inner_writer)?
+    }
     scope.finish();
     Ok(())
 }
@@ -36,7 +40,7 @@ pub fn de_default_retention(
     while let Some(mut tag) = decoder.next_tag() {
         match tag.start_el() {
             s if s.matches("Mode") /* Mode com.amazonaws.s3#DefaultRetention$Mode */ =>  {
-                let var_4 =
+                let var_5 =
                     Some(
                         Result::<crate::types::ObjectLockRetentionMode, ::aws_smithy_xml::decode::XmlDecodeError>::Ok(
                             crate::types::ObjectLockRetentionMode::from(
@@ -46,11 +50,11 @@ pub fn de_default_retention(
                         ?
                     )
                 ;
-                builder = builder.set_mode(var_4);
+                builder = builder.set_mode(var_5);
             }
             ,
             s if s.matches("Days") /* Days com.amazonaws.s3#DefaultRetention$Days */ =>  {
-                let var_5 =
+                let var_6 =
                     Some(
                          {
                             <i32 as ::aws_smithy_types::primitive::Parse>::parse_smithy_primitive(
@@ -61,11 +65,11 @@ pub fn de_default_retention(
                         ?
                     )
                 ;
-                builder = builder.set_days(var_5);
+                builder = builder.set_days(var_6);
             }
             ,
             s if s.matches("Years") /* Years com.amazonaws.s3#DefaultRetention$Years */ =>  {
-                let var_6 =
+                let var_7 =
                     Some(
                          {
                             <i32 as ::aws_smithy_types::primitive::Parse>::parse_smithy_primitive(
@@ -76,7 +80,17 @@ pub fn de_default_retention(
                         ?
                     )
                 ;
-                builder = builder.set_years(var_6);
+                builder = builder.set_years(var_7);
+            }
+            ,
+            s if s.matches("DefaultEventHold") /* DefaultEventHold com.amazonaws.s3#DefaultRetention$DefaultEventHold */ =>  {
+                let var_8 =
+                    Some(
+                        crate::protocol_serde::shape_event_hold_duration::de_event_hold_duration(&mut tag, depth + 1)
+                        ?
+                    )
+                ;
+                builder = builder.set_default_event_hold(var_8);
             }
             ,
             _ => {}
