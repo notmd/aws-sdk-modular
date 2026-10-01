@@ -4,6 +4,7 @@ pub fn de_get_session_token_http_error(
     _response_status: u16,
     _response_headers: &::aws_smithy_runtime_api::http::Headers,
     _response_body: &[u8],
+    _cfg: &::aws_smithy_types::config_bag::ConfigBag,
 ) -> std::result::Result<
     crate::operation::get_session_token::GetSessionTokenOutput,
     crate::operation::get_session_token::GetSessionTokenError,
@@ -55,6 +56,7 @@ pub fn de_get_session_token_http_response(
     _response_status: u16,
     _response_headers: &::aws_smithy_runtime_api::http::Headers,
     _response_body: &[u8],
+    _cfg: &::aws_smithy_types::config_bag::ConfigBag,
 ) -> std::result::Result<
     crate::operation::get_session_token::GetSessionTokenOutput,
     crate::operation::get_session_token::GetSessionTokenError,
@@ -107,6 +109,36 @@ pub fn de_get_session_token(
                     )
                 ;
                 builder = builder.set_credentials(var_1);
+            }
+            ,
+            s if s.matches("SessionTokenUtilization") /* SessionTokenUtilization com.amazonaws.sts.synthetic#GetSessionTokenOutput$SessionTokenUtilization */ =>  {
+                let var_2 =
+                    Some(
+                         {
+                            <i32 as ::aws_smithy_types::primitive::Parse>::parse_smithy_primitive(
+                                ::aws_smithy_xml::decode::try_data(&mut tag)?.as_ref()
+                            )
+                            .map_err(|_|::aws_smithy_xml::decode::XmlDecodeError::custom("expected (integer: `com.amazonaws.sts#sessionTokenUtilizationType`)"))
+                        }
+                        ?
+                    )
+                ;
+                builder = builder.set_session_token_utilization(var_2);
+            }
+            ,
+            s if s.matches("SessionTokenSize") /* SessionTokenSize com.amazonaws.sts.synthetic#GetSessionTokenOutput$SessionTokenSize */ =>  {
+                let var_3 =
+                    Some(
+                         {
+                            <i32 as ::aws_smithy_types::primitive::Parse>::parse_smithy_primitive(
+                                ::aws_smithy_xml::decode::try_data(&mut tag)?.as_ref()
+                            )
+                            .map_err(|_|::aws_smithy_xml::decode::XmlDecodeError::custom("expected (integer: `com.amazonaws.sts#sessionTokenSizeType`)"))
+                        }
+                        ?
+                    )
+                ;
+                builder = builder.set_session_token_size(var_3);
             }
             ,
             _ => {}

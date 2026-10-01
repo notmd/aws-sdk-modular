@@ -5,7 +5,7 @@
 pub struct TerminateServiceJobInput {
     /// <p>The service job ID of the service job to terminate.</p>
     pub job_id: ::std::option::Option<::std::string::String>,
-    /// <p>A message to attach to the service job that explains the reason for canceling it. This message is returned by <code>DescribeServiceJob</code> operations on the service job.</p>
+    /// <p>A message to attach to the service job that explains the reason for terminating it. This message is returned by <code>DescribeServiceJob</code> operations on the service job.</p>
     pub reason: ::std::option::Option<::std::string::String>,
 }
 impl TerminateServiceJobInput {
@@ -13,7 +13,7 @@ impl TerminateServiceJobInput {
     pub fn job_id(&self) -> ::std::option::Option<&str> {
         self.job_id.as_deref()
     }
-    /// <p>A message to attach to the service job that explains the reason for canceling it. This message is returned by <code>DescribeServiceJob</code> operations on the service job.</p>
+    /// <p>A message to attach to the service job that explains the reason for terminating it. This message is returned by <code>DescribeServiceJob</code> operations on the service job.</p>
     pub fn reason(&self) -> ::std::option::Option<&str> {
         self.reason.as_deref()
     }
@@ -48,18 +48,18 @@ impl TerminateServiceJobInputBuilder {
     pub fn get_job_id(&self) -> &::std::option::Option<::std::string::String> {
         &self.job_id
     }
-    /// <p>A message to attach to the service job that explains the reason for canceling it. This message is returned by <code>DescribeServiceJob</code> operations on the service job.</p>
+    /// <p>A message to attach to the service job that explains the reason for terminating it. This message is returned by <code>DescribeServiceJob</code> operations on the service job.</p>
     /// This field is required.
     pub fn reason(mut self, input: impl ::std::convert::Into<::std::string::String>) -> Self {
         self.reason = ::std::option::Option::Some(input.into());
         self
     }
-    /// <p>A message to attach to the service job that explains the reason for canceling it. This message is returned by <code>DescribeServiceJob</code> operations on the service job.</p>
+    /// <p>A message to attach to the service job that explains the reason for terminating it. This message is returned by <code>DescribeServiceJob</code> operations on the service job.</p>
     pub fn set_reason(mut self, input: ::std::option::Option<::std::string::String>) -> Self {
         self.reason = input;
         self
     }
-    /// <p>A message to attach to the service job that explains the reason for canceling it. This message is returned by <code>DescribeServiceJob</code> operations on the service job.</p>
+    /// <p>A message to attach to the service job that explains the reason for terminating it. This message is returned by <code>DescribeServiceJob</code> operations on the service job.</p>
     pub fn get_reason(&self) -> &::std::option::Option<::std::string::String> {
         &self.reason
     }

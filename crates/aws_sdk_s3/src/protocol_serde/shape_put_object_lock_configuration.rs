@@ -4,6 +4,7 @@ pub fn de_put_object_lock_configuration_http_error(
     _response_status: u16,
     _response_headers: &::aws_smithy_runtime_api::http::Headers,
     _response_body: &[u8],
+    _cfg: &::aws_smithy_types::config_bag::ConfigBag,
 ) -> std::result::Result<
     crate::operation::put_object_lock_configuration::PutObjectLockConfigurationOutput,
     crate::operation::put_object_lock_configuration::PutObjectLockConfigurationError,
@@ -23,6 +24,7 @@ pub fn de_put_object_lock_configuration_http_response(
     _response_status: u16,
     _response_headers: &::aws_smithy_runtime_api::http::Headers,
     _response_body: &[u8],
+    _cfg: &::aws_smithy_types::config_bag::ConfigBag,
 ) -> std::result::Result<
     crate::operation::put_object_lock_configuration::PutObjectLockConfigurationOutput,
     crate::operation::put_object_lock_configuration::PutObjectLockConfigurationError,
@@ -33,14 +35,29 @@ pub fn de_put_object_lock_configuration_http_response(
             crate::operation::put_object_lock_configuration::builders::PutObjectLockConfigurationOutputBuilder::default(
             );
         output = output.set_request_charged(
-            crate::protocol_serde::shape_put_object_lock_configuration_output::de_request_charged_header(
+            match crate::protocol_serde::shape_put_object_lock_configuration_output::de_request_charged_header(
                 _response_headers,
-            )
-            .map_err(|_| {
-                crate::operation::put_object_lock_configuration::PutObjectLockConfigurationError::unhandled(
-                    "Failed to parse RequestCharged from header `x-amz-request-charged",
-                )
-            })?,
+            ) {
+                ::std::result::Result::Ok(value) => value,
+                ::std::result::Result::Err(err) => {
+                    let _ = &err;
+                    let has_unreadable_value = _response_headers
+                        .get_all_bytes("x-amz-request-charged")
+                        .any(|value| std::str::from_utf8(value).is_err());
+                    if has_unreadable_value
+                        && _cfg.load::<::aws_smithy_runtime_api::http::NonUtf8HeaderHandling>()
+                            == ::std::option::Option::Some(&::aws_smithy_runtime_api::http::NonUtf8HeaderHandling::Skip)
+                    {
+                        ::std::option::Option::None
+                    } else {
+                        return ::std::result::Result::Err(
+                            crate::operation::put_object_lock_configuration::PutObjectLockConfigurationError::unhandled(
+                                "Failed to parse RequestCharged from header `x-amz-request-charged`",
+                            ),
+                        );
+                    }
+                }
+            },
         );
         output._set_extended_request_id(
             crate::s3_request_id::RequestIdExt::extended_request_id(_response_headers).map(str::to_string),

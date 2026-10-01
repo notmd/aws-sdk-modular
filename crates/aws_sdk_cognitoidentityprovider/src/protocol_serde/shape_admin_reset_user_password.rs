@@ -4,6 +4,7 @@ pub fn de_admin_reset_user_password_http_error(
     _response_status: u16,
     _response_headers: &::aws_smithy_runtime_api::http::Headers,
     _response_body: &[u8],
+    _cfg: &::aws_smithy_types::config_bag::ConfigBag,
 ) -> std::result::Result<
     crate::operation::admin_reset_user_password::AdminResetUserPasswordOutput,
     crate::operation::admin_reset_user_password::AdminResetUserPasswordError,
@@ -259,6 +260,7 @@ pub fn de_admin_reset_user_password_http_response(
     _response_status: u16,
     _response_headers: &::aws_smithy_runtime_api::http::Headers,
     _response_body: &[u8],
+    _cfg: &::aws_smithy_types::config_bag::ConfigBag,
 ) -> std::result::Result<
     crate::operation::admin_reset_user_password::AdminResetUserPasswordOutput,
     crate::operation::admin_reset_user_password::AdminResetUserPasswordError,

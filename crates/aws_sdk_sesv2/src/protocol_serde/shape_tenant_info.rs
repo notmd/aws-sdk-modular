@@ -25,40 +25,48 @@ where
             loop {
                 match tokens.next().transpose()? {
                     Some(::aws_smithy_json::deserialize::Token::EndObject { .. }) => break,
-                    Some(::aws_smithy_json::deserialize::Token::ObjectKey { key, .. }) => {
-                        match key.to_unescaped()?.as_ref() {
-                            "TenantName" => {
-                                builder = builder.set_tenant_name(
-                                    ::aws_smithy_json::deserialize::token::expect_string_or_null(tokens.next())?
-                                        .map(|s| s.to_unescaped().map(|u| u.into_owned()))
-                                        .transpose()?,
-                                );
-                            }
-                            "TenantId" => {
-                                builder = builder.set_tenant_id(
-                                    ::aws_smithy_json::deserialize::token::expect_string_or_null(tokens.next())?
-                                        .map(|s| s.to_unescaped().map(|u| u.into_owned()))
-                                        .transpose()?,
-                                );
-                            }
-                            "TenantArn" => {
-                                builder = builder.set_tenant_arn(
-                                    ::aws_smithy_json::deserialize::token::expect_string_or_null(tokens.next())?
-                                        .map(|s| s.to_unescaped().map(|u| u.into_owned()))
-                                        .transpose()?,
-                                );
-                            }
-                            "CreatedTimestamp" => {
-                                builder = builder.set_created_timestamp(
-                                    ::aws_smithy_json::deserialize::token::expect_timestamp_or_null(
-                                        tokens.next(),
-                                        ::aws_smithy_types::date_time::Format::EpochSeconds,
-                                    )?,
-                                );
-                            }
-                            _ => ::aws_smithy_json::deserialize::token::skip_value(tokens)?,
+                    Some(::aws_smithy_json::deserialize::Token::ObjectKey { key, .. }) => match key
+                        .to_unescaped()?
+                        .as_ref()
+                    {
+                        "TenantName" => {
+                            builder = builder.set_tenant_name(
+                                ::aws_smithy_json::deserialize::token::expect_string_or_null(tokens.next())?
+                                    .map(|s| s.to_unescaped().map(|u| u.into_owned()))
+                                    .transpose()?,
+                            );
                         }
-                    }
+                        "TenantId" => {
+                            builder = builder.set_tenant_id(
+                                ::aws_smithy_json::deserialize::token::expect_string_or_null(tokens.next())?
+                                    .map(|s| s.to_unescaped().map(|u| u.into_owned()))
+                                    .transpose()?,
+                            );
+                        }
+                        "TenantArn" => {
+                            builder = builder.set_tenant_arn(
+                                ::aws_smithy_json::deserialize::token::expect_string_or_null(tokens.next())?
+                                    .map(|s| s.to_unescaped().map(|u| u.into_owned()))
+                                    .transpose()?,
+                            );
+                        }
+                        "CreatedTimestamp" => {
+                            builder = builder.set_created_timestamp(
+                                ::aws_smithy_json::deserialize::token::expect_timestamp_or_null(
+                                    tokens.next(),
+                                    ::aws_smithy_types::date_time::Format::EpochSeconds,
+                                )?,
+                            );
+                        }
+                        "SendingStatus" => {
+                            builder = builder.set_sending_status(
+                                ::aws_smithy_json::deserialize::token::expect_string_or_null(tokens.next())?
+                                    .map(|s| s.to_unescaped().map(|u| crate::types::SendingStatus::from(u.as_ref())))
+                                    .transpose()?,
+                            );
+                        }
+                        _ => ::aws_smithy_json::deserialize::token::skip_value(tokens)?,
+                    },
                     other => {
                         return Err(::aws_smithy_json::deserialize::error::DeserializeError::custom(
                             format!("expected object key or end object, found: {other:?}"),

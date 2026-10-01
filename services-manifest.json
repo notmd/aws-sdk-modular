@@ -1,6 +1,6 @@
 {
   "repository": "https://github.com/awslabs/aws-sdk-rust",
-  "revision": "26155f26ed36d90263a2c9058a67b08543c96f85",
+  "revision": "c7775434628c96f7e0fc72fb83af0f5ad5dd6c9f",
   "services": [
     {
       "key": "batch",

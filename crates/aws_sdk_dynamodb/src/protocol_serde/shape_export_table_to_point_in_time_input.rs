@@ -44,5 +44,11 @@ pub fn ser_export_table_to_point_in_time_input_input(
         )?;
         object_12.finish();
     }
+    if let Some(var_13) = &input.filter_specification {
+        #[allow(unused_mut)]
+        let mut object_14 = object.key("FilterSpecification").start_object();
+        crate::protocol_serde::shape_filter_specification::ser_filter_specification(&mut object_14, var_13)?;
+        object_14.finish();
+    }
     Ok(())
 }

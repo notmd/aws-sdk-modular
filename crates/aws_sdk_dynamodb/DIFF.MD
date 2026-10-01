@@ -1,7 +1,7 @@
 # AWS SDK modularizer diff
 
 - repository: `https://github.com/awslabs/aws-sdk-rust`
-- revision: `26155f26ed36d90263a2c9058a67b08543c96f85`
+- revision: `c7775434628c96f7e0fc72fb83af0f5ad5dd6c9f`
 - service: `sdk/dynamodb`
 - model: `aws-models/dynamodb.json`
 - package: `aws-sdk-dynamodb`
@@ -102,7 +102,7 @@ diff --git a/Cargo.toml b/Cargo.toml
 
  [dependencies.aws-runtime]
 -path = "../aws-runtime"
- version = "1.9.2"
+ version = "1.10.0"
 
  [dependencies.aws-smithy-async]
 -path = "../aws-smithy-async"
@@ -110,11 +110,11 @@ diff --git a/Cargo.toml b/Cargo.toml
 
  [dependencies.aws-smithy-http]
 -path = "../aws-smithy-http"
- version = "0.64.0"
+ version = "0.64.1"
 
  [dependencies.aws-smithy-json]
 -path = "../aws-smithy-json"
- version = "0.63.0"
+ version = "0.63.1"
 
  [dependencies.aws-smithy-observability]
 -path = "../aws-smithy-observability"
@@ -123,28 +123,28 @@ diff --git a/Cargo.toml b/Cargo.toml
  [dependencies.aws-smithy-runtime]
 -path = "../aws-smithy-runtime"
  features = ["client"]
- version = "1.14.0"
+ version = "1.15.0"
 
  [dependencies.aws-smithy-runtime-api]
 -path = "../aws-smithy-runtime-api"
  features = ["client", "http-1x"]
- version = "1.16.0"
+ version = "1.18.0"
 
  [dependencies.aws-smithy-schema]
 -path = "../aws-smithy-schema"
- version = "0.2.0"
+ version = "0.2.1"
 
  [dependencies.aws-smithy-types]
 -path = "../aws-smithy-types"
  features = ["http-body-1-x"]
- version = "1.6.3"
+ version = "1.8.1"
 
  [dependencies.aws-types]
 -path = "../aws-types"
  version = "1.6.0"
 
  [dependencies.bytes]
-@@ -90,51 +79,41 @@
+@@ -87,51 +76,41 @@
  version = "0.5.1"
 
  [dev-dependencies.aws-config]
@@ -160,7 +160,7 @@ diff --git a/Cargo.toml b/Cargo.toml
  [dev-dependencies.aws-runtime]
 -path = "../aws-runtime"
  features = ["test-util"]
- version = "1.9.2"
+ version = "1.10.0"
 
  [dev-dependencies.aws-smithy-async]
 -path = "../aws-smithy-async"
@@ -169,8 +169,8 @@ diff --git a/Cargo.toml b/Cargo.toml
 
  [dev-dependencies.aws-smithy-http-client]
 -path = "../aws-smithy-http-client"
- features = ["test-util", "wire-mock"]
- version = "1.4.0"
+ features = ["test-util", "wire-mock", "legacy-test-util"]
+ version = "1.4.2"
 
  [dev-dependencies.aws-smithy-protocol-test]
 -path = "../aws-smithy-protocol-test"
@@ -179,25 +179,25 @@ diff --git a/Cargo.toml b/Cargo.toml
  [dev-dependencies.aws-smithy-runtime]
 -path = "../aws-smithy-runtime"
  features = ["test-util"]
- version = "1.14.0"
+ version = "1.15.0"
 
  [dev-dependencies.aws-smithy-runtime-api]
 -path = "../aws-smithy-runtime-api"
  features = ["test-util"]
- version = "1.16.0"
+ version = "1.18.0"
 
  [dev-dependencies.aws-smithy-types]
 -path = "../aws-smithy-types"
  features = ["http-body-1-x", "test-util"]
- version = "1.6.3"
+ version = "1.8.1"
 
  [dev-dependencies.aws-smithy-xml]
 -path = "../aws-smithy-xml"
- version = "0.62.0"
+ version = "0.62.1"
 
  [dev-dependencies.criterion]
-@@ -167,6 +146,64 @@
- test-util = ["aws-credential-types/test-util", "aws-smithy-runtime/legacy-test-util", "aws-smithy-runtime/test-util"]
+@@ -166,6 +145,64 @@
+ test-util = ["aws-credential-types/test-util"]
  gated-tests = []
  default = ["rustls", "default-https-client", "rt-tokio"]
 +op_batch_execute_statement = []
@@ -3945,7 +3945,7 @@ diff --git a/src/protocol_serde.rs b/src/protocol_serde.rs
  pub(crate) fn or_empty_doc(data: &[u8]) -> &[u8] {
      if data.is_empty() {
          b"{}"
-@@ -152,552 +390,1803 @@
+@@ -152,556 +390,1831 @@
      }
  }
 
@@ -4513,8 +4513,10 @@ diff --git a/src/protocol_serde.rs b/src/protocol_serde.rs
 +    feature = "op_batch_get_item",
 +    feature = "op_batch_write_item",
 +    feature = "op_delete_item",
++    feature = "op_describe_export",
 +    feature = "op_execute_statement",
 +    feature = "op_execute_transaction",
++    feature = "op_export_table_to_point_in_time",
 +    feature = "op_get_item",
 +    feature = "op_put_item",
 +    feature = "op_query",
@@ -4531,8 +4533,10 @@ diff --git a/src/protocol_serde.rs b/src/protocol_serde.rs
 +    feature = "op_batch_get_item",
 +    feature = "op_batch_write_item",
 +    feature = "op_delete_item",
++    feature = "op_describe_export",
 +    feature = "op_execute_statement",
 +    feature = "op_execute_transaction",
++    feature = "op_export_table_to_point_in_time",
 +    feature = "op_get_item",
 +    feature = "op_put_item",
 +    feature = "op_query",
@@ -4645,6 +4649,9 @@ diff --git a/src/protocol_serde.rs b/src/protocol_serde.rs
 +#[cfg(feature = "op_describe_contributor_insights")]
  pub(crate) mod shape_failure_exception;
 
++#[cfg(any(feature = "op_describe_export", feature = "op_export_table_to_point_in_time"))]
+ pub(crate) mod shape_filter_specification;
+
 +#[cfg(any(
 +    feature = "op_create_table",
 +    feature = "op_describe_import",
@@ -4705,8 +4712,10 @@ diff --git a/src/protocol_serde.rs b/src/protocol_serde.rs
 +    feature = "op_batch_get_item",
 +    feature = "op_batch_write_item",
 +    feature = "op_delete_item",
++    feature = "op_describe_export",
 +    feature = "op_execute_statement",
 +    feature = "op_execute_transaction",
++    feature = "op_export_table_to_point_in_time",
 +    feature = "op_get_item",
 +    feature = "op_put_item",
 +    feature = "op_query",
@@ -4726,8 +4735,10 @@ diff --git a/src/protocol_serde.rs b/src/protocol_serde.rs
 +    feature = "op_batch_get_item",
 +    feature = "op_batch_write_item",
 +    feature = "op_delete_item",
++    feature = "op_describe_export",
 +    feature = "op_execute_statement",
 +    feature = "op_execute_transaction",
++    feature = "op_export_table_to_point_in_time",
 +    feature = "op_get_item",
 +    feature = "op_put_item",
 +    feature = "op_query",
@@ -5423,8 +5434,10 @@ diff --git a/src/protocol_serde.rs b/src/protocol_serde.rs
 +    feature = "op_batch_get_item",
 +    feature = "op_batch_write_item",
 +    feature = "op_delete_item",
++    feature = "op_describe_export",
 +    feature = "op_execute_statement",
 +    feature = "op_execute_transaction",
++    feature = "op_export_table_to_point_in_time",
 +    feature = "op_get_item",
 +    feature = "op_put_item",
 +    feature = "op_query",
@@ -5436,8 +5449,15 @@ diff --git a/src/protocol_serde.rs b/src/protocol_serde.rs
 +))]
  pub(crate) mod shape_binary_set_attribute_value;
 
-+#[cfg(feature = "op_batch_get_item")]
++#[cfg(any(
++    feature = "op_batch_get_item",
++    feature = "op_describe_export",
++    feature = "op_export_table_to_point_in_time"
++))]
  pub(crate) mod shape_expression_attribute_name_map;
+
++#[cfg(any(feature = "op_describe_export", feature = "op_export_table_to_point_in_time"))]
+ pub(crate) mod shape_expression_attribute_value_map;
 
 +#[cfg(any(
 +    feature = "op_create_table",
@@ -5473,8 +5493,10 @@ diff --git a/src/protocol_serde.rs b/src/protocol_serde.rs
 +    feature = "op_batch_get_item",
 +    feature = "op_batch_write_item",
 +    feature = "op_delete_item",
++    feature = "op_describe_export",
 +    feature = "op_execute_statement",
 +    feature = "op_execute_transaction",
++    feature = "op_export_table_to_point_in_time",
 +    feature = "op_get_item",
 +    feature = "op_put_item",
 +    feature = "op_query",
@@ -5504,8 +5526,10 @@ diff --git a/src/protocol_serde.rs b/src/protocol_serde.rs
 +    feature = "op_batch_get_item",
 +    feature = "op_batch_write_item",
 +    feature = "op_delete_item",
++    feature = "op_describe_export",
 +    feature = "op_execute_statement",
 +    feature = "op_execute_transaction",
++    feature = "op_export_table_to_point_in_time",
 +    feature = "op_get_item",
 +    feature = "op_put_item",
 +    feature = "op_query",
@@ -5522,8 +5546,10 @@ diff --git a/src/protocol_serde.rs b/src/protocol_serde.rs
 +    feature = "op_batch_get_item",
 +    feature = "op_batch_write_item",
 +    feature = "op_delete_item",
++    feature = "op_describe_export",
 +    feature = "op_execute_statement",
 +    feature = "op_execute_transaction",
++    feature = "op_export_table_to_point_in_time",
 +    feature = "op_get_item",
 +    feature = "op_put_item",
 +    feature = "op_query",
@@ -5597,8 +5623,10 @@ diff --git a/src/protocol_serde.rs b/src/protocol_serde.rs
 +    feature = "op_batch_get_item",
 +    feature = "op_batch_write_item",
 +    feature = "op_delete_item",
++    feature = "op_describe_export",
 +    feature = "op_execute_statement",
 +    feature = "op_execute_transaction",
++    feature = "op_export_table_to_point_in_time",
 +    feature = "op_get_item",
 +    feature = "op_put_item",
 +    feature = "op_query",
@@ -6073,7 +6101,7 @@ diff --git a/src/serde_util.rs b/src/serde_util.rs
 diff --git a/src/types.rs b/src/types.rs
 --- a/src/types.rs
 +++ b/src/types.rs
-@@ -1,678 +1,2350 @@
+@@ -1,682 +1,2360 @@
  // Code generated by software.amazon.smithy.rust.codegen.smithy-rs. DO NOT EDIT.
 +#[cfg(any(
 +    feature = "op_batch_execute_statement",
@@ -6348,6 +6376,9 @@ diff --git a/src/types.rs b/src/types.rs
 
 +#[cfg(any(feature = "op_describe_export", feature = "op_export_table_to_point_in_time"))]
  pub use crate::types::_incremental_export_specification::IncrementalExportSpecification;
+
++#[cfg(any(feature = "op_describe_export", feature = "op_export_table_to_point_in_time"))]
+ pub use crate::types::_filter_specification::FilterSpecification;
 
 +#[cfg(any(
 +    feature = "op_describe_import",
@@ -6669,8 +6700,10 @@ diff --git a/src/types.rs b/src/types.rs
 +    feature = "op_batch_get_item",
 +    feature = "op_batch_write_item",
 +    feature = "op_delete_item",
++    feature = "op_describe_export",
 +    feature = "op_execute_statement",
 +    feature = "op_execute_transaction",
++    feature = "op_export_table_to_point_in_time",
 +    feature = "op_get_item",
 +    feature = "op_put_item",
 +    feature = "op_query",
@@ -7287,8 +7320,10 @@ diff --git a/src/types.rs b/src/types.rs
 +    feature = "op_batch_get_item",
 +    feature = "op_batch_write_item",
 +    feature = "op_delete_item",
++    feature = "op_describe_export",
 +    feature = "op_execute_statement",
 +    feature = "op_execute_transaction",
++    feature = "op_export_table_to_point_in_time",
 +    feature = "op_get_item",
 +    feature = "op_put_item",
 +    feature = "op_query",
@@ -7595,6 +7630,9 @@ diff --git a/src/types.rs b/src/types.rs
 
 +#[cfg(feature = "op_describe_contributor_insights")]
  mod _failure_exception;
+
++#[cfg(any(feature = "op_describe_export", feature = "op_export_table_to_point_in_time"))]
+ mod _filter_specification;
 
 +#[cfg(feature = "op_transact_get_items")]
  mod _get;
@@ -8432,7 +8470,7 @@ diff --git a/src/types.rs b/src/types.rs
 diff --git a/src/types/builders.rs b/src/types/builders.rs
 --- a/src/types/builders.rs
 +++ b/src/types/builders.rs
-@@ -1,246 +1,757 @@
+@@ -1,248 +1,760 @@
  // Code generated by software.amazon.smithy.rust.codegen.smithy-rs. DO NOT EDIT.
 +#[cfg(any(
 +    feature = "op_create_backup",
@@ -8578,6 +8616,9 @@ diff --git a/src/types/builders.rs b/src/types/builders.rs
 
 +#[cfg(any(feature = "op_describe_export", feature = "op_export_table_to_point_in_time"))]
  pub use crate::types::_incremental_export_specification::IncrementalExportSpecificationBuilder;
+
++#[cfg(any(feature = "op_describe_export", feature = "op_export_table_to_point_in_time"))]
+ pub use crate::types::_filter_specification::FilterSpecificationBuilder;
 
 +#[cfg(any(
 +    feature = "op_describe_import",
@@ -10504,7 +10545,7 @@ diff --git a/Cargo.toml b/Cargo.toml
 
  [dependencies.aws-runtime]
 -path = "../aws-runtime"
- version = "1.9.2"
+ version = "1.10.0"
 
  [dependencies.aws-smithy-async]
 -path = "../aws-smithy-async"
@@ -10512,11 +10553,11 @@ diff --git a/Cargo.toml b/Cargo.toml
 
  [dependencies.aws-smithy-http]
 -path = "../aws-smithy-http"
- version = "0.64.0"
+ version = "0.64.1"
 
  [dependencies.aws-smithy-json]
 -path = "../aws-smithy-json"
- version = "0.63.0"
+ version = "0.63.1"
 
  [dependencies.aws-smithy-observability]
 -path = "../aws-smithy-observability"
@@ -10525,28 +10566,28 @@ diff --git a/Cargo.toml b/Cargo.toml
  [dependencies.aws-smithy-runtime]
 -path = "../aws-smithy-runtime"
  features = ["client"]
- version = "1.14.0"
+ version = "1.15.0"
 
  [dependencies.aws-smithy-runtime-api]
 -path = "../aws-smithy-runtime-api"
  features = ["client", "http-1x"]
- version = "1.16.0"
+ version = "1.18.0"
 
  [dependencies.aws-smithy-schema]
 -path = "../aws-smithy-schema"
- version = "0.2.0"
+ version = "0.2.1"
 
  [dependencies.aws-smithy-types]
 -path = "../aws-smithy-types"
  features = ["http-body-1-x"]
- version = "1.6.3"
+ version = "1.8.1"
 
  [dependencies.aws-types]
 -path = "../aws-types"
  version = "1.6.0"
 
  [dependencies.bytes]
-@@ -90,51 +79,41 @@
+@@ -87,51 +76,41 @@
  version = "0.5.1"
 
  [dev-dependencies.aws-config]
@@ -10562,7 +10603,7 @@ diff --git a/Cargo.toml b/Cargo.toml
  [dev-dependencies.aws-runtime]
 -path = "../aws-runtime"
  features = ["test-util"]
- version = "1.9.2"
+ version = "1.10.0"
 
  [dev-dependencies.aws-smithy-async]
 -path = "../aws-smithy-async"
@@ -10571,8 +10612,8 @@ diff --git a/Cargo.toml b/Cargo.toml
 
  [dev-dependencies.aws-smithy-http-client]
 -path = "../aws-smithy-http-client"
- features = ["test-util", "wire-mock"]
- version = "1.4.0"
+ features = ["test-util", "wire-mock", "legacy-test-util"]
+ version = "1.4.2"
 
  [dev-dependencies.aws-smithy-protocol-test]
 -path = "../aws-smithy-protocol-test"
@@ -10581,25 +10622,25 @@ diff --git a/Cargo.toml b/Cargo.toml
  [dev-dependencies.aws-smithy-runtime]
 -path = "../aws-smithy-runtime"
  features = ["test-util"]
- version = "1.14.0"
+ version = "1.15.0"
 
  [dev-dependencies.aws-smithy-runtime-api]
 -path = "../aws-smithy-runtime-api"
  features = ["test-util"]
- version = "1.16.0"
+ version = "1.18.0"
 
  [dev-dependencies.aws-smithy-types]
 -path = "../aws-smithy-types"
  features = ["http-body-1-x", "test-util"]
- version = "1.6.3"
+ version = "1.8.1"
 
  [dev-dependencies.aws-smithy-xml]
 -path = "../aws-smithy-xml"
- version = "0.62.0"
+ version = "0.62.1"
 
  [dev-dependencies.criterion]
-@@ -167,6 +146,64 @@
- test-util = ["aws-credential-types/test-util", "aws-smithy-runtime/legacy-test-util", "aws-smithy-runtime/test-util"]
+@@ -166,6 +145,64 @@
+ test-util = ["aws-credential-types/test-util"]
  gated-tests = []
  default = ["rustls", "default-https-client", "rt-tokio"]
 +op_batch_execute_statement = []
@@ -14322,7 +14363,7 @@ diff --git a/src/protocol_serde.rs b/src/protocol_serde.rs
  pub(crate) fn or_empty_doc(data: &[u8]) -> &[u8] {
      if data.is_empty() {
          b"{}"
-@@ -152,552 +390,1803 @@
+@@ -152,556 +390,1831 @@
      }
  }
 
@@ -14890,8 +14931,10 @@ diff --git a/src/protocol_serde.rs b/src/protocol_serde.rs
 +    feature = "op_batch_get_item",
 +    feature = "op_batch_write_item",
 +    feature = "op_delete_item",
++    feature = "op_describe_export",
 +    feature = "op_execute_statement",
 +    feature = "op_execute_transaction",
++    feature = "op_export_table_to_point_in_time",
 +    feature = "op_get_item",
 +    feature = "op_put_item",
 +    feature = "op_query",
@@ -14908,8 +14951,10 @@ diff --git a/src/protocol_serde.rs b/src/protocol_serde.rs
 +    feature = "op_batch_get_item",
 +    feature = "op_batch_write_item",
 +    feature = "op_delete_item",
++    feature = "op_describe_export",
 +    feature = "op_execute_statement",
 +    feature = "op_execute_transaction",
++    feature = "op_export_table_to_point_in_time",
 +    feature = "op_get_item",
 +    feature = "op_put_item",
 +    feature = "op_query",
@@ -15022,6 +15067,9 @@ diff --git a/src/protocol_serde.rs b/src/protocol_serde.rs
 +#[cfg(feature = "op_describe_contributor_insights")]
  pub(crate) mod shape_failure_exception;
 
++#[cfg(any(feature = "op_describe_export", feature = "op_export_table_to_point_in_time"))]
+ pub(crate) mod shape_filter_specification;
+
 +#[cfg(any(
 +    feature = "op_create_table",
 +    feature = "op_describe_import",
@@ -15082,8 +15130,10 @@ diff --git a/src/protocol_serde.rs b/src/protocol_serde.rs
 +    feature = "op_batch_get_item",
 +    feature = "op_batch_write_item",
 +    feature = "op_delete_item",
++    feature = "op_describe_export",
 +    feature = "op_execute_statement",
 +    feature = "op_execute_transaction",
++    feature = "op_export_table_to_point_in_time",
 +    feature = "op_get_item",
 +    feature = "op_put_item",
 +    feature = "op_query",
@@ -15103,8 +15153,10 @@ diff --git a/src/protocol_serde.rs b/src/protocol_serde.rs
 +    feature = "op_batch_get_item",
 +    feature = "op_batch_write_item",
 +    feature = "op_delete_item",
++    feature = "op_describe_export",
 +    feature = "op_execute_statement",
 +    feature = "op_execute_transaction",
++    feature = "op_export_table_to_point_in_time",
 +    feature = "op_get_item",
 +    feature = "op_put_item",
 +    feature = "op_query",
@@ -15800,8 +15852,10 @@ diff --git a/src/protocol_serde.rs b/src/protocol_serde.rs
 +    feature = "op_batch_get_item",
 +    feature = "op_batch_write_item",
 +    feature = "op_delete_item",
++    feature = "op_describe_export",
 +    feature = "op_execute_statement",
 +    feature = "op_execute_transaction",
++    feature = "op_export_table_to_point_in_time",
 +    feature = "op_get_item",
 +    feature = "op_put_item",
 +    feature = "op_query",
@@ -15813,8 +15867,15 @@ diff --git a/src/protocol_serde.rs b/src/protocol_serde.rs
 +))]
  pub(crate) mod shape_binary_set_attribute_value;
 
-+#[cfg(feature = "op_batch_get_item")]
++#[cfg(any(
++    feature = "op_batch_get_item",
++    feature = "op_describe_export",
++    feature = "op_export_table_to_point_in_time"
++))]
  pub(crate) mod shape_expression_attribute_name_map;
+
++#[cfg(any(feature = "op_describe_export", feature = "op_export_table_to_point_in_time"))]
+ pub(crate) mod shape_expression_attribute_value_map;
 
 +#[cfg(any(
 +    feature = "op_create_table",
@@ -15850,8 +15911,10 @@ diff --git a/src/protocol_serde.rs b/src/protocol_serde.rs
 +    feature = "op_batch_get_item",
 +    feature = "op_batch_write_item",
 +    feature = "op_delete_item",
++    feature = "op_describe_export",
 +    feature = "op_execute_statement",
 +    feature = "op_execute_transaction",
++    feature = "op_export_table_to_point_in_time",
 +    feature = "op_get_item",
 +    feature = "op_put_item",
 +    feature = "op_query",
@@ -15881,8 +15944,10 @@ diff --git a/src/protocol_serde.rs b/src/protocol_serde.rs
 +    feature = "op_batch_get_item",
 +    feature = "op_batch_write_item",
 +    feature = "op_delete_item",
++    feature = "op_describe_export",
 +    feature = "op_execute_statement",
 +    feature = "op_execute_transaction",
++    feature = "op_export_table_to_point_in_time",
 +    feature = "op_get_item",
 +    feature = "op_put_item",
 +    feature = "op_query",
@@ -15899,8 +15964,10 @@ diff --git a/src/protocol_serde.rs b/src/protocol_serde.rs
 +    feature = "op_batch_get_item",
 +    feature = "op_batch_write_item",
 +    feature = "op_delete_item",
++    feature = "op_describe_export",
 +    feature = "op_execute_statement",
 +    feature = "op_execute_transaction",
++    feature = "op_export_table_to_point_in_time",
 +    feature = "op_get_item",
 +    feature = "op_put_item",
 +    feature = "op_query",
@@ -15974,8 +16041,10 @@ diff --git a/src/protocol_serde.rs b/src/protocol_serde.rs
 +    feature = "op_batch_get_item",
 +    feature = "op_batch_write_item",
 +    feature = "op_delete_item",
++    feature = "op_describe_export",
 +    feature = "op_execute_statement",
 +    feature = "op_execute_transaction",
++    feature = "op_export_table_to_point_in_time",
 +    feature = "op_get_item",
 +    feature = "op_put_item",
 +    feature = "op_query",
@@ -16440,7 +16509,7 @@ diff --git a/src/serde_util.rs b/src/serde_util.rs
 diff --git a/src/types.rs b/src/types.rs
 --- a/src/types.rs
 +++ b/src/types.rs
-@@ -1,678 +1,2350 @@
+@@ -1,682 +1,2360 @@
  // Code generated by software.amazon.smithy.rust.codegen.smithy-rs. DO NOT EDIT.
 +#[cfg(any(
 +    feature = "op_batch_execute_statement",
@@ -16715,6 +16784,9 @@ diff --git a/src/types.rs b/src/types.rs
 
 +#[cfg(any(feature = "op_describe_export", feature = "op_export_table_to_point_in_time"))]
  pub use crate::types::_incremental_export_specification::IncrementalExportSpecification;
+
++#[cfg(any(feature = "op_describe_export", feature = "op_export_table_to_point_in_time"))]
+ pub use crate::types::_filter_specification::FilterSpecification;
 
 +#[cfg(any(
 +    feature = "op_describe_import",
@@ -17036,8 +17108,10 @@ diff --git a/src/types.rs b/src/types.rs
 +    feature = "op_batch_get_item",
 +    feature = "op_batch_write_item",
 +    feature = "op_delete_item",
++    feature = "op_describe_export",
 +    feature = "op_execute_statement",
 +    feature = "op_execute_transaction",
++    feature = "op_export_table_to_point_in_time",
 +    feature = "op_get_item",
 +    feature = "op_put_item",
 +    feature = "op_query",
@@ -17654,8 +17728,10 @@ diff --git a/src/types.rs b/src/types.rs
 +    feature = "op_batch_get_item",
 +    feature = "op_batch_write_item",
 +    feature = "op_delete_item",
++    feature = "op_describe_export",
 +    feature = "op_execute_statement",
 +    feature = "op_execute_transaction",
++    feature = "op_export_table_to_point_in_time",
 +    feature = "op_get_item",
 +    feature = "op_put_item",
 +    feature = "op_query",
@@ -17962,6 +18038,9 @@ diff --git a/src/types.rs b/src/types.rs
 
 +#[cfg(feature = "op_describe_contributor_insights")]
  mod _failure_exception;
+
++#[cfg(any(feature = "op_describe_export", feature = "op_export_table_to_point_in_time"))]
+ mod _filter_specification;
 
 +#[cfg(feature = "op_transact_get_items")]
  mod _get;
@@ -18794,7 +18873,7 @@ diff --git a/src/types.rs b/src/types.rs
 diff --git a/src/types/builders.rs b/src/types/builders.rs
 --- a/src/types/builders.rs
 +++ b/src/types/builders.rs
-@@ -1,246 +1,757 @@
+@@ -1,248 +1,760 @@
  // Code generated by software.amazon.smithy.rust.codegen.smithy-rs. DO NOT EDIT.
 +#[cfg(any(
 +    feature = "op_create_backup",
@@ -18940,6 +19019,9 @@ diff --git a/src/types/builders.rs b/src/types/builders.rs
 
 +#[cfg(any(feature = "op_describe_export", feature = "op_export_table_to_point_in_time"))]
  pub use crate::types::_incremental_export_specification::IncrementalExportSpecificationBuilder;
+
++#[cfg(any(feature = "op_describe_export", feature = "op_export_table_to_point_in_time"))]
+ pub use crate::types::_filter_specification::FilterSpecificationBuilder;
 
 +#[cfg(any(
 +    feature = "op_describe_import",

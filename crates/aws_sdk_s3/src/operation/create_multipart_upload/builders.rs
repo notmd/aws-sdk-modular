@@ -1300,41 +1300,41 @@ impl CreateMultipartUploadFluentBuilder {
     pub fn get_object_lock_event_hold(&self) -> &::std::option::Option<crate::types::ObjectLockEventHold> {
         self.inner.get_object_lock_event_hold()
     }
-    /// <p>Specifies the event hold duration in days to apply to the uploaded object.</p><note>
+    /// <p>Specifies the event hold duration in days to apply to the uploaded object. You cannot specify a duration in both days and years.</p><note>
     /// <p>This functionality is not supported for directory buckets.</p>
     /// </note>
     pub fn object_lock_event_hold_duration_days(mut self, input: i32) -> Self {
         self.inner = self.inner.object_lock_event_hold_duration_days(input);
         self
     }
-    /// <p>Specifies the event hold duration in days to apply to the uploaded object.</p><note>
+    /// <p>Specifies the event hold duration in days to apply to the uploaded object. You cannot specify a duration in both days and years.</p><note>
     /// <p>This functionality is not supported for directory buckets.</p>
     /// </note>
     pub fn set_object_lock_event_hold_duration_days(mut self, input: ::std::option::Option<i32>) -> Self {
         self.inner = self.inner.set_object_lock_event_hold_duration_days(input);
         self
     }
-    /// <p>Specifies the event hold duration in days to apply to the uploaded object.</p><note>
+    /// <p>Specifies the event hold duration in days to apply to the uploaded object. You cannot specify a duration in both days and years.</p><note>
     /// <p>This functionality is not supported for directory buckets.</p>
     /// </note>
     pub fn get_object_lock_event_hold_duration_days(&self) -> &::std::option::Option<i32> {
         self.inner.get_object_lock_event_hold_duration_days()
     }
-    /// <p>Specifies the event hold duration in years to apply to the uploaded object.</p><note>
+    /// <p>Specifies the event hold duration in years to apply to the uploaded object. You cannot specify a duration in both days and years.</p><note>
     /// <p>This functionality is not supported for directory buckets.</p>
     /// </note>
     pub fn object_lock_event_hold_duration_years(mut self, input: i32) -> Self {
         self.inner = self.inner.object_lock_event_hold_duration_years(input);
         self
     }
-    /// <p>Specifies the event hold duration in years to apply to the uploaded object.</p><note>
+    /// <p>Specifies the event hold duration in years to apply to the uploaded object. You cannot specify a duration in both days and years.</p><note>
     /// <p>This functionality is not supported for directory buckets.</p>
     /// </note>
     pub fn set_object_lock_event_hold_duration_years(mut self, input: ::std::option::Option<i32>) -> Self {
         self.inner = self.inner.set_object_lock_event_hold_duration_years(input);
         self
     }
-    /// <p>Specifies the event hold duration in years to apply to the uploaded object.</p><note>
+    /// <p>Specifies the event hold duration in years to apply to the uploaded object. You cannot specify a duration in both days and years.</p><note>
     /// <p>This functionality is not supported for directory buckets.</p>
     /// </note>
     pub fn get_object_lock_event_hold_duration_years(&self) -> &::std::option::Option<i32> {

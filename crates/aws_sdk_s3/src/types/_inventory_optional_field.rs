@@ -17,6 +17,7 @@
 ///     InventoryOptionalField::ETag => { /* ... */ },
 ///     InventoryOptionalField::EncryptionStatus => { /* ... */ },
 ///     InventoryOptionalField::IntelligentTieringAccessTier => { /* ... */ },
+///     InventoryOptionalField::IntelligentTieringReferenceDate => { /* ... */ },
 ///     InventoryOptionalField::IsMultipartUploaded => { /* ... */ },
 ///     InventoryOptionalField::LastModifiedDate => { /* ... */ },
 ///     InventoryOptionalField::LifecycleExpirationDate => { /* ... */ },
@@ -75,6 +76,8 @@ pub enum InventoryOptionalField {
     #[allow(missing_docs)] // documentation missing in model
     IntelligentTieringAccessTier,
     #[allow(missing_docs)] // documentation missing in model
+    IntelligentTieringReferenceDate,
+    #[allow(missing_docs)] // documentation missing in model
     IsMultipartUploaded,
     #[allow(missing_docs)] // documentation missing in model
     LastModifiedDate,
@@ -114,6 +117,7 @@ impl ::std::convert::From<&str> for InventoryOptionalField {
             "ETag" => InventoryOptionalField::ETag,
             "EncryptionStatus" => InventoryOptionalField::EncryptionStatus,
             "IntelligentTieringAccessTier" => InventoryOptionalField::IntelligentTieringAccessTier,
+            "IntelligentTieringReferenceDate" => InventoryOptionalField::IntelligentTieringReferenceDate,
             "IsMultipartUploaded" => InventoryOptionalField::IsMultipartUploaded,
             "LastModifiedDate" => InventoryOptionalField::LastModifiedDate,
             "LifecycleExpirationDate" => InventoryOptionalField::LifecycleExpirationDate,
@@ -149,6 +153,7 @@ impl InventoryOptionalField {
             InventoryOptionalField::ETag => "ETag",
             InventoryOptionalField::EncryptionStatus => "EncryptionStatus",
             InventoryOptionalField::IntelligentTieringAccessTier => "IntelligentTieringAccessTier",
+            InventoryOptionalField::IntelligentTieringReferenceDate => "IntelligentTieringReferenceDate",
             InventoryOptionalField::IsMultipartUploaded => "IsMultipartUploaded",
             InventoryOptionalField::LastModifiedDate => "LastModifiedDate",
             InventoryOptionalField::LifecycleExpirationDate => "LifecycleExpirationDate",
@@ -173,6 +178,7 @@ impl InventoryOptionalField {
             "ETag",
             "EncryptionStatus",
             "IntelligentTieringAccessTier",
+            "IntelligentTieringReferenceDate",
             "IsMultipartUploaded",
             "LastModifiedDate",
             "LifecycleExpirationDate",
@@ -214,6 +220,7 @@ impl ::std::fmt::Display for InventoryOptionalField {
             InventoryOptionalField::ETag => write!(f, "ETag"),
             InventoryOptionalField::EncryptionStatus => write!(f, "EncryptionStatus"),
             InventoryOptionalField::IntelligentTieringAccessTier => write!(f, "IntelligentTieringAccessTier"),
+            InventoryOptionalField::IntelligentTieringReferenceDate => write!(f, "IntelligentTieringReferenceDate"),
             InventoryOptionalField::IsMultipartUploaded => write!(f, "IsMultipartUploaded"),
             InventoryOptionalField::LastModifiedDate => write!(f, "LastModifiedDate"),
             InventoryOptionalField::LifecycleExpirationDate => write!(f, "LifecycleExpirationDate"),

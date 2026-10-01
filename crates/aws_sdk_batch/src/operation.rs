@@ -5,6 +5,10 @@ pub use ::aws_types::request_id::RequestId;
 /// Types for the `CancelJob` operation.
 pub mod cancel_job;
 
+#[cfg(feature = "op_cancel_jobs")]
+/// Types for the `CancelJobs` operation.
+pub mod cancel_jobs;
+
 #[cfg(feature = "op_create_compute_environment")]
 /// Types for the `CreateComputeEnvironment` operation.
 pub mod create_compute_environment;
@@ -145,9 +149,17 @@ pub mod tag_resource;
 /// Types for the `TerminateJob` operation.
 pub mod terminate_job;
 
+#[cfg(feature = "op_terminate_jobs")]
+/// Types for the `TerminateJobs` operation.
+pub mod terminate_jobs;
+
 #[cfg(feature = "op_terminate_service_job")]
 /// Types for the `TerminateServiceJob` operation.
 pub mod terminate_service_job;
+
+#[cfg(feature = "op_terminate_service_jobs")]
+/// Types for the `TerminateServiceJobs` operation.
+pub mod terminate_service_jobs;
 
 #[cfg(feature = "op_untag_resource")]
 /// Types for the `UntagResource` operation.

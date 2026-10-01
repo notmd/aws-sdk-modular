@@ -1,7 +1,7 @@
 # AWS SDK modularizer diff
 
 - repository: `https://github.com/awslabs/aws-sdk-rust`
-- revision: `26155f26ed36d90263a2c9058a67b08543c96f85`
+- revision: `c7775434628c96f7e0fc72fb83af0f5ad5dd6c9f`
 - service: `sdk/iam`
 - model: `aws-models/iam.json`
 - package: `aws-sdk-iam`
@@ -224,7 +224,7 @@ diff --git a/Cargo.toml b/Cargo.toml
 
  [dependencies.aws-runtime]
 -path = "../aws-runtime"
- version = "1.9.2"
+ version = "1.10.0"
 
  [dependencies.aws-smithy-async]
 -path = "../aws-smithy-async"
@@ -232,11 +232,11 @@ diff --git a/Cargo.toml b/Cargo.toml
 
  [dependencies.aws-smithy-http]
 -path = "../aws-smithy-http"
- version = "0.64.0"
+ version = "0.64.1"
 
  [dependencies.aws-smithy-json]
 -path = "../aws-smithy-json"
- version = "0.63.0"
+ version = "0.63.1"
 
  [dependencies.aws-smithy-observability]
 -path = "../aws-smithy-observability"
@@ -244,37 +244,37 @@ diff --git a/Cargo.toml b/Cargo.toml
 
  [dependencies.aws-smithy-query]
 -path = "../aws-smithy-query"
- version = "0.62.0"
+ version = "0.62.1"
 
  [dependencies.aws-smithy-runtime]
 -path = "../aws-smithy-runtime"
  features = ["client"]
- version = "1.14.0"
+ version = "1.15.0"
 
  [dependencies.aws-smithy-runtime-api]
 -path = "../aws-smithy-runtime-api"
  features = ["client", "http-1x"]
- version = "1.16.0"
+ version = "1.18.0"
 
  [dependencies.aws-smithy-schema]
 -path = "../aws-smithy-schema"
- version = "0.2.0"
+ version = "0.2.1"
 
  [dependencies.aws-smithy-types]
 -path = "../aws-smithy-types"
  features = ["http-body-1-x"]
- version = "1.6.3"
+ version = "1.8.1"
 
  [dependencies.aws-smithy-xml]
 -path = "../aws-smithy-xml"
- version = "0.62.0"
+ version = "0.62.1"
 
  [dependencies.aws-types]
 -path = "../aws-types"
  version = "1.6.0"
 
  [dependencies.fastrand]
-@@ -89,45 +76,36 @@
+@@ -86,45 +73,36 @@
  [dependencies.tracing]
  version = "0.1"
  [dev-dependencies.aws-config]
@@ -289,7 +289,7 @@ diff --git a/Cargo.toml b/Cargo.toml
  [dev-dependencies.aws-runtime]
 -path = "../aws-runtime"
  features = ["test-util"]
- version = "1.9.2"
+ version = "1.10.0"
 
  [dev-dependencies.aws-smithy-async]
 -path = "../aws-smithy-async"
@@ -298,8 +298,8 @@ diff --git a/Cargo.toml b/Cargo.toml
 
  [dev-dependencies.aws-smithy-http-client]
 -path = "../aws-smithy-http-client"
- features = ["test-util", "wire-mock"]
- version = "1.4.0"
+ features = ["test-util", "wire-mock", "legacy-test-util"]
+ version = "1.4.2"
 
  [dev-dependencies.aws-smithy-protocol-test]
 -path = "../aws-smithy-protocol-test"
@@ -308,20 +308,20 @@ diff --git a/Cargo.toml b/Cargo.toml
  [dev-dependencies.aws-smithy-runtime]
 -path = "../aws-smithy-runtime"
  features = ["test-util"]
- version = "1.14.0"
+ version = "1.15.0"
 
  [dev-dependencies.aws-smithy-runtime-api]
 -path = "../aws-smithy-runtime-api"
  features = ["test-util"]
- version = "1.16.0"
+ version = "1.18.0"
 
  [dev-dependencies.aws-smithy-types]
 -path = "../aws-smithy-types"
  features = ["http-body-1-x", "test-util"]
- version = "1.6.3"
+ version = "1.8.1"
 
-@@ -158,3 +136,183 @@
- test-util = ["aws-credential-types/test-util", "aws-smithy-runtime/legacy-test-util", "aws-smithy-runtime/test-util"]
+@@ -157,3 +135,183 @@
+ test-util = ["aws-credential-types/test-util"]
  gated-tests = []
  default = ["rustls", "default-https-client", "rt-tokio"]
 +op_accept_delegation_request = []
@@ -15792,7 +15792,7 @@ diff --git a/Cargo.toml b/Cargo.toml
 
  [dependencies.aws-runtime]
 -path = "../aws-runtime"
- version = "1.9.2"
+ version = "1.10.0"
 
  [dependencies.aws-smithy-async]
 -path = "../aws-smithy-async"
@@ -15800,11 +15800,11 @@ diff --git a/Cargo.toml b/Cargo.toml
 
  [dependencies.aws-smithy-http]
 -path = "../aws-smithy-http"
- version = "0.64.0"
+ version = "0.64.1"
 
  [dependencies.aws-smithy-json]
 -path = "../aws-smithy-json"
- version = "0.63.0"
+ version = "0.63.1"
 
  [dependencies.aws-smithy-observability]
 -path = "../aws-smithy-observability"
@@ -15812,37 +15812,37 @@ diff --git a/Cargo.toml b/Cargo.toml
 
  [dependencies.aws-smithy-query]
 -path = "../aws-smithy-query"
- version = "0.62.0"
+ version = "0.62.1"
 
  [dependencies.aws-smithy-runtime]
 -path = "../aws-smithy-runtime"
  features = ["client"]
- version = "1.14.0"
+ version = "1.15.0"
 
  [dependencies.aws-smithy-runtime-api]
 -path = "../aws-smithy-runtime-api"
  features = ["client", "http-1x"]
- version = "1.16.0"
+ version = "1.18.0"
 
  [dependencies.aws-smithy-schema]
 -path = "../aws-smithy-schema"
- version = "0.2.0"
+ version = "0.2.1"
 
  [dependencies.aws-smithy-types]
 -path = "../aws-smithy-types"
  features = ["http-body-1-x"]
- version = "1.6.3"
+ version = "1.8.1"
 
  [dependencies.aws-smithy-xml]
 -path = "../aws-smithy-xml"
- version = "0.62.0"
+ version = "0.62.1"
 
  [dependencies.aws-types]
 -path = "../aws-types"
  version = "1.6.0"
 
  [dependencies.fastrand]
-@@ -89,45 +76,36 @@
+@@ -86,45 +73,36 @@
  [dependencies.tracing]
  version = "0.1"
  [dev-dependencies.aws-config]
@@ -15857,7 +15857,7 @@ diff --git a/Cargo.toml b/Cargo.toml
  [dev-dependencies.aws-runtime]
 -path = "../aws-runtime"
  features = ["test-util"]
- version = "1.9.2"
+ version = "1.10.0"
 
  [dev-dependencies.aws-smithy-async]
 -path = "../aws-smithy-async"
@@ -15866,8 +15866,8 @@ diff --git a/Cargo.toml b/Cargo.toml
 
  [dev-dependencies.aws-smithy-http-client]
 -path = "../aws-smithy-http-client"
- features = ["test-util", "wire-mock"]
- version = "1.4.0"
+ features = ["test-util", "wire-mock", "legacy-test-util"]
+ version = "1.4.2"
 
  [dev-dependencies.aws-smithy-protocol-test]
 -path = "../aws-smithy-protocol-test"
@@ -15876,20 +15876,20 @@ diff --git a/Cargo.toml b/Cargo.toml
  [dev-dependencies.aws-smithy-runtime]
 -path = "../aws-smithy-runtime"
  features = ["test-util"]
- version = "1.14.0"
+ version = "1.15.0"
 
  [dev-dependencies.aws-smithy-runtime-api]
 -path = "../aws-smithy-runtime-api"
  features = ["test-util"]
- version = "1.16.0"
+ version = "1.18.0"
 
  [dev-dependencies.aws-smithy-types]
 -path = "../aws-smithy-types"
  features = ["http-body-1-x", "test-util"]
- version = "1.6.3"
+ version = "1.8.1"
 
-@@ -158,3 +136,183 @@
- test-util = ["aws-credential-types/test-util", "aws-smithy-runtime/legacy-test-util", "aws-smithy-runtime/test-util"]
+@@ -157,3 +135,183 @@
+ test-util = ["aws-credential-types/test-util"]
  gated-tests = []
  default = ["rustls", "default-https-client", "rt-tokio"]
 +op_accept_delegation_request = []

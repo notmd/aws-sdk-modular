@@ -1,5 +1,37 @@
 # AWS SDK modularizer checkpoint log
 
+## 2026-08-31 — `90034a503` — derive redundant SDK crate names from service keys
+
+- Objective: remove redundant `package_name` and `library_name` properties from all service manifest entries while preserving generated Cargo names and eliminating redundant `[lib]` diff hunks.
+- Generic rule: derive each service package as `aws-sdk-{key}` and library as `aws_sdk_{key}` with hyphens converted to underscores; keep the transform generic so explicit custom names remain supported, and format the transformed and upstream stages with the Smithy-RS Rustfmt settings before computing per-file diffs.
+- Changed files: `services-manifest.json`, manifest/conformance/transform implementation and tests, README/Prompt guidance, and all 18 generated service `Cargo.toml`/`DIFF.MD`/`DIFF.diff` artifacts.
+- Commands: generation passed; `AWS_SDK_MODULARIZER_ARCHIVE=/tmp/aws-sdk-rust.tar.gz RUSTFLAGS='-Awarnings' just conformance` passed for all 18 services; `cargo check --workspace`, `cargo test --workspace`, `cargo fmt --all -- --check`, and `git diff --check` passed.
+- Diff result: zero redundant manifest properties, zero generated `[lib]` additions, zero formatting-only `CONTENT_TYPE` hunks, and every `DIFF.MD` retains per-file diffs.
+- Operation coverage: 1,149 -> 1,149 operations, coverage delta `+0`, with zero missing and zero ambiguous mappings.
+- Remaining blocker: none.
+- Next action: continue adding model-driven operation coverage while retaining key-derived crate naming and formatted-baseline diff generation.
+
+## 2026-08-31 — `2574c1d90` — format the upstream diff baseline
+
+- Objective: apply the Smithy-RS Rust formatting configuration to the upstream baseline before computing generated-crate diffs.
+- Generic rule: copy each raw upstream service into a temporary baseline, run `cargo fmt` with edition 2021, `max_width = 120`, and Unix newlines, then compare it with the transformed and formatted stage; never modify the pinned archive.
+- Changed files: `src/conformance.rs`, `conformance/summary.md`, and all generated service `DIFF.MD`/`DIFF.diff` artifacts.
+- Commands: generation passed; `AWS_SDK_MODULARIZER_ARCHIVE=/tmp/aws-sdk-rust.tar.gz RUSTFLAGS='-Awarnings' just conformance` passed for all 18 services; `cargo check --workspace`, `cargo test --workspace`, `cargo fmt --all -- --check`, and `git diff --check` passed.
+- Diff result: formatting-only `CONTENT_TYPE` hunks reduced from 705 to 0; diff artifacts now contain transformation/customization changes against a formatted baseline.
+- Operation coverage: 1,149 -> 1,149 operations, coverage delta `+0`, with zero missing and zero ambiguous mappings.
+- Remaining blocker: none.
+- Next action: retain formatted upstream baselines for subsequent modularizer diff generation.
+
+## 2026-08-31 — `03d2fecb6` — match Smithy-RS rustfmt workspace configuration
+
+- Objective: use the Smithy-RS Rust formatting configuration for the workspace and regenerate formatted service outputs and diff artifacts.
+- Generic rule: format the entire workspace with edition 2021, `max_width = 120`, and Unix newlines; apply the same settings to temporary generated stages before computing their diffs.
+- Changed files: `rustfmt.toml`, workspace/package edition settings, edition-2021-compatible modularizer code, all formatted generated crates and their per-file/unified diff artifacts, and the coverage summary.
+- Commands: `AWS_SDK_MODULARIZER_ARCHIVE=/tmp/aws-sdk-rust.tar.gz cargo run --release -p aws-sdk-modularizer -- --manifest services-manifest.json` passed; `AWS_SDK_MODULARIZER_ARCHIVE=/tmp/aws-sdk-rust.tar.gz RUSTFLAGS='-Awarnings' just conformance` passed for all 18 services; `cargo check --workspace`, `cargo test --workspace`, `cargo fmt --all -- --check`, and `git diff --check` passed.
+- Operation coverage: 1,149 -> 1,149 operations, coverage delta `+0`, with zero missing and zero ambiguous mappings.
+- Remaining blocker: none.
+- Next action: retain the Smithy-RS formatting settings for subsequent modularizer changes.
+
 ## 2026-08-31 — `01f5ce2bd` — format generated crates before computing diffs
 
 - Objective: persist transformed files before formatting them with Rust edition 2021, compute diffs from the formatted stage, embed every changed file's diff in `DIFF.MD`, and simplify the manifest's shared upstream configuration.

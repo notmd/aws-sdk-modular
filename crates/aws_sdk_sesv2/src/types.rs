@@ -115,6 +115,7 @@ pub use crate::types::_tenant_suppression_attributes::TenantSuppressionAttribute
     feature = "op_get_reputation_entity",
     feature = "op_get_tenant",
     feature = "op_list_reputation_entities",
+    feature = "op_list_tenants",
     feature = "op_update_reputation_entity_customer_managed_status"
 ))]
 pub use crate::types::_sending_status::SendingStatus;
@@ -537,6 +538,9 @@ pub use crate::types::_recommendation_impact::RecommendationImpact;
 #[cfg(feature = "op_get_suppressed_destination")]
 pub use crate::types::_suppressed_destination_attributes::SuppressedDestinationAttributes;
 
+#[cfg(feature = "op_list_configuration_sets")]
+pub use crate::types::_configuration_set_filter_key::ConfigurationSetFilterKey;
+
 #[cfg(feature = "op_list_contact_lists")]
 pub use crate::types::_contact_list::ContactList;
 
@@ -559,6 +563,9 @@ pub use crate::types::_contact::Contact;
 
 #[cfg(feature = "op_list_custom_verification_email_templates")]
 pub use crate::types::_custom_verification_email_template_metadata::CustomVerificationEmailTemplateMetadata;
+
+#[cfg(feature = "op_list_email_identities")]
+pub use crate::types::_identity_filter_key::IdentityFilterKey;
 
 #[cfg(feature = "op_list_email_identities")]
 pub use crate::types::_identity_info::IdentityInfo;
@@ -598,6 +605,9 @@ pub use crate::types::_list_tenant_resources_filter_key::ListTenantResourcesFilt
 
 #[cfg(feature = "op_list_tenant_resources")]
 pub use crate::types::_tenant_resource::TenantResource;
+
+#[cfg(feature = "op_list_tenants")]
+pub use crate::types::_list_tenants_filter_key::ListTenantsFilterKey;
 
 #[cfg(feature = "op_list_tenants")]
 pub use crate::types::_tenant_info::TenantInfo;
@@ -905,6 +915,9 @@ mod _complaint;
 #[cfg(any(feature = "op_send_bulk_email", feature = "op_send_email"))]
 mod _configuration_overrides;
 
+#[cfg(feature = "op_list_configuration_sets")]
+mod _configuration_set_filter_key;
+
 #[cfg(feature = "op_list_contacts")]
 mod _contact;
 
@@ -1164,6 +1177,9 @@ mod _identity_certificate;
 mod _identity_certificate_status;
 
 #[cfg(feature = "op_list_email_identities")]
+mod _identity_filter_key;
+
+#[cfg(feature = "op_list_email_identities")]
 mod _identity_info;
 
 #[cfg(any(
@@ -1227,6 +1243,9 @@ mod _list_recommendations_filter_key;
 
 #[cfg(feature = "op_list_tenant_resources")]
 mod _list_tenant_resources_filter_key;
+
+#[cfg(feature = "op_list_tenants")]
+mod _list_tenants_filter_key;
 
 #[cfg(feature = "op_get_email_identity")]
 mod _mail_from_attributes;
@@ -1406,6 +1425,7 @@ mod _sending_options;
     feature = "op_get_reputation_entity",
     feature = "op_get_tenant",
     feature = "op_list_reputation_entities",
+    feature = "op_list_tenants",
     feature = "op_update_reputation_entity_customer_managed_status"
 ))]
 mod _sending_status;

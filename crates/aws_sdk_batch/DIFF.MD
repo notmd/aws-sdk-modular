@@ -1,7 +1,7 @@
 # AWS SDK modularizer diff
 
 - repository: `https://github.com/awslabs/aws-sdk-rust`
-- revision: `26155f26ed36d90263a2c9058a67b08543c96f85`
+- revision: `c7775434628c96f7e0fc72fb83af0f5ad5dd6c9f`
 - service: `sdk/batch`
 - model: `aws-models/batch.json`
 - package: `aws-sdk-batch`
@@ -11,6 +11,7 @@
 ## Operations
 
 - `op_cancel_job`: `CancelJob`
+- `op_cancel_jobs`: `CancelJobs`
 - `op_create_compute_environment`: `CreateComputeEnvironment`
 - `op_create_consumable_resource`: `CreateConsumableResource`
 - `op_create_job_queue`: `CreateJobQueue`
@@ -46,7 +47,9 @@
 - `op_submit_service_job`: `SubmitServiceJob`
 - `op_tag_resource`: `TagResource`
 - `op_terminate_job`: `TerminateJob`
+- `op_terminate_jobs`: `TerminateJobs`
 - `op_terminate_service_job`: `TerminateServiceJob`
+- `op_terminate_service_jobs`: `TerminateServiceJobs`
 - `op_untag_resource`: `UntagResource`
 - `op_update_compute_environment`: `UpdateComputeEnvironment`
 - `op_update_consumable_resource`: `UpdateConsumableResource`
@@ -87,7 +90,7 @@ diff --git a/Cargo.toml b/Cargo.toml
 
  [dependencies.aws-runtime]
 -path = "../aws-runtime"
- version = "1.9.2"
+ version = "1.10.0"
 
  [dependencies.aws-smithy-async]
 -path = "../aws-smithy-async"
@@ -95,11 +98,11 @@ diff --git a/Cargo.toml b/Cargo.toml
 
  [dependencies.aws-smithy-http]
 -path = "../aws-smithy-http"
- version = "0.64.0"
+ version = "0.64.1"
 
  [dependencies.aws-smithy-json]
 -path = "../aws-smithy-json"
- version = "0.63.0"
+ version = "0.63.1"
 
  [dependencies.aws-smithy-observability]
 -path = "../aws-smithy-observability"
@@ -108,28 +111,28 @@ diff --git a/Cargo.toml b/Cargo.toml
  [dependencies.aws-smithy-runtime]
 -path = "../aws-smithy-runtime"
  features = ["client"]
- version = "1.14.0"
+ version = "1.15.0"
 
  [dependencies.aws-smithy-runtime-api]
 -path = "../aws-smithy-runtime-api"
  features = ["client", "http-1x"]
- version = "1.16.0"
+ version = "1.18.0"
 
  [dependencies.aws-smithy-schema]
 -path = "../aws-smithy-schema"
- version = "0.2.0"
+ version = "0.2.1"
 
  [dependencies.aws-smithy-types]
 -path = "../aws-smithy-types"
  features = ["http-body-1-x"]
- version = "1.6.3"
+ version = "1.8.1"
 
  [dependencies.aws-types]
 -path = "../aws-types"
  version = "1.6.0"
 
  [dependencies.bytes]
-@@ -84,16 +73,13 @@
+@@ -81,16 +70,13 @@
  [dependencies.tracing]
  version = "0.1"
  [dev-dependencies.aws-config]
@@ -146,11 +149,12 @@ diff --git a/Cargo.toml b/Cargo.toml
  version = "0.64.0"
 
  [dev-dependencies.pretty_assertions]
-@@ -118,3 +104,48 @@
- test-util = ["aws-credential-types/test-util", "aws-smithy-runtime/legacy-test-util", "aws-smithy-runtime/test-util"]
+@@ -117,3 +103,51 @@
+ test-util = ["aws-credential-types/test-util"]
  gated-tests = []
  default = ["rustls", "default-https-client", "rt-tokio"]
 +op_cancel_job = []
++op_cancel_jobs = []
 +op_create_compute_environment = []
 +op_create_consumable_resource = []
 +op_create_job_queue = []
@@ -186,7 +190,9 @@ diff --git a/Cargo.toml b/Cargo.toml
 +op_submit_service_job = []
 +op_tag_resource = []
 +op_terminate_job = []
++op_terminate_jobs = []
 +op_terminate_service_job = []
++op_terminate_service_jobs = []
 +op_untag_resource = []
 +op_update_compute_environment = []
 +op_update_consumable_resource = []
@@ -203,12 +209,15 @@ diff --git a/Cargo.toml b/Cargo.toml
 diff --git a/src/client.rs b/src/client.rs
 --- a/src/client.rs
 +++ b/src/client.rs
-@@ -136,18 +136,25 @@
+@@ -136,20 +136,28 @@
      }
  }
 
 +#[cfg(feature = "op_cancel_job")]
  mod cancel_job;
+
++#[cfg(feature = "op_cancel_jobs")]
+ mod cancel_jobs;
 
 +#[cfg(feature = "op_create_compute_environment")]
  mod create_compute_environment;
@@ -229,7 +238,7 @@ diff --git a/src/client.rs b/src/client.rs
  mod create_service_environment;
 
  /// Operation customization and supporting types.
-@@ -177,78 +184,116 @@
+@@ -179,82 +187,122 @@
  /// ```
  pub mod customize;
 
@@ -320,8 +329,14 @@ diff --git a/src/client.rs b/src/client.rs
 +#[cfg(feature = "op_terminate_job")]
  mod terminate_job;
 
++#[cfg(feature = "op_terminate_jobs")]
+ mod terminate_jobs;
+
 +#[cfg(feature = "op_terminate_service_job")]
  mod terminate_service_job;
+
++#[cfg(feature = "op_terminate_service_jobs")]
+ mod terminate_service_jobs;
 
 +#[cfg(feature = "op_untag_resource")]
  mod untag_resource;
@@ -354,12 +369,13 @@ diff --git a/src/client.rs b/src/client.rs
 diff --git a/src/error_meta.rs b/src/error_meta.rs
 --- a/src/error_meta.rs
 +++ b/src/error_meta.rs
-@@ -3,8 +3,102 @@
+@@ -3,8 +3,108 @@
  #[non_exhaustive]
  #[derive(::std::fmt::Debug)]
  pub enum Error {
 +    #[cfg(any(
 +        feature = "op_cancel_job",
++        feature = "op_cancel_jobs",
 +        feature = "op_create_compute_environment",
 +        feature = "op_create_consumable_resource",
 +        feature = "op_create_job_queue",
@@ -395,7 +411,9 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
 +        feature = "op_submit_service_job",
 +        feature = "op_tag_resource",
 +        feature = "op_terminate_job",
++        feature = "op_terminate_jobs",
 +        feature = "op_terminate_service_job",
++        feature = "op_terminate_service_jobs",
 +        feature = "op_untag_resource",
 +        feature = "op_update_compute_environment",
 +        feature = "op_update_consumable_resource",
@@ -409,6 +427,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
      ClientException(crate::types::error::ClientException),
 +    #[cfg(any(
 +        feature = "op_cancel_job",
++        feature = "op_cancel_jobs",
 +        feature = "op_create_compute_environment",
 +        feature = "op_create_consumable_resource",
 +        feature = "op_create_job_queue",
@@ -444,7 +463,9 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
 +        feature = "op_submit_service_job",
 +        feature = "op_tag_resource",
 +        feature = "op_terminate_job",
++        feature = "op_terminate_jobs",
 +        feature = "op_terminate_service_job",
++        feature = "op_terminate_service_jobs",
 +        feature = "op_untag_resource",
 +        feature = "op_update_compute_environment",
 +        feature = "op_update_consumable_resource",
@@ -457,12 +478,13 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
      /// <p>These errors are usually caused by a server issue.</p>
      ServerException(crate::types::error::ServerException),
      /// An unexpected error occurred (e.g., invalid JSON returned by the service or an unknown error code).
-@@ -21,7 +115,101 @@
+@@ -21,7 +121,107 @@
  impl ::std::fmt::Display for Error {
      fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
          match self {
 +            #[cfg(any(
 +                feature = "op_cancel_job",
++                feature = "op_cancel_jobs",
 +                feature = "op_create_compute_environment",
 +                feature = "op_create_consumable_resource",
 +                feature = "op_create_job_queue",
@@ -498,7 +520,9 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
 +                feature = "op_submit_service_job",
 +                feature = "op_tag_resource",
 +                feature = "op_terminate_job",
++                feature = "op_terminate_jobs",
 +                feature = "op_terminate_service_job",
++                feature = "op_terminate_service_jobs",
 +                feature = "op_untag_resource",
 +                feature = "op_update_compute_environment",
 +                feature = "op_update_consumable_resource",
@@ -511,6 +535,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
              Error::ClientException(inner) => inner.fmt(f),
 +            #[cfg(any(
 +                feature = "op_cancel_job",
++                feature = "op_cancel_jobs",
 +                feature = "op_create_compute_environment",
 +                feature = "op_create_consumable_resource",
 +                feature = "op_create_job_queue",
@@ -546,7 +571,9 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
 +                feature = "op_submit_service_job",
 +                feature = "op_tag_resource",
 +                feature = "op_terminate_job",
++                feature = "op_terminate_jobs",
 +                feature = "op_terminate_service_job",
++                feature = "op_terminate_service_jobs",
 +                feature = "op_untag_resource",
 +                feature = "op_update_compute_environment",
 +                feature = "op_update_consumable_resource",
@@ -559,12 +586,13 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
              Error::ServerException(inner) => inner.fmt(f),
              Error::Unhandled(_) => {
                  if let ::std::option::Option::Some(code) =
-@@ -46,12 +234,107 @@
+@@ -46,12 +246,113 @@
  impl ::aws_smithy_types::error::metadata::ProvideErrorMetadata for Error {
      fn meta(&self) -> &::aws_smithy_types::error::metadata::ErrorMetadata {
          match self {
 +            #[cfg(any(
 +                feature = "op_cancel_job",
++                feature = "op_cancel_jobs",
 +                feature = "op_create_compute_environment",
 +                feature = "op_create_consumable_resource",
 +                feature = "op_create_job_queue",
@@ -600,7 +628,9 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
 +                feature = "op_submit_service_job",
 +                feature = "op_tag_resource",
 +                feature = "op_terminate_job",
++                feature = "op_terminate_jobs",
 +                feature = "op_terminate_service_job",
++                feature = "op_terminate_service_jobs",
 +                feature = "op_untag_resource",
 +                feature = "op_update_compute_environment",
 +                feature = "op_update_consumable_resource",
@@ -613,6 +643,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
              Self::ClientException(inner) => inner.meta(),
 +            #[cfg(any(
 +                feature = "op_cancel_job",
++                feature = "op_cancel_jobs",
 +                feature = "op_create_compute_environment",
 +                feature = "op_create_consumable_resource",
 +                feature = "op_create_job_queue",
@@ -648,7 +679,9 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
 +                feature = "op_submit_service_job",
 +                feature = "op_tag_resource",
 +                feature = "op_terminate_job",
++                feature = "op_terminate_jobs",
 +                feature = "op_terminate_service_job",
++                feature = "op_terminate_service_jobs",
 +                feature = "op_untag_resource",
 +                feature = "op_update_compute_environment",
 +                feature = "op_update_consumable_resource",
@@ -667,7 +700,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl<R> From<::aws_smithy_runtime_api::client::result::SdkError<crate::operation::cancel_job::CancelJobError, R>>
      for Error
  where
-@@ -69,6 +352,7 @@
+@@ -69,6 +370,7 @@
          }
      }
  }
@@ -675,7 +708,23 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl From<crate::operation::cancel_job::CancelJobError> for Error {
      fn from(err: crate::operation::cancel_job::CancelJobError) -> Self {
          match err {
-@@ -78,6 +362,7 @@
+@@ -78,6 +380,7 @@
+         }
+     }
+ }
++#[cfg(feature = "op_cancel_jobs")]
+ impl<R> From<::aws_smithy_runtime_api::client::result::SdkError<crate::operation::cancel_jobs::CancelJobsError, R>>
+     for Error
+ where
+@@ -95,6 +398,7 @@
+         }
+     }
+ }
++#[cfg(feature = "op_cancel_jobs")]
+ impl From<crate::operation::cancel_jobs::CancelJobsError> for Error {
+     fn from(err: crate::operation::cancel_jobs::CancelJobsError) -> Self {
+         match err {
+@@ -104,6 +408,7 @@
          }
      }
  }
@@ -683,7 +732,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl<R>
      From<
          ::aws_smithy_runtime_api::client::result::SdkError<
-@@ -103,6 +388,7 @@
+@@ -129,6 +434,7 @@
          }
      }
  }
@@ -691,7 +740,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl From<crate::operation::create_compute_environment::CreateComputeEnvironmentError> for Error {
      fn from(err: crate::operation::create_compute_environment::CreateComputeEnvironmentError) -> Self {
          match err {
-@@ -118,6 +404,7 @@
+@@ -144,6 +450,7 @@
          }
      }
  }
@@ -699,7 +748,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl<R>
      From<
          ::aws_smithy_runtime_api::client::result::SdkError<
-@@ -143,6 +430,7 @@
+@@ -169,6 +476,7 @@
          }
      }
  }
@@ -707,7 +756,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl From<crate::operation::create_consumable_resource::CreateConsumableResourceError> for Error {
      fn from(err: crate::operation::create_consumable_resource::CreateConsumableResourceError) -> Self {
          match err {
-@@ -158,6 +446,7 @@
+@@ -184,6 +492,7 @@
          }
      }
  }
@@ -715,7 +764,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl<R>
      From<::aws_smithy_runtime_api::client::result::SdkError<crate::operation::create_job_queue::CreateJobQueueError, R>>
      for Error
-@@ -179,6 +468,7 @@
+@@ -205,6 +514,7 @@
          }
      }
  }
@@ -723,7 +772,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl From<crate::operation::create_job_queue::CreateJobQueueError> for Error {
      fn from(err: crate::operation::create_job_queue::CreateJobQueueError) -> Self {
          match err {
-@@ -192,6 +482,7 @@
+@@ -218,6 +528,7 @@
          }
      }
  }
@@ -731,7 +780,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl<R>
      From<
          ::aws_smithy_runtime_api::client::result::SdkError<
-@@ -217,6 +508,7 @@
+@@ -243,6 +554,7 @@
          }
      }
  }
@@ -739,7 +788,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl From<crate::operation::create_quota_share::CreateQuotaShareError> for Error {
      fn from(err: crate::operation::create_quota_share::CreateQuotaShareError) -> Self {
          match err {
-@@ -230,6 +522,7 @@
+@@ -256,6 +568,7 @@
          }
      }
  }
@@ -747,7 +796,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl<R>
      From<
          ::aws_smithy_runtime_api::client::result::SdkError<
-@@ -255,6 +548,7 @@
+@@ -281,6 +594,7 @@
          }
      }
  }
@@ -755,7 +804,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl From<crate::operation::create_scheduling_policy::CreateSchedulingPolicyError> for Error {
      fn from(err: crate::operation::create_scheduling_policy::CreateSchedulingPolicyError) -> Self {
          match err {
-@@ -270,6 +564,7 @@
+@@ -296,6 +610,7 @@
          }
      }
  }
@@ -763,7 +812,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl<R>
      From<
          ::aws_smithy_runtime_api::client::result::SdkError<
-@@ -295,6 +590,7 @@
+@@ -321,6 +636,7 @@
          }
      }
  }
@@ -771,7 +820,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl From<crate::operation::create_service_environment::CreateServiceEnvironmentError> for Error {
      fn from(err: crate::operation::create_service_environment::CreateServiceEnvironmentError) -> Self {
          match err {
-@@ -310,6 +606,7 @@
+@@ -336,6 +652,7 @@
          }
      }
  }
@@ -779,7 +828,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl<R>
      From<
          ::aws_smithy_runtime_api::client::result::SdkError<
-@@ -335,6 +632,7 @@
+@@ -361,6 +678,7 @@
          }
      }
  }
@@ -787,7 +836,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl From<crate::operation::delete_compute_environment::DeleteComputeEnvironmentError> for Error {
      fn from(err: crate::operation::delete_compute_environment::DeleteComputeEnvironmentError) -> Self {
          match err {
-@@ -350,6 +648,7 @@
+@@ -376,6 +694,7 @@
          }
      }
  }
@@ -795,7 +844,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl<R>
      From<
          ::aws_smithy_runtime_api::client::result::SdkError<
-@@ -375,6 +674,7 @@
+@@ -401,6 +720,7 @@
          }
      }
  }
@@ -803,7 +852,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl From<crate::operation::delete_consumable_resource::DeleteConsumableResourceError> for Error {
      fn from(err: crate::operation::delete_consumable_resource::DeleteConsumableResourceError) -> Self {
          match err {
-@@ -390,6 +690,7 @@
+@@ -416,6 +736,7 @@
          }
      }
  }
@@ -811,7 +860,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl<R>
      From<::aws_smithy_runtime_api::client::result::SdkError<crate::operation::delete_job_queue::DeleteJobQueueError, R>>
      for Error
-@@ -411,6 +712,7 @@
+@@ -437,6 +758,7 @@
          }
      }
  }
@@ -819,7 +868,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl From<crate::operation::delete_job_queue::DeleteJobQueueError> for Error {
      fn from(err: crate::operation::delete_job_queue::DeleteJobQueueError) -> Self {
          match err {
-@@ -424,6 +726,7 @@
+@@ -450,6 +772,7 @@
          }
      }
  }
@@ -827,7 +876,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl<R>
      From<
          ::aws_smithy_runtime_api::client::result::SdkError<
-@@ -449,6 +752,7 @@
+@@ -475,6 +798,7 @@
          }
      }
  }
@@ -835,7 +884,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl From<crate::operation::delete_quota_share::DeleteQuotaShareError> for Error {
      fn from(err: crate::operation::delete_quota_share::DeleteQuotaShareError) -> Self {
          match err {
-@@ -462,6 +766,7 @@
+@@ -488,6 +812,7 @@
          }
      }
  }
@@ -843,7 +892,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl<R>
      From<
          ::aws_smithy_runtime_api::client::result::SdkError<
-@@ -487,6 +792,7 @@
+@@ -513,6 +838,7 @@
          }
      }
  }
@@ -851,7 +900,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl From<crate::operation::delete_scheduling_policy::DeleteSchedulingPolicyError> for Error {
      fn from(err: crate::operation::delete_scheduling_policy::DeleteSchedulingPolicyError) -> Self {
          match err {
-@@ -502,6 +808,7 @@
+@@ -528,6 +854,7 @@
          }
      }
  }
@@ -859,7 +908,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl<R>
      From<
          ::aws_smithy_runtime_api::client::result::SdkError<
-@@ -527,6 +834,7 @@
+@@ -553,6 +880,7 @@
          }
      }
  }
@@ -867,7 +916,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl From<crate::operation::delete_service_environment::DeleteServiceEnvironmentError> for Error {
      fn from(err: crate::operation::delete_service_environment::DeleteServiceEnvironmentError) -> Self {
          match err {
-@@ -542,6 +850,7 @@
+@@ -568,6 +896,7 @@
          }
      }
  }
@@ -875,7 +924,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl<R>
      From<
          ::aws_smithy_runtime_api::client::result::SdkError<
-@@ -567,6 +876,7 @@
+@@ -593,6 +922,7 @@
          }
      }
  }
@@ -883,7 +932,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl From<crate::operation::deregister_job_definition::DeregisterJobDefinitionError> for Error {
      fn from(err: crate::operation::deregister_job_definition::DeregisterJobDefinitionError) -> Self {
          match err {
-@@ -582,6 +892,7 @@
+@@ -608,6 +938,7 @@
          }
      }
  }
@@ -891,7 +940,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl<R>
      From<
          ::aws_smithy_runtime_api::client::result::SdkError<
-@@ -607,6 +918,7 @@
+@@ -633,6 +964,7 @@
          }
      }
  }
@@ -899,7 +948,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl From<crate::operation::describe_compute_environments::DescribeComputeEnvironmentsError> for Error {
      fn from(err: crate::operation::describe_compute_environments::DescribeComputeEnvironmentsError) -> Self {
          match err {
-@@ -622,6 +934,7 @@
+@@ -648,6 +980,7 @@
          }
      }
  }
@@ -907,7 +956,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl<R>
      From<
          ::aws_smithy_runtime_api::client::result::SdkError<
-@@ -647,6 +960,7 @@
+@@ -673,6 +1006,7 @@
          }
      }
  }
@@ -915,7 +964,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl From<crate::operation::describe_consumable_resource::DescribeConsumableResourceError> for Error {
      fn from(err: crate::operation::describe_consumable_resource::DescribeConsumableResourceError) -> Self {
          match err {
-@@ -662,6 +976,7 @@
+@@ -688,6 +1022,7 @@
          }
      }
  }
@@ -923,7 +972,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl<R>
      From<
          ::aws_smithy_runtime_api::client::result::SdkError<
-@@ -687,6 +1002,7 @@
+@@ -713,6 +1048,7 @@
          }
      }
  }
@@ -931,7 +980,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl From<crate::operation::describe_job_definitions::DescribeJobDefinitionsError> for Error {
      fn from(err: crate::operation::describe_job_definitions::DescribeJobDefinitionsError) -> Self {
          match err {
-@@ -702,6 +1018,7 @@
+@@ -728,6 +1064,7 @@
          }
      }
  }
@@ -939,7 +988,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl<R>
      From<
          ::aws_smithy_runtime_api::client::result::SdkError<
-@@ -727,6 +1044,7 @@
+@@ -753,6 +1090,7 @@
          }
      }
  }
@@ -947,7 +996,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl From<crate::operation::describe_job_queues::DescribeJobQueuesError> for Error {
      fn from(err: crate::operation::describe_job_queues::DescribeJobQueuesError) -> Self {
          match err {
-@@ -740,6 +1058,7 @@
+@@ -766,6 +1104,7 @@
          }
      }
  }
@@ -955,7 +1004,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl<R> From<::aws_smithy_runtime_api::client::result::SdkError<crate::operation::describe_jobs::DescribeJobsError, R>>
      for Error
  where
-@@ -757,6 +1076,7 @@
+@@ -783,6 +1122,7 @@
          }
      }
  }
@@ -963,7 +1012,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl From<crate::operation::describe_jobs::DescribeJobsError> for Error {
      fn from(err: crate::operation::describe_jobs::DescribeJobsError) -> Self {
          match err {
-@@ -766,6 +1086,7 @@
+@@ -792,6 +1132,7 @@
          }
      }
  }
@@ -971,7 +1020,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl<R>
      From<
          ::aws_smithy_runtime_api::client::result::SdkError<
-@@ -791,6 +1112,7 @@
+@@ -817,6 +1158,7 @@
          }
      }
  }
@@ -979,7 +1028,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl From<crate::operation::describe_quota_share::DescribeQuotaShareError> for Error {
      fn from(err: crate::operation::describe_quota_share::DescribeQuotaShareError) -> Self {
          match err {
-@@ -806,6 +1128,7 @@
+@@ -832,6 +1174,7 @@
          }
      }
  }
@@ -987,7 +1036,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl<R>
      From<
          ::aws_smithy_runtime_api::client::result::SdkError<
-@@ -831,6 +1154,7 @@
+@@ -857,6 +1200,7 @@
          }
      }
  }
@@ -995,7 +1044,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl From<crate::operation::describe_scheduling_policies::DescribeSchedulingPoliciesError> for Error {
      fn from(err: crate::operation::describe_scheduling_policies::DescribeSchedulingPoliciesError) -> Self {
          match err {
-@@ -846,6 +1170,7 @@
+@@ -872,6 +1216,7 @@
          }
      }
  }
@@ -1003,7 +1052,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl<R>
      From<
          ::aws_smithy_runtime_api::client::result::SdkError<
-@@ -871,6 +1196,7 @@
+@@ -897,6 +1242,7 @@
          }
      }
  }
@@ -1011,7 +1060,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl From<crate::operation::describe_service_environments::DescribeServiceEnvironmentsError> for Error {
      fn from(err: crate::operation::describe_service_environments::DescribeServiceEnvironmentsError) -> Self {
          match err {
-@@ -886,6 +1212,7 @@
+@@ -912,6 +1258,7 @@
          }
      }
  }
@@ -1019,7 +1068,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl<R>
      From<
          ::aws_smithy_runtime_api::client::result::SdkError<
-@@ -911,6 +1238,7 @@
+@@ -937,6 +1284,7 @@
          }
      }
  }
@@ -1027,7 +1076,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl From<crate::operation::describe_service_job::DescribeServiceJobError> for Error {
      fn from(err: crate::operation::describe_service_job::DescribeServiceJobError) -> Self {
          match err {
-@@ -926,6 +1254,7 @@
+@@ -952,6 +1300,7 @@
          }
      }
  }
@@ -1035,7 +1084,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl<R>
      From<
          ::aws_smithy_runtime_api::client::result::SdkError<
-@@ -951,6 +1280,7 @@
+@@ -977,6 +1326,7 @@
          }
      }
  }
@@ -1043,7 +1092,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl From<crate::operation::get_job_queue_snapshot::GetJobQueueSnapshotError> for Error {
      fn from(err: crate::operation::get_job_queue_snapshot::GetJobQueueSnapshotError) -> Self {
          match err {
-@@ -966,6 +1296,7 @@
+@@ -992,6 +1342,7 @@
          }
      }
  }
@@ -1051,7 +1100,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl<R>
      From<
          ::aws_smithy_runtime_api::client::result::SdkError<
-@@ -991,6 +1322,7 @@
+@@ -1017,6 +1368,7 @@
          }
      }
  }
@@ -1059,7 +1108,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl From<crate::operation::list_consumable_resources::ListConsumableResourcesError> for Error {
      fn from(err: crate::operation::list_consumable_resources::ListConsumableResourcesError) -> Self {
          match err {
-@@ -1006,6 +1338,7 @@
+@@ -1032,6 +1384,7 @@
          }
      }
  }
@@ -1067,7 +1116,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl<R> From<::aws_smithy_runtime_api::client::result::SdkError<crate::operation::list_jobs::ListJobsError, R>>
      for Error
  where
-@@ -1023,6 +1356,7 @@
+@@ -1049,6 +1402,7 @@
          }
      }
  }
@@ -1075,7 +1124,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl From<crate::operation::list_jobs::ListJobsError> for Error {
      fn from(err: crate::operation::list_jobs::ListJobsError) -> Self {
          match err {
-@@ -1032,6 +1366,7 @@
+@@ -1058,6 +1412,7 @@
          }
      }
  }
@@ -1083,7 +1132,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl<R>
      From<
          ::aws_smithy_runtime_api::client::result::SdkError<
-@@ -1057,6 +1392,7 @@
+@@ -1083,6 +1438,7 @@
          }
      }
  }
@@ -1091,7 +1140,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl From<crate::operation::list_jobs_by_consumable_resource::ListJobsByConsumableResourceError> for Error {
      fn from(err: crate::operation::list_jobs_by_consumable_resource::ListJobsByConsumableResourceError) -> Self {
          match err {
-@@ -1072,6 +1408,7 @@
+@@ -1098,6 +1454,7 @@
          }
      }
  }
@@ -1099,7 +1148,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl<R>
      From<
          ::aws_smithy_runtime_api::client::result::SdkError<
-@@ -1097,6 +1434,7 @@
+@@ -1123,6 +1480,7 @@
          }
      }
  }
@@ -1107,7 +1156,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl From<crate::operation::list_quota_shares::ListQuotaSharesError> for Error {
      fn from(err: crate::operation::list_quota_shares::ListQuotaSharesError) -> Self {
          match err {
-@@ -1110,6 +1448,7 @@
+@@ -1136,6 +1494,7 @@
          }
      }
  }
@@ -1115,7 +1164,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl<R>
      From<
          ::aws_smithy_runtime_api::client::result::SdkError<
-@@ -1135,6 +1474,7 @@
+@@ -1161,6 +1520,7 @@
          }
      }
  }
@@ -1123,7 +1172,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl From<crate::operation::list_scheduling_policies::ListSchedulingPoliciesError> for Error {
      fn from(err: crate::operation::list_scheduling_policies::ListSchedulingPoliciesError) -> Self {
          match err {
-@@ -1150,6 +1490,7 @@
+@@ -1176,6 +1536,7 @@
          }
      }
  }
@@ -1131,7 +1180,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl<R>
      From<
          ::aws_smithy_runtime_api::client::result::SdkError<
-@@ -1175,6 +1516,7 @@
+@@ -1201,6 +1562,7 @@
          }
      }
  }
@@ -1139,7 +1188,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl From<crate::operation::list_service_jobs::ListServiceJobsError> for Error {
      fn from(err: crate::operation::list_service_jobs::ListServiceJobsError) -> Self {
          match err {
-@@ -1188,6 +1530,7 @@
+@@ -1214,6 +1576,7 @@
          }
      }
  }
@@ -1147,7 +1196,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl<R>
      From<
          ::aws_smithy_runtime_api::client::result::SdkError<
-@@ -1213,6 +1556,7 @@
+@@ -1239,6 +1602,7 @@
          }
      }
  }
@@ -1155,7 +1204,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl From<crate::operation::list_tags_for_resource::ListTagsForResourceError> for Error {
      fn from(err: crate::operation::list_tags_for_resource::ListTagsForResourceError) -> Self {
          match err {
-@@ -1228,6 +1572,7 @@
+@@ -1254,6 +1618,7 @@
          }
      }
  }
@@ -1163,7 +1212,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl<R>
      From<
          ::aws_smithy_runtime_api::client::result::SdkError<
-@@ -1253,6 +1598,7 @@
+@@ -1279,6 +1644,7 @@
          }
      }
  }
@@ -1171,7 +1220,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl From<crate::operation::register_job_definition::RegisterJobDefinitionError> for Error {
      fn from(err: crate::operation::register_job_definition::RegisterJobDefinitionError) -> Self {
          match err {
-@@ -1268,6 +1614,7 @@
+@@ -1294,6 +1660,7 @@
          }
      }
  }
@@ -1179,7 +1228,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl<R> From<::aws_smithy_runtime_api::client::result::SdkError<crate::operation::submit_job::SubmitJobError, R>>
      for Error
  where
-@@ -1285,6 +1632,7 @@
+@@ -1311,6 +1678,7 @@
          }
      }
  }
@@ -1187,7 +1236,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl From<crate::operation::submit_job::SubmitJobError> for Error {
      fn from(err: crate::operation::submit_job::SubmitJobError) -> Self {
          match err {
-@@ -1294,6 +1642,7 @@
+@@ -1320,6 +1688,7 @@
          }
      }
  }
@@ -1195,7 +1244,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl<R>
      From<
          ::aws_smithy_runtime_api::client::result::SdkError<
-@@ -1319,6 +1668,7 @@
+@@ -1345,6 +1714,7 @@
          }
      }
  }
@@ -1203,7 +1252,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl From<crate::operation::submit_service_job::SubmitServiceJobError> for Error {
      fn from(err: crate::operation::submit_service_job::SubmitServiceJobError) -> Self {
          match err {
-@@ -1332,6 +1682,7 @@
+@@ -1358,6 +1728,7 @@
          }
      }
  }
@@ -1211,7 +1260,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl<R> From<::aws_smithy_runtime_api::client::result::SdkError<crate::operation::tag_resource::TagResourceError, R>>
      for Error
  where
-@@ -1349,6 +1700,7 @@
+@@ -1375,6 +1746,7 @@
          }
      }
  }
@@ -1219,7 +1268,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl From<crate::operation::tag_resource::TagResourceError> for Error {
      fn from(err: crate::operation::tag_resource::TagResourceError) -> Self {
          match err {
-@@ -1358,6 +1710,7 @@
+@@ -1384,6 +1756,7 @@
          }
      }
  }
@@ -1227,7 +1276,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl<R> From<::aws_smithy_runtime_api::client::result::SdkError<crate::operation::terminate_job::TerminateJobError, R>>
      for Error
  where
-@@ -1375,6 +1728,7 @@
+@@ -1401,6 +1774,7 @@
          }
      }
  }
@@ -1235,7 +1284,23 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl From<crate::operation::terminate_job::TerminateJobError> for Error {
      fn from(err: crate::operation::terminate_job::TerminateJobError) -> Self {
          match err {
-@@ -1384,6 +1738,7 @@
+@@ -1410,6 +1784,7 @@
+         }
+     }
+ }
++#[cfg(feature = "op_terminate_jobs")]
+ impl<R>
+     From<::aws_smithy_runtime_api::client::result::SdkError<crate::operation::terminate_jobs::TerminateJobsError, R>>
+     for Error
+@@ -1431,6 +1806,7 @@
+         }
+     }
+ }
++#[cfg(feature = "op_terminate_jobs")]
+ impl From<crate::operation::terminate_jobs::TerminateJobsError> for Error {
+     fn from(err: crate::operation::terminate_jobs::TerminateJobsError) -> Self {
+         match err {
+@@ -1444,6 +1820,7 @@
          }
      }
  }
@@ -1243,7 +1308,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl<R>
      From<
          ::aws_smithy_runtime_api::client::result::SdkError<
-@@ -1409,6 +1764,7 @@
+@@ -1469,6 +1846,7 @@
          }
      }
  }
@@ -1251,7 +1316,23 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl From<crate::operation::terminate_service_job::TerminateServiceJobError> for Error {
      fn from(err: crate::operation::terminate_service_job::TerminateServiceJobError) -> Self {
          match err {
-@@ -1424,6 +1780,7 @@
+@@ -1484,6 +1862,7 @@
+         }
+     }
+ }
++#[cfg(feature = "op_terminate_service_jobs")]
+ impl<R>
+     From<
+         ::aws_smithy_runtime_api::client::result::SdkError<
+@@ -1509,6 +1888,7 @@
+         }
+     }
+ }
++#[cfg(feature = "op_terminate_service_jobs")]
+ impl From<crate::operation::terminate_service_jobs::TerminateServiceJobsError> for Error {
+     fn from(err: crate::operation::terminate_service_jobs::TerminateServiceJobsError) -> Self {
+         match err {
+@@ -1524,6 +1904,7 @@
          }
      }
  }
@@ -1259,7 +1340,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl<R>
      From<::aws_smithy_runtime_api::client::result::SdkError<crate::operation::untag_resource::UntagResourceError, R>>
      for Error
-@@ -1445,6 +1802,7 @@
+@@ -1545,6 +1926,7 @@
          }
      }
  }
@@ -1267,7 +1348,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl From<crate::operation::untag_resource::UntagResourceError> for Error {
      fn from(err: crate::operation::untag_resource::UntagResourceError) -> Self {
          match err {
-@@ -1458,6 +1816,7 @@
+@@ -1558,6 +1940,7 @@
          }
      }
  }
@@ -1275,7 +1356,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl<R>
      From<
          ::aws_smithy_runtime_api::client::result::SdkError<
-@@ -1483,6 +1842,7 @@
+@@ -1583,6 +1966,7 @@
          }
      }
  }
@@ -1283,7 +1364,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl From<crate::operation::update_compute_environment::UpdateComputeEnvironmentError> for Error {
      fn from(err: crate::operation::update_compute_environment::UpdateComputeEnvironmentError) -> Self {
          match err {
-@@ -1498,6 +1858,7 @@
+@@ -1598,6 +1982,7 @@
          }
      }
  }
@@ -1291,7 +1372,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl<R>
      From<
          ::aws_smithy_runtime_api::client::result::SdkError<
-@@ -1523,6 +1884,7 @@
+@@ -1623,6 +2008,7 @@
          }
      }
  }
@@ -1299,7 +1380,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl From<crate::operation::update_consumable_resource::UpdateConsumableResourceError> for Error {
      fn from(err: crate::operation::update_consumable_resource::UpdateConsumableResourceError) -> Self {
          match err {
-@@ -1538,6 +1900,7 @@
+@@ -1638,6 +2024,7 @@
          }
      }
  }
@@ -1307,7 +1388,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl<R>
      From<::aws_smithy_runtime_api::client::result::SdkError<crate::operation::update_job_queue::UpdateJobQueueError, R>>
      for Error
-@@ -1559,6 +1922,7 @@
+@@ -1659,6 +2046,7 @@
          }
      }
  }
@@ -1315,7 +1396,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl From<crate::operation::update_job_queue::UpdateJobQueueError> for Error {
      fn from(err: crate::operation::update_job_queue::UpdateJobQueueError) -> Self {
          match err {
-@@ -1572,6 +1936,7 @@
+@@ -1672,6 +2060,7 @@
          }
      }
  }
@@ -1323,7 +1404,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl<R>
      From<
          ::aws_smithy_runtime_api::client::result::SdkError<
-@@ -1597,6 +1962,7 @@
+@@ -1697,6 +2086,7 @@
          }
      }
  }
@@ -1331,7 +1412,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl From<crate::operation::update_quota_share::UpdateQuotaShareError> for Error {
      fn from(err: crate::operation::update_quota_share::UpdateQuotaShareError) -> Self {
          match err {
-@@ -1610,6 +1976,7 @@
+@@ -1710,6 +2100,7 @@
          }
      }
  }
@@ -1339,7 +1420,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl<R>
      From<
          ::aws_smithy_runtime_api::client::result::SdkError<
-@@ -1635,6 +2002,7 @@
+@@ -1735,6 +2126,7 @@
          }
      }
  }
@@ -1347,7 +1428,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl From<crate::operation::update_scheduling_policy::UpdateSchedulingPolicyError> for Error {
      fn from(err: crate::operation::update_scheduling_policy::UpdateSchedulingPolicyError) -> Self {
          match err {
-@@ -1650,6 +2018,7 @@
+@@ -1750,6 +2142,7 @@
          }
      }
  }
@@ -1355,7 +1436,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl<R>
      From<
          ::aws_smithy_runtime_api::client::result::SdkError<
-@@ -1675,6 +2044,7 @@
+@@ -1775,6 +2168,7 @@
          }
      }
  }
@@ -1363,7 +1444,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl From<crate::operation::update_service_environment::UpdateServiceEnvironmentError> for Error {
      fn from(err: crate::operation::update_service_environment::UpdateServiceEnvironmentError) -> Self {
          match err {
-@@ -1690,6 +2060,7 @@
+@@ -1790,6 +2184,7 @@
          }
      }
  }
@@ -1371,7 +1452,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl<R>
      From<
          ::aws_smithy_runtime_api::client::result::SdkError<
-@@ -1715,6 +2086,7 @@
+@@ -1815,6 +2210,7 @@
          }
      }
  }
@@ -1379,12 +1460,13 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl From<crate::operation::update_service_job::UpdateServiceJobError> for Error {
      fn from(err: crate::operation::update_service_job::UpdateServiceJobError) -> Self {
          match err {
-@@ -1731,7 +2103,101 @@
+@@ -1831,7 +2227,107 @@
  impl ::std::error::Error for Error {
      fn source(&self) -> std::option::Option<&(dyn ::std::error::Error + 'static)> {
          match self {
 +            #[cfg(any(
 +                feature = "op_cancel_job",
++                feature = "op_cancel_jobs",
 +                feature = "op_create_compute_environment",
 +                feature = "op_create_consumable_resource",
 +                feature = "op_create_job_queue",
@@ -1420,7 +1502,9 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
 +                feature = "op_submit_service_job",
 +                feature = "op_tag_resource",
 +                feature = "op_terminate_job",
++                feature = "op_terminate_jobs",
 +                feature = "op_terminate_service_job",
++                feature = "op_terminate_service_jobs",
 +                feature = "op_untag_resource",
 +                feature = "op_update_compute_environment",
 +                feature = "op_update_consumable_resource",
@@ -1433,6 +1517,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
              Error::ClientException(inner) => inner.source(),
 +            #[cfg(any(
 +                feature = "op_cancel_job",
++                feature = "op_cancel_jobs",
 +                feature = "op_create_compute_environment",
 +                feature = "op_create_consumable_resource",
 +                feature = "op_create_job_queue",
@@ -1468,7 +1553,9 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
 +                feature = "op_submit_service_job",
 +                feature = "op_tag_resource",
 +                feature = "op_terminate_job",
++                feature = "op_terminate_jobs",
 +                feature = "op_terminate_service_job",
++                feature = "op_terminate_service_jobs",
 +                feature = "op_untag_resource",
 +                feature = "op_update_compute_environment",
 +                feature = "op_update_consumable_resource",
@@ -1481,12 +1568,13 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
              Error::ServerException(inner) => inner.source(),
              Error::Unhandled(inner) => ::std::option::Option::Some(&*inner.source),
          }
-@@ -1740,7 +2206,101 @@
+@@ -1840,7 +2336,107 @@
  impl ::aws_types::request_id::RequestId for Error {
      fn request_id(&self) -> Option<&str> {
          match self {
 +            #[cfg(any(
 +                feature = "op_cancel_job",
++                feature = "op_cancel_jobs",
 +                feature = "op_create_compute_environment",
 +                feature = "op_create_consumable_resource",
 +                feature = "op_create_job_queue",
@@ -1522,7 +1610,9 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
 +                feature = "op_submit_service_job",
 +                feature = "op_tag_resource",
 +                feature = "op_terminate_job",
++                feature = "op_terminate_jobs",
 +                feature = "op_terminate_service_job",
++                feature = "op_terminate_service_jobs",
 +                feature = "op_untag_resource",
 +                feature = "op_update_compute_environment",
 +                feature = "op_update_consumable_resource",
@@ -1535,6 +1625,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
              Self::ClientException(e) => e.request_id(),
 +            #[cfg(any(
 +                feature = "op_cancel_job",
++                feature = "op_cancel_jobs",
 +                feature = "op_create_compute_environment",
 +                feature = "op_create_consumable_resource",
 +                feature = "op_create_job_queue",
@@ -1570,7 +1661,9 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
 +                feature = "op_submit_service_job",
 +                feature = "op_tag_resource",
 +                feature = "op_terminate_job",
++                feature = "op_terminate_jobs",
 +                feature = "op_terminate_service_job",
++                feature = "op_terminate_service_jobs",
 +                feature = "op_untag_resource",
 +                feature = "op_update_compute_environment",
 +                feature = "op_update_consumable_resource",
@@ -1757,13 +1850,17 @@ diff --git a/src/lens.rs b/src/lens.rs
 diff --git a/src/operation.rs b/src/operation.rs
 --- a/src/operation.rs
 +++ b/src/operation.rs
-@@ -1,137 +1,182 @@
+@@ -1,146 +1,194 @@
  // Code generated by software.amazon.smithy.rust.codegen.smithy-rs. DO NOT EDIT.
  pub use ::aws_types::request_id::RequestId;
 
 +#[cfg(feature = "op_cancel_job")]
  /// Types for the `CancelJob` operation.
  pub mod cancel_job;
+
++#[cfg(feature = "op_cancel_jobs")]
+ /// Types for the `CancelJobs` operation.
+ pub mod cancel_jobs;
 
 +#[cfg(feature = "op_create_compute_environment")]
  /// Types for the `CreateComputeEnvironment` operation.
@@ -1905,9 +2002,17 @@ diff --git a/src/operation.rs b/src/operation.rs
  /// Types for the `TerminateJob` operation.
  pub mod terminate_job;
 
++#[cfg(feature = "op_terminate_jobs")]
+ /// Types for the `TerminateJobs` operation.
+ pub mod terminate_jobs;
+
 +#[cfg(feature = "op_terminate_service_job")]
  /// Types for the `TerminateServiceJob` operation.
  pub mod terminate_service_job;
+
++#[cfg(feature = "op_terminate_service_jobs")]
+ /// Types for the `TerminateServiceJobs` operation.
+ pub mod terminate_service_jobs;
 
 +#[cfg(feature = "op_untag_resource")]
  /// Types for the `UntagResource` operation.
@@ -1948,10 +2053,11 @@ diff --git a/src/operation.rs b/src/operation.rs
 diff --git a/src/protocol_serde.rs b/src/protocol_serde.rs
 --- a/src/protocol_serde.rs
 +++ b/src/protocol_serde.rs
-@@ -1,4 +1,51 @@
+@@ -1,4 +1,54 @@
  // Code generated by software.amazon.smithy.rust.codegen.smithy-rs. DO NOT EDIT.
 +#[cfg(any(
 +    feature = "op_cancel_job",
++    feature = "op_cancel_jobs",
 +    feature = "op_create_compute_environment",
 +    feature = "op_create_consumable_resource",
 +    feature = "op_create_job_queue",
@@ -1987,7 +2093,9 @@ diff --git a/src/protocol_serde.rs b/src/protocol_serde.rs
 +    feature = "op_submit_service_job",
 +    feature = "op_tag_resource",
 +    feature = "op_terminate_job",
++    feature = "op_terminate_jobs",
 +    feature = "op_terminate_service_job",
++    feature = "op_terminate_service_jobs",
 +    feature = "op_untag_resource",
 +    feature = "op_update_compute_environment",
 +    feature = "op_update_consumable_resource",
@@ -2000,12 +2108,13 @@ diff --git a/src/protocol_serde.rs b/src/protocol_serde.rs
  pub(crate) fn type_erase_result<O, E>(
      result: ::std::result::Result<O, E>,
  ) -> ::std::result::Result<
-@@ -17,6 +64,53 @@
+@@ -17,6 +67,56 @@
          .map_err(::std::convert::Into::into)
  }
 
 +#[cfg(any(
 +    feature = "op_cancel_job",
++    feature = "op_cancel_jobs",
 +    feature = "op_create_compute_environment",
 +    feature = "op_create_consumable_resource",
 +    feature = "op_create_job_queue",
@@ -2041,7 +2150,9 @@ diff --git a/src/protocol_serde.rs b/src/protocol_serde.rs
 +    feature = "op_submit_service_job",
 +    feature = "op_tag_resource",
 +    feature = "op_terminate_job",
++    feature = "op_terminate_jobs",
 +    feature = "op_terminate_service_job",
++    feature = "op_terminate_service_jobs",
 +    feature = "op_untag_resource",
 +    feature = "op_update_compute_environment",
 +    feature = "op_update_consumable_resource",
@@ -2054,12 +2165,15 @@ diff --git a/src/protocol_serde.rs b/src/protocol_serde.rs
  pub fn parse_http_error_metadata(
      _response_status: u16,
      response_headers: &::aws_smithy_runtime_api::http::Headers,
-@@ -28,98 +122,191 @@
+@@ -28,104 +128,203 @@
      crate::json_errors::parse_error_metadata(response_body, response_headers)
  }
 
 +#[cfg(feature = "op_cancel_job")]
  pub(crate) mod shape_cancel_job;
+
++#[cfg(feature = "op_cancel_jobs")]
+ pub(crate) mod shape_cancel_jobs;
 
 +#[cfg(feature = "op_create_compute_environment")]
  pub(crate) mod shape_create_compute_environment;
@@ -2166,8 +2280,14 @@ diff --git a/src/protocol_serde.rs b/src/protocol_serde.rs
 +#[cfg(feature = "op_terminate_job")]
  pub(crate) mod shape_terminate_job;
 
++#[cfg(feature = "op_terminate_jobs")]
+ pub(crate) mod shape_terminate_jobs;
+
 +#[cfg(feature = "op_terminate_service_job")]
  pub(crate) mod shape_terminate_service_job;
+
++#[cfg(feature = "op_terminate_service_jobs")]
+ pub(crate) mod shape_terminate_service_jobs;
 
 +#[cfg(feature = "op_untag_resource")]
  pub(crate) mod shape_untag_resource;
@@ -2198,6 +2318,7 @@ diff --git a/src/protocol_serde.rs b/src/protocol_serde.rs
 
 +#[cfg(any(
 +    feature = "op_cancel_job",
++    feature = "op_cancel_jobs",
 +    feature = "op_create_compute_environment",
 +    feature = "op_create_consumable_resource",
 +    feature = "op_create_job_queue",
@@ -2233,7 +2354,9 @@ diff --git a/src/protocol_serde.rs b/src/protocol_serde.rs
 +    feature = "op_submit_service_job",
 +    feature = "op_tag_resource",
 +    feature = "op_terminate_job",
++    feature = "op_terminate_jobs",
 +    feature = "op_terminate_service_job",
++    feature = "op_terminate_service_jobs",
 +    feature = "op_untag_resource",
 +    feature = "op_update_compute_environment",
 +    feature = "op_update_consumable_resource",
@@ -2246,12 +2369,16 @@ diff --git a/src/protocol_serde.rs b/src/protocol_serde.rs
  pub(crate) fn or_empty_doc(data: &[u8]) -> &[u8] {
      if data.is_empty() {
          b"{}"
-@@ -128,526 +315,1327 @@
+@@ -134,548 +333,1373 @@
      }
  }
 
++#[cfg(feature = "op_cancel_jobs")]
+ pub(crate) mod shape_cancel_jobs_input;
+
 +#[cfg(any(
 +    feature = "op_cancel_job",
++    feature = "op_cancel_jobs",
 +    feature = "op_create_compute_environment",
 +    feature = "op_create_consumable_resource",
 +    feature = "op_create_job_queue",
@@ -2287,7 +2414,9 @@ diff --git a/src/protocol_serde.rs b/src/protocol_serde.rs
 +    feature = "op_submit_service_job",
 +    feature = "op_tag_resource",
 +    feature = "op_terminate_job",
++    feature = "op_terminate_jobs",
 +    feature = "op_terminate_service_job",
++    feature = "op_terminate_service_jobs",
 +    feature = "op_untag_resource",
 +    feature = "op_update_compute_environment",
 +    feature = "op_update_consumable_resource",
@@ -2391,6 +2520,7 @@ diff --git a/src/protocol_serde.rs b/src/protocol_serde.rs
 
 +#[cfg(any(
 +    feature = "op_cancel_job",
++    feature = "op_cancel_jobs",
 +    feature = "op_create_compute_environment",
 +    feature = "op_create_consumable_resource",
 +    feature = "op_create_job_queue",
@@ -2426,7 +2556,9 @@ diff --git a/src/protocol_serde.rs b/src/protocol_serde.rs
 +    feature = "op_submit_service_job",
 +    feature = "op_tag_resource",
 +    feature = "op_terminate_job",
++    feature = "op_terminate_jobs",
 +    feature = "op_terminate_service_job",
++    feature = "op_terminate_service_jobs",
 +    feature = "op_untag_resource",
 +    feature = "op_update_compute_environment",
 +    feature = "op_update_consumable_resource",
@@ -2450,8 +2582,14 @@ diff --git a/src/protocol_serde.rs b/src/protocol_serde.rs
 +#[cfg(feature = "op_terminate_job")]
  pub(crate) mod shape_terminate_job_input;
 
++#[cfg(feature = "op_terminate_jobs")]
+ pub(crate) mod shape_terminate_jobs_input;
+
 +#[cfg(feature = "op_terminate_service_job")]
  pub(crate) mod shape_terminate_service_job_input;
+
++#[cfg(feature = "op_terminate_service_jobs")]
+ pub(crate) mod shape_terminate_service_jobs_input;
 
 +#[cfg(feature = "op_update_compute_environment")]
  pub(crate) mod shape_update_compute_environment_input;
@@ -2476,6 +2614,9 @@ diff --git a/src/protocol_serde.rs b/src/protocol_serde.rs
 
 +#[cfg(feature = "op_submit_job")]
  pub(crate) mod shape_array_properties;
+
++#[cfg(feature = "op_cancel_jobs")]
+ pub(crate) mod shape_cancel_jobs_error_detail_list;
 
 +#[cfg(any(
 +    feature = "op_create_service_environment",
@@ -2547,6 +2688,9 @@ diff --git a/src/protocol_serde.rs b/src/protocol_serde.rs
 +    feature = "op_describe_compute_environments"
 +))]
  pub(crate) mod shape_eks_configuration;
+
++#[cfg(feature = "op_update_compute_environment")]
+ pub(crate) mod shape_eks_configuration_update;
 
 +#[cfg(any(
 +    feature = "op_describe_job_definitions",
@@ -2711,6 +2855,19 @@ diff --git a/src/protocol_serde.rs b/src/protocol_serde.rs
  pub(crate) mod shape_service_job_timeout;
 
 +#[cfg(any(
++    feature = "op_cancel_jobs",
++    feature = "op_create_compute_environment",
++    feature = "op_describe_compute_environments",
++    feature = "op_describe_job_definitions",
++    feature = "op_describe_jobs",
++    feature = "op_register_job_definition",
++    feature = "op_terminate_jobs",
++    feature = "op_terminate_service_jobs",
++    feature = "op_update_compute_environment"
++))]
+ pub(crate) mod shape_string_list;
+
++#[cfg(any(
 +    feature = "op_create_compute_environment",
 +    feature = "op_describe_compute_environments",
 +    feature = "op_describe_consumable_resource",
@@ -2725,11 +2882,20 @@ diff --git a/src/protocol_serde.rs b/src/protocol_serde.rs
 +))]
  pub(crate) mod shape_tagris_tags_map;
 
++#[cfg(feature = "op_terminate_jobs")]
+ pub(crate) mod shape_terminate_jobs_error_detail_list;
+
++#[cfg(feature = "op_terminate_service_jobs")]
+ pub(crate) mod shape_terminate_service_jobs_error_detail_list;
+
 +#[cfg(any(
 +    feature = "op_describe_compute_environments",
 +    feature = "op_update_compute_environment"
 +))]
  pub(crate) mod shape_update_policy;
+
++#[cfg(feature = "op_cancel_jobs")]
+ pub(crate) mod shape_cancel_jobs_error_detail;
 
 +#[cfg(feature = "op_describe_compute_environments")]
  pub(crate) mod shape_compute_environment_detail;
@@ -2766,6 +2932,13 @@ diff --git a/src/protocol_serde.rs b/src/protocol_serde.rs
 +    feature = "op_register_job_definition"
 +))]
  pub(crate) mod shape_ecs_task_properties;
+
++#[cfg(any(
++    feature = "op_create_compute_environment",
++    feature = "op_describe_compute_environments",
++    feature = "op_update_compute_environment"
++))]
+ pub(crate) mod shape_eks_access_entry;
 
 +#[cfg(any(
 +    feature = "op_describe_job_definitions",
@@ -2959,6 +3132,12 @@ diff --git a/src/protocol_serde.rs b/src/protocol_serde.rs
 
 +#[cfg(feature = "op_submit_job")]
  pub(crate) mod shape_task_properties_override;
+
++#[cfg(feature = "op_terminate_jobs")]
+ pub(crate) mod shape_terminate_jobs_error_detail;
+
++#[cfg(feature = "op_terminate_service_jobs")]
+ pub(crate) mod shape_terminate_service_jobs_error_detail;
 
 +#[cfg(any(
 +    feature = "op_describe_job_definitions",
@@ -3366,16 +3545,6 @@ diff --git a/src/protocol_serde.rs b/src/protocol_serde.rs
 
 +#[cfg(any(
 +    feature = "op_create_compute_environment",
-+    feature = "op_describe_compute_environments",
-+    feature = "op_describe_job_definitions",
-+    feature = "op_describe_jobs",
-+    feature = "op_register_job_definition",
-+    feature = "op_update_compute_environment"
-+))]
- pub(crate) mod shape_string_list;
-
-+#[cfg(any(
-+    feature = "op_create_compute_environment",
 +    feature = "op_describe_compute_environments"
 +))]
  pub(crate) mod shape_tags_map;
@@ -3584,11 +3753,19 @@ diff --git a/src/serde_util.rs b/src/serde_util.rs
 +++ b/src/serde_util.rs
 @@ -1,4 +1,5 @@
  // Code generated by software.amazon.smithy.rust.codegen.smithy-rs. DO NOT EDIT.
++#[cfg(feature = "op_cancel_jobs")]
+ pub(crate) fn cancel_jobs_output_output_correct_errors(
+     mut builder: crate::operation::cancel_jobs::builders::CancelJobsOutputBuilder,
+ ) -> crate::operation::cancel_jobs::builders::CancelJobsOutputBuilder {
+@@ -11,6 +12,7 @@
+     builder
+ }
+
 +#[cfg(feature = "op_create_consumable_resource")]
  pub(crate) fn create_consumable_resource_output_output_correct_errors(
      mut builder: crate::operation::create_consumable_resource::builders::CreateConsumableResourceOutputBuilder,
  ) -> crate::operation::create_consumable_resource::builders::CreateConsumableResourceOutputBuilder {
-@@ -11,6 +12,7 @@
+@@ -23,6 +25,7 @@
      builder
  }
 
@@ -3596,7 +3773,7 @@ diff --git a/src/serde_util.rs b/src/serde_util.rs
  pub(crate) fn create_job_queue_output_output_correct_errors(
      mut builder: crate::operation::create_job_queue::builders::CreateJobQueueOutputBuilder,
  ) -> crate::operation::create_job_queue::builders::CreateJobQueueOutputBuilder {
-@@ -23,6 +25,7 @@
+@@ -35,6 +38,7 @@
      builder
  }
 
@@ -3604,7 +3781,7 @@ diff --git a/src/serde_util.rs b/src/serde_util.rs
  pub(crate) fn create_scheduling_policy_output_output_correct_errors(
      mut builder: crate::operation::create_scheduling_policy::builders::CreateSchedulingPolicyOutputBuilder,
  ) -> crate::operation::create_scheduling_policy::builders::CreateSchedulingPolicyOutputBuilder {
-@@ -35,6 +38,7 @@
+@@ -47,6 +51,7 @@
      builder
  }
 
@@ -3612,7 +3789,7 @@ diff --git a/src/serde_util.rs b/src/serde_util.rs
  pub(crate) fn create_service_environment_output_output_correct_errors(
      mut builder: crate::operation::create_service_environment::builders::CreateServiceEnvironmentOutputBuilder,
  ) -> crate::operation::create_service_environment::builders::CreateServiceEnvironmentOutputBuilder {
-@@ -47,6 +51,7 @@
+@@ -59,6 +64,7 @@
      builder
  }
 
@@ -3620,7 +3797,7 @@ diff --git a/src/serde_util.rs b/src/serde_util.rs
  pub(crate) fn describe_consumable_resource_output_output_correct_errors(
      mut builder: crate::operation::describe_consumable_resource::builders::DescribeConsumableResourceOutputBuilder,
  ) -> crate::operation::describe_consumable_resource::builders::DescribeConsumableResourceOutputBuilder {
-@@ -59,6 +64,7 @@
+@@ -71,6 +77,7 @@
      builder
  }
 
@@ -3628,7 +3805,7 @@ diff --git a/src/serde_util.rs b/src/serde_util.rs
  pub(crate) fn describe_service_job_output_output_correct_errors(
      mut builder: crate::operation::describe_service_job::builders::DescribeServiceJobOutputBuilder,
  ) -> crate::operation::describe_service_job::builders::DescribeServiceJobOutputBuilder {
-@@ -83,6 +89,7 @@
+@@ -95,6 +102,7 @@
      builder
  }
 
@@ -3636,7 +3813,7 @@ diff --git a/src/serde_util.rs b/src/serde_util.rs
  pub(crate) fn list_consumable_resources_output_output_correct_errors(
      mut builder: crate::operation::list_consumable_resources::builders::ListConsumableResourcesOutputBuilder,
  ) -> crate::operation::list_consumable_resources::builders::ListConsumableResourcesOutputBuilder {
-@@ -92,6 +99,7 @@
+@@ -104,6 +112,7 @@
      builder
  }
 
@@ -3644,7 +3821,7 @@ diff --git a/src/serde_util.rs b/src/serde_util.rs
  pub(crate) fn list_jobs_output_output_correct_errors(
      mut builder: crate::operation::list_jobs::builders::ListJobsOutputBuilder,
  ) -> crate::operation::list_jobs::builders::ListJobsOutputBuilder {
-@@ -101,6 +109,7 @@
+@@ -113,6 +122,7 @@
      builder
  }
 
@@ -3652,7 +3829,7 @@ diff --git a/src/serde_util.rs b/src/serde_util.rs
  pub(crate) fn list_jobs_by_consumable_resource_output_output_correct_errors(
      mut builder: crate::operation::list_jobs_by_consumable_resource::builders::ListJobsByConsumableResourceOutputBuilder,
  ) -> crate::operation::list_jobs_by_consumable_resource::builders::ListJobsByConsumableResourceOutputBuilder {
-@@ -110,6 +119,7 @@
+@@ -122,6 +132,7 @@
      builder
  }
 
@@ -3660,7 +3837,7 @@ diff --git a/src/serde_util.rs b/src/serde_util.rs
  pub(crate) fn list_service_jobs_output_output_correct_errors(
      mut builder: crate::operation::list_service_jobs::builders::ListServiceJobsOutputBuilder,
  ) -> crate::operation::list_service_jobs::builders::ListServiceJobsOutputBuilder {
-@@ -119,6 +129,7 @@
+@@ -131,6 +142,7 @@
      builder
  }
 
@@ -3668,7 +3845,7 @@ diff --git a/src/serde_util.rs b/src/serde_util.rs
  pub(crate) fn register_job_definition_output_output_correct_errors(
      mut builder: crate::operation::register_job_definition::builders::RegisterJobDefinitionOutputBuilder,
  ) -> crate::operation::register_job_definition::builders::RegisterJobDefinitionOutputBuilder {
-@@ -134,6 +145,7 @@
+@@ -146,6 +158,7 @@
      builder
  }
 
@@ -3676,7 +3853,7 @@ diff --git a/src/serde_util.rs b/src/serde_util.rs
  pub(crate) fn submit_job_output_output_correct_errors(
      mut builder: crate::operation::submit_job::builders::SubmitJobOutputBuilder,
  ) -> crate::operation::submit_job::builders::SubmitJobOutputBuilder {
-@@ -146,6 +158,7 @@
+@@ -158,6 +171,7 @@
      builder
  }
 
@@ -3684,7 +3861,23 @@ diff --git a/src/serde_util.rs b/src/serde_util.rs
  pub(crate) fn submit_service_job_output_output_correct_errors(
      mut builder: crate::operation::submit_service_job::builders::SubmitServiceJobOutputBuilder,
  ) -> crate::operation::submit_service_job::builders::SubmitServiceJobOutputBuilder {
-@@ -158,6 +171,7 @@
+@@ -170,6 +184,7 @@
+     builder
+ }
+
++#[cfg(feature = "op_terminate_jobs")]
+ pub(crate) fn terminate_jobs_output_output_correct_errors(
+     mut builder: crate::operation::terminate_jobs::builders::TerminateJobsOutputBuilder,
+ ) -> crate::operation::terminate_jobs::builders::TerminateJobsOutputBuilder {
+@@ -182,6 +197,7 @@
+     builder
+ }
+
++#[cfg(feature = "op_terminate_service_jobs")]
+ pub(crate) fn terminate_service_jobs_output_output_correct_errors(
+     mut builder: crate::operation::terminate_service_jobs::builders::TerminateServiceJobsOutputBuilder,
+ ) -> crate::operation::terminate_service_jobs::builders::TerminateServiceJobsOutputBuilder {
+@@ -194,6 +210,7 @@
      builder
  }
 
@@ -3692,7 +3885,7 @@ diff --git a/src/serde_util.rs b/src/serde_util.rs
  pub(crate) fn update_consumable_resource_output_output_correct_errors(
      mut builder: crate::operation::update_consumable_resource::builders::UpdateConsumableResourceOutputBuilder,
  ) -> crate::operation::update_consumable_resource::builders::UpdateConsumableResourceOutputBuilder {
-@@ -170,6 +184,7 @@
+@@ -206,6 +223,7 @@
      builder
  }
 
@@ -3700,7 +3893,7 @@ diff --git a/src/serde_util.rs b/src/serde_util.rs
  pub(crate) fn update_service_environment_output_output_correct_errors(
      mut builder: crate::operation::update_service_environment::builders::UpdateServiceEnvironmentOutputBuilder,
  ) -> crate::operation::update_service_environment::builders::UpdateServiceEnvironmentOutputBuilder {
-@@ -182,6 +197,12 @@
+@@ -218,6 +236,12 @@
      builder
  }
 
@@ -3713,7 +3906,7 @@ diff --git a/src/serde_util.rs b/src/serde_util.rs
  pub(crate) fn quota_share_preemption_configuration_correct_errors(
      mut builder: crate::types::builders::QuotaSharePreemptionConfigurationBuilder,
  ) -> crate::types::builders::QuotaSharePreemptionConfigurationBuilder {
-@@ -193,6 +214,12 @@
+@@ -229,6 +253,12 @@
      builder
  }
 
@@ -3726,7 +3919,7 @@ diff --git a/src/serde_util.rs b/src/serde_util.rs
  pub(crate) fn quota_share_resource_sharing_configuration_correct_errors(
      mut builder: crate::types::builders::QuotaShareResourceSharingConfigurationBuilder,
  ) -> crate::types::builders::QuotaShareResourceSharingConfigurationBuilder {
-@@ -204,6 +231,7 @@
+@@ -240,6 +270,7 @@
      builder
  }
 
@@ -3734,7 +3927,15 @@ diff --git a/src/serde_util.rs b/src/serde_util.rs
  pub(crate) fn service_job_retry_strategy_correct_errors(
      mut builder: crate::types::builders::ServiceJobRetryStrategyBuilder,
  ) -> crate::types::builders::ServiceJobRetryStrategyBuilder {
-@@ -213,6 +241,7 @@
+@@ -249,6 +280,7 @@
+     builder
+ }
+
++#[cfg(feature = "op_cancel_jobs")]
+ pub(crate) fn cancel_jobs_error_detail_correct_errors(
+     mut builder: crate::types::builders::CancelJobsErrorDetailBuilder,
+ ) -> crate::types::builders::CancelJobsErrorDetailBuilder {
+@@ -264,6 +296,7 @@
      builder
  }
 
@@ -3742,7 +3943,7 @@ diff --git a/src/serde_util.rs b/src/serde_util.rs
  pub(crate) fn compute_environment_detail_correct_errors(
      mut builder: crate::types::builders::ComputeEnvironmentDetailBuilder,
  ) -> crate::types::builders::ComputeEnvironmentDetailBuilder {
-@@ -225,6 +254,7 @@
+@@ -276,6 +309,7 @@
      builder
  }
 
@@ -3750,7 +3951,7 @@ diff --git a/src/serde_util.rs b/src/serde_util.rs
  pub(crate) fn consumable_resource_summary_correct_errors(
      mut builder: crate::types::builders::ConsumableResourceSummaryBuilder,
  ) -> crate::types::builders::ConsumableResourceSummaryBuilder {
-@@ -237,6 +267,7 @@
+@@ -288,6 +322,7 @@
      builder
  }
 
@@ -3758,7 +3959,7 @@ diff --git a/src/serde_util.rs b/src/serde_util.rs
  pub(crate) fn job_definition_correct_errors(
      mut builder: crate::types::builders::JobDefinitionBuilder,
  ) -> crate::types::builders::JobDefinitionBuilder {
-@@ -255,6 +286,7 @@
+@@ -306,6 +341,7 @@
      builder
  }
 
@@ -3766,7 +3967,7 @@ diff --git a/src/serde_util.rs b/src/serde_util.rs
  pub(crate) fn job_detail_correct_errors(
      mut builder: crate::types::builders::JobDetailBuilder,
  ) -> crate::types::builders::JobDetailBuilder {
-@@ -279,6 +311,7 @@
+@@ -330,6 +366,7 @@
      builder
  }
 
@@ -3774,7 +3975,7 @@ diff --git a/src/serde_util.rs b/src/serde_util.rs
  pub(crate) fn job_queue_detail_correct_errors(
      mut builder: crate::types::builders::JobQueueDetailBuilder,
  ) -> crate::types::builders::JobQueueDetailBuilder {
-@@ -300,6 +333,7 @@
+@@ -351,6 +388,7 @@
      builder
  }
 
@@ -3782,7 +3983,7 @@ diff --git a/src/serde_util.rs b/src/serde_util.rs
  pub(crate) fn job_summary_correct_errors(
      mut builder: crate::types::builders::JobSummaryBuilder,
  ) -> crate::types::builders::JobSummaryBuilder {
-@@ -312,6 +346,7 @@
+@@ -363,6 +401,7 @@
      builder
  }
 
@@ -3790,7 +3991,7 @@ diff --git a/src/serde_util.rs b/src/serde_util.rs
  pub(crate) fn list_jobs_by_consumable_resource_summary_correct_errors(
      mut builder: crate::types::builders::ListJobsByConsumableResourceSummaryBuilder,
  ) -> crate::types::builders::ListJobsByConsumableResourceSummaryBuilder {
-@@ -342,6 +377,12 @@
+@@ -393,6 +432,12 @@
      builder
  }
 
@@ -3803,7 +4004,7 @@ diff --git a/src/serde_util.rs b/src/serde_util.rs
  pub(crate) fn quota_share_capacity_limit_correct_errors(
      mut builder: crate::types::builders::QuotaShareCapacityLimitBuilder,
  ) -> crate::types::builders::QuotaShareCapacityLimitBuilder {
-@@ -354,6 +395,7 @@
+@@ -405,6 +450,7 @@
      builder
  }
 
@@ -3811,7 +4012,7 @@ diff --git a/src/serde_util.rs b/src/serde_util.rs
  pub(crate) fn scheduling_policy_detail_correct_errors(
      mut builder: crate::types::builders::SchedulingPolicyDetailBuilder,
  ) -> crate::types::builders::SchedulingPolicyDetailBuilder {
-@@ -366,6 +408,7 @@
+@@ -417,6 +463,7 @@
      builder
  }
 
@@ -3819,7 +4020,7 @@ diff --git a/src/serde_util.rs b/src/serde_util.rs
  pub(crate) fn scheduling_policy_listing_detail_correct_errors(
      mut builder: crate::types::builders::SchedulingPolicyListingDetailBuilder,
  ) -> crate::types::builders::SchedulingPolicyListingDetailBuilder {
-@@ -375,6 +418,7 @@
+@@ -426,6 +473,7 @@
      builder
  }
 
@@ -3827,7 +4028,7 @@ diff --git a/src/serde_util.rs b/src/serde_util.rs
  pub(crate) fn service_environment_detail_correct_errors(
      mut builder: crate::types::builders::ServiceEnvironmentDetailBuilder,
  ) -> crate::types::builders::ServiceEnvironmentDetailBuilder {
-@@ -393,6 +437,7 @@
+@@ -444,6 +492,7 @@
      builder
  }
 
@@ -3835,7 +4036,7 @@ diff --git a/src/serde_util.rs b/src/serde_util.rs
  pub(crate) fn service_job_summary_correct_errors(
      mut builder: crate::types::builders::ServiceJobSummaryBuilder,
  ) -> crate::types::builders::ServiceJobSummaryBuilder {
-@@ -408,6 +453,7 @@
+@@ -459,6 +508,7 @@
      builder
  }
 
@@ -3843,7 +4044,23 @@ diff --git a/src/serde_util.rs b/src/serde_util.rs
  pub(crate) fn service_resource_id_correct_errors(
      mut builder: crate::types::builders::ServiceResourceIdBuilder,
  ) -> crate::types::builders::ServiceResourceIdBuilder {
-@@ -420,6 +466,10 @@
+@@ -471,6 +521,7 @@
+     builder
+ }
+
++#[cfg(feature = "op_terminate_jobs")]
+ pub(crate) fn terminate_jobs_error_detail_correct_errors(
+     mut builder: crate::types::builders::TerminateJobsErrorDetailBuilder,
+ ) -> crate::types::builders::TerminateJobsErrorDetailBuilder {
+@@ -486,6 +537,7 @@
+     builder
+ }
+
++#[cfg(feature = "op_terminate_service_jobs")]
+ pub(crate) fn terminate_service_jobs_error_detail_correct_errors(
+     mut builder: crate::types::builders::TerminateServiceJobsErrorDetailBuilder,
+ ) -> crate::types::builders::TerminateServiceJobsErrorDetailBuilder {
+@@ -501,6 +553,10 @@
      builder
  }
 
@@ -3854,7 +4071,7 @@ diff --git a/src/serde_util.rs b/src/serde_util.rs
  pub(crate) fn compute_resource_correct_errors(
      mut builder: crate::types::builders::ComputeResourceBuilder,
  ) -> crate::types::builders::ComputeResourceBuilder {
-@@ -432,6 +482,11 @@
+@@ -513,6 +569,11 @@
      builder
  }
 
@@ -3866,7 +4083,7 @@ diff --git a/src/serde_util.rs b/src/serde_util.rs
  pub(crate) fn ecs_properties_correct_errors(
      mut builder: crate::types::builders::EcsPropertiesBuilder,
  ) -> crate::types::builders::EcsPropertiesBuilder {
-@@ -441,6 +496,10 @@
+@@ -522,6 +583,10 @@
      builder
  }
 
@@ -3877,7 +4094,7 @@ diff --git a/src/serde_util.rs b/src/serde_util.rs
  pub(crate) fn eks_configuration_correct_errors(
      mut builder: crate::types::builders::EksConfigurationBuilder,
  ) -> crate::types::builders::EksConfigurationBuilder {
-@@ -453,6 +512,11 @@
+@@ -534,6 +599,11 @@
      builder
  }
 
@@ -3889,7 +4106,7 @@ diff --git a/src/serde_util.rs b/src/serde_util.rs
  pub(crate) fn node_properties_correct_errors(
      mut builder: crate::types::builders::NodePropertiesBuilder,
  ) -> crate::types::builders::NodePropertiesBuilder {
-@@ -468,6 +532,11 @@
+@@ -549,6 +619,11 @@
      builder
  }
 
@@ -3901,7 +4118,7 @@ diff --git a/src/serde_util.rs b/src/serde_util.rs
  pub(crate) fn quota_share_policy_correct_errors(
      mut builder: crate::types::builders::QuotaSharePolicyBuilder,
  ) -> crate::types::builders::QuotaSharePolicyBuilder {
-@@ -479,6 +548,11 @@
+@@ -560,6 +635,11 @@
      builder
  }
 
@@ -3913,7 +4130,19 @@ diff --git a/src/serde_util.rs b/src/serde_util.rs
  pub(crate) fn compute_environment_order_correct_errors(
      mut builder: crate::types::builders::ComputeEnvironmentOrderBuilder,
  ) -> crate::types::builders::ComputeEnvironmentOrderBuilder {
-@@ -491,6 +565,11 @@
+@@ -572,6 +652,11 @@
+     builder
+ }
+
++#[cfg(any(
++    feature = "op_create_compute_environment",
++    feature = "op_describe_compute_environments",
++    feature = "op_update_compute_environment"
++))]
+ pub(crate) fn eks_access_entry_correct_errors(
+     mut builder: crate::types::builders::EksAccessEntryBuilder,
+ ) -> crate::types::builders::EksAccessEntryBuilder {
+@@ -583,6 +668,11 @@
      builder
  }
 
@@ -3925,7 +4154,7 @@ diff --git a/src/serde_util.rs b/src/serde_util.rs
  pub(crate) fn ephemeral_storage_correct_errors(
      mut builder: crate::types::builders::EphemeralStorageBuilder,
  ) -> crate::types::builders::EphemeralStorageBuilder {
-@@ -500,6 +579,11 @@
+@@ -592,6 +682,11 @@
      builder
  }
 
@@ -3937,7 +4166,7 @@ diff --git a/src/serde_util.rs b/src/serde_util.rs
  pub(crate) fn job_state_time_limit_action_correct_errors(
      mut builder: crate::types::builders::JobStateTimeLimitActionBuilder,
  ) -> crate::types::builders::JobStateTimeLimitActionBuilder {
-@@ -522,6 +606,11 @@
+@@ -614,6 +709,11 @@
      builder
  }
 
@@ -3949,7 +4178,7 @@ diff --git a/src/serde_util.rs b/src/serde_util.rs
  pub(crate) fn log_configuration_correct_errors(
      mut builder: crate::types::builders::LogConfigurationBuilder,
  ) -> crate::types::builders::LogConfigurationBuilder {
-@@ -531,6 +620,10 @@
+@@ -623,6 +723,10 @@
      builder
  }
 
@@ -3960,7 +4189,7 @@ diff --git a/src/serde_util.rs b/src/serde_util.rs
  pub(crate) fn managed_instances_provider_correct_errors(
      mut builder: crate::types::builders::ManagedInstancesProviderBuilder,
  ) -> crate::types::builders::ManagedInstancesProviderBuilder {
-@@ -546,6 +639,11 @@
+@@ -638,6 +742,11 @@
      builder
  }
 
@@ -3972,7 +4201,7 @@ diff --git a/src/serde_util.rs b/src/serde_util.rs
  pub(crate) fn repository_credentials_correct_errors(
      mut builder: crate::types::builders::RepositoryCredentialsBuilder,
  ) -> crate::types::builders::RepositoryCredentialsBuilder {
-@@ -555,6 +653,11 @@
+@@ -647,6 +756,11 @@
      builder
  }
 
@@ -3984,7 +4213,7 @@ diff --git a/src/serde_util.rs b/src/serde_util.rs
  pub(crate) fn service_environment_order_correct_errors(
      mut builder: crate::types::builders::ServiceEnvironmentOrderBuilder,
  ) -> crate::types::builders::ServiceEnvironmentOrderBuilder {
-@@ -567,6 +670,11 @@
+@@ -659,6 +773,11 @@
      builder
  }
 
@@ -3996,7 +4225,7 @@ diff --git a/src/serde_util.rs b/src/serde_util.rs
  pub(crate) fn ec2_configuration_correct_errors(
      mut builder: crate::types::builders::Ec2ConfigurationBuilder,
  ) -> crate::types::builders::Ec2ConfigurationBuilder {
-@@ -576,6 +684,11 @@
+@@ -668,6 +787,11 @@
      builder
  }
 
@@ -4008,7 +4237,7 @@ diff --git a/src/serde_util.rs b/src/serde_util.rs
  pub(crate) fn ecs_task_properties_correct_errors(
      mut builder: crate::types::builders::EcsTaskPropertiesBuilder,
  ) -> crate::types::builders::EcsTaskPropertiesBuilder {
-@@ -585,6 +698,12 @@
+@@ -677,6 +801,12 @@
      builder
  }
 
@@ -4021,7 +4250,7 @@ diff --git a/src/serde_util.rs b/src/serde_util.rs
  pub(crate) fn evaluate_on_exit_correct_errors(
      mut builder: crate::types::builders::EvaluateOnExitBuilder,
  ) -> crate::types::builders::EvaluateOnExitBuilder {
-@@ -594,6 +713,10 @@
+@@ -686,6 +816,10 @@
      builder
  }
 
@@ -4032,7 +4261,7 @@ diff --git a/src/serde_util.rs b/src/serde_util.rs
  pub(crate) fn instance_launch_template_correct_errors(
      mut builder: crate::types::builders::InstanceLaunchTemplateBuilder,
  ) -> crate::types::builders::InstanceLaunchTemplateBuilder {
-@@ -609,6 +732,11 @@
+@@ -701,6 +835,11 @@
      builder
  }
 
@@ -4044,7 +4273,7 @@ diff --git a/src/serde_util.rs b/src/serde_util.rs
  pub(crate) fn node_range_property_correct_errors(
      mut builder: crate::types::builders::NodeRangePropertyBuilder,
  ) -> crate::types::builders::NodeRangePropertyBuilder {
-@@ -618,6 +746,12 @@
+@@ -710,6 +849,12 @@
      builder
  }
 
@@ -4057,7 +4286,7 @@ diff --git a/src/serde_util.rs b/src/serde_util.rs
  pub(crate) fn resource_requirement_correct_errors(
      mut builder: crate::types::builders::ResourceRequirementBuilder,
  ) -> crate::types::builders::ResourceRequirementBuilder {
-@@ -630,6 +764,11 @@
+@@ -722,6 +867,11 @@
      builder
  }
 
@@ -4069,7 +4298,7 @@ diff --git a/src/serde_util.rs b/src/serde_util.rs
  pub(crate) fn secret_correct_errors(
      mut builder: crate::types::builders::SecretBuilder,
  ) -> crate::types::builders::SecretBuilder {
-@@ -642,6 +781,11 @@
+@@ -734,6 +884,11 @@
      builder
  }
 
@@ -4081,7 +4310,7 @@ diff --git a/src/serde_util.rs b/src/serde_util.rs
  pub(crate) fn share_attributes_correct_errors(
      mut builder: crate::types::builders::ShareAttributesBuilder,
  ) -> crate::types::builders::ShareAttributesBuilder {
-@@ -651,6 +795,11 @@
+@@ -743,6 +898,11 @@
      builder
  }
 
@@ -4093,7 +4322,7 @@ diff --git a/src/serde_util.rs b/src/serde_util.rs
  pub(crate) fn ulimit_correct_errors(
      mut builder: crate::types::builders::UlimitBuilder,
  ) -> crate::types::builders::UlimitBuilder {
-@@ -666,6 +815,11 @@
+@@ -758,6 +918,11 @@
      builder
  }
 
@@ -4105,7 +4334,7 @@ diff --git a/src/serde_util.rs b/src/serde_util.rs
  pub(crate) fn device_correct_errors(
      mut builder: crate::types::builders::DeviceBuilder,
  ) -> crate::types::builders::DeviceBuilder {
-@@ -675,6 +829,11 @@
+@@ -767,6 +932,11 @@
      builder
  }
 
@@ -4117,7 +4346,7 @@ diff --git a/src/serde_util.rs b/src/serde_util.rs
  pub(crate) fn efs_volume_configuration_correct_errors(
      mut builder: crate::types::builders::EfsVolumeConfigurationBuilder,
  ) -> crate::types::builders::EfsVolumeConfigurationBuilder {
-@@ -684,6 +843,11 @@
+@@ -776,6 +946,11 @@
      builder
  }
 
@@ -4129,7 +4358,7 @@ diff --git a/src/serde_util.rs b/src/serde_util.rs
  pub(crate) fn eks_container_correct_errors(
      mut builder: crate::types::builders::EksContainerBuilder,
  ) -> crate::types::builders::EksContainerBuilder {
-@@ -693,6 +857,11 @@
+@@ -785,6 +960,11 @@
      builder
  }
 
@@ -4141,7 +4370,7 @@ diff --git a/src/serde_util.rs b/src/serde_util.rs
  pub(crate) fn eks_volume_correct_errors(
      mut builder: crate::types::builders::EksVolumeBuilder,
  ) -> crate::types::builders::EksVolumeBuilder {
-@@ -702,6 +871,11 @@
+@@ -794,6 +974,11 @@
      builder
  }
 
@@ -4153,7 +4382,7 @@ diff --git a/src/serde_util.rs b/src/serde_util.rs
  pub(crate) fn image_pull_secret_correct_errors(
      mut builder: crate::types::builders::ImagePullSecretBuilder,
  ) -> crate::types::builders::ImagePullSecretBuilder {
-@@ -711,6 +885,11 @@
+@@ -803,6 +988,11 @@
      builder
  }
 
@@ -4165,7 +4394,7 @@ diff --git a/src/serde_util.rs b/src/serde_util.rs
  pub(crate) fn managed_instances_network_configuration_correct_errors(
      mut builder: crate::types::builders::ManagedInstancesNetworkConfigurationBuilder,
  ) -> crate::types::builders::ManagedInstancesNetworkConfigurationBuilder {
-@@ -723,6 +902,11 @@
+@@ -815,6 +1005,11 @@
      builder
  }
 
@@ -4177,7 +4406,7 @@ diff --git a/src/serde_util.rs b/src/serde_util.rs
  pub(crate) fn s3_files_volume_configuration_correct_errors(
      mut builder: crate::types::builders::S3FilesVolumeConfigurationBuilder,
  ) -> crate::types::builders::S3FilesVolumeConfigurationBuilder {
-@@ -732,6 +916,11 @@
+@@ -824,6 +1019,11 @@
      builder
  }
 
@@ -4189,7 +4418,7 @@ diff --git a/src/serde_util.rs b/src/serde_util.rs
  pub(crate) fn tmpfs_correct_errors(
      mut builder: crate::types::builders::TmpfsBuilder,
  ) -> crate::types::builders::TmpfsBuilder {
-@@ -744,6 +933,11 @@
+@@ -836,6 +1036,11 @@
      builder
  }
 
@@ -4201,7 +4430,7 @@ diff --git a/src/serde_util.rs b/src/serde_util.rs
  pub(crate) fn eks_persistent_volume_claim_correct_errors(
      mut builder: crate::types::builders::EksPersistentVolumeClaimBuilder,
  ) -> crate::types::builders::EksPersistentVolumeClaimBuilder {
-@@ -753,6 +947,11 @@
+@@ -845,6 +1050,11 @@
      builder
  }
 
@@ -4213,7 +4442,7 @@ diff --git a/src/serde_util.rs b/src/serde_util.rs
  pub(crate) fn eks_secret_correct_errors(
      mut builder: crate::types::builders::EksSecretBuilder,
  ) -> crate::types::builders::EksSecretBuilder {
-@@ -762,6 +961,11 @@
+@@ -854,6 +1064,11 @@
      builder
  }
 
@@ -4225,7 +4454,7 @@ diff --git a/src/serde_util.rs b/src/serde_util.rs
  pub(crate) fn task_container_properties_correct_errors(
      mut builder: crate::types::builders::TaskContainerPropertiesBuilder,
  ) -> crate::types::builders::TaskContainerPropertiesBuilder {
-@@ -771,6 +975,12 @@
+@@ -863,6 +1078,12 @@
      builder
  }
 
@@ -4238,7 +4467,7 @@ diff --git a/src/serde_util.rs b/src/serde_util.rs
  pub(crate) fn eks_container_environment_variable_correct_errors(
      mut builder: crate::types::builders::EksContainerEnvironmentVariableBuilder,
  ) -> crate::types::builders::EksContainerEnvironmentVariableBuilder {
-@@ -780,6 +990,11 @@
+@@ -872,6 +1093,11 @@
      builder
  }
 
@@ -4258,7 +4487,7 @@ diff --git a/src/serde_util.rs b/src/serde_util.rs
 diff --git a/src/types.rs b/src/types.rs
 --- a/src/types.rs
 +++ b/src/types.rs
-@@ -1,722 +1,1898 @@
+@@ -1,750 +1,1964 @@
  // Code generated by software.amazon.smithy.rust.codegen.smithy-rs. DO NOT EDIT.
 +#[cfg(any(
 +    feature = "op_create_compute_environment",
@@ -4473,6 +4702,12 @@ diff --git a/src/types.rs b/src/types.rs
 +))]
  pub use crate::types::_update_policy::UpdatePolicy;
 
++#[cfg(feature = "op_update_compute_environment")]
+ pub use crate::types::_eks_configuration_update::EksConfigurationUpdate;
+
++#[cfg(feature = "op_cancel_jobs")]
+ pub use crate::types::_cancel_jobs_error_detail::CancelJobsErrorDetail;
+
 +#[cfg(any(
 +    feature = "op_create_compute_environment",
 +    feature = "op_describe_compute_environments",
@@ -4505,6 +4740,13 @@ diff --git a/src/types.rs b/src/types.rs
 +    feature = "op_describe_compute_environments"
 +))]
  pub use crate::types::_managed_instances_provider::ManagedInstancesProvider;
+
++#[cfg(any(
++    feature = "op_create_compute_environment",
++    feature = "op_describe_compute_environments",
++    feature = "op_update_compute_environment"
++))]
+ pub use crate::types::_eks_access_entry::EksAccessEntry;
 
 +#[cfg(any(
 +    feature = "op_create_compute_environment",
@@ -4700,6 +4942,12 @@ diff --git a/src/types.rs b/src/types.rs
 +#[cfg(feature = "op_submit_job")]
  pub use crate::types::_eks_pod_properties_override::EksPodPropertiesOverride;
 
++#[cfg(feature = "op_terminate_jobs")]
+ pub use crate::types::_terminate_jobs_error_detail::TerminateJobsErrorDetail;
+
++#[cfg(feature = "op_terminate_service_jobs")]
+ pub use crate::types::_terminate_service_jobs_error_detail::TerminateServiceJobsErrorDetail;
+
 +#[cfg(feature = "op_update_compute_environment")]
  pub use crate::types::_cr_update_allocation_strategy::CrUpdateAllocationStrategy;
 
@@ -4732,6 +4980,20 @@ diff --git a/src/types.rs b/src/types.rs
 +    feature = "op_update_compute_environment"
 +))]
  pub use crate::types::_infrastructure_optimization::InfrastructureOptimization;
+
++#[cfg(any(
++    feature = "op_create_compute_environment",
++    feature = "op_describe_compute_environments",
++    feature = "op_update_compute_environment"
++))]
+ pub use crate::types::_eks_access_entry_desired_state::EksAccessEntryDesiredState;
+
++#[cfg(any(
++    feature = "op_create_compute_environment",
++    feature = "op_describe_compute_environments",
++    feature = "op_update_compute_environment"
++))]
+ pub use crate::types::_eks_access_entry_status::EksAccessEntryStatus;
 
 +#[cfg(any(
 +    feature = "op_create_job_queue",
@@ -5239,6 +5501,9 @@ diff --git a/src/types.rs b/src/types.rs
 +#[cfg(feature = "op_describe_jobs")]
  mod _attempt_task_container_details;
 
++#[cfg(feature = "op_cancel_jobs")]
+ mod _cancel_jobs_error_detail;
+
 +#[cfg(any(
 +    feature = "op_create_service_environment",
 +    feature = "op_describe_service_environments",
@@ -5434,6 +5699,27 @@ diff --git a/src/types.rs b/src/types.rs
 +))]
  mod _efs_volume_configuration;
 
++#[cfg(any(
++    feature = "op_create_compute_environment",
++    feature = "op_describe_compute_environments",
++    feature = "op_update_compute_environment"
++))]
+ mod _eks_access_entry;
+
++#[cfg(any(
++    feature = "op_create_compute_environment",
++    feature = "op_describe_compute_environments",
++    feature = "op_update_compute_environment"
++))]
+ mod _eks_access_entry_desired_state;
+
++#[cfg(any(
++    feature = "op_create_compute_environment",
++    feature = "op_describe_compute_environments",
++    feature = "op_update_compute_environment"
++))]
+ mod _eks_access_entry_status;
+
 +#[cfg(feature = "op_describe_jobs")]
  mod _eks_attempt_container_detail;
 
@@ -5445,6 +5731,9 @@ diff --git a/src/types.rs b/src/types.rs
 +    feature = "op_describe_compute_environments"
 +))]
  mod _eks_configuration;
+
++#[cfg(feature = "op_update_compute_environment")]
+ mod _eks_configuration_update;
 
 +#[cfg(any(
 +    feature = "op_describe_job_definitions",
@@ -6119,6 +6408,12 @@ diff --git a/src/types.rs b/src/types.rs
 +#[cfg(feature = "op_submit_job")]
  mod _task_properties_override;
 
++#[cfg(feature = "op_terminate_jobs")]
+ mod _terminate_jobs_error_detail;
+
++#[cfg(feature = "op_terminate_service_jobs")]
+ mod _terminate_service_jobs_error_detail;
+
 +#[cfg(any(
 +    feature = "op_describe_job_definitions",
 +    feature = "op_describe_jobs",
@@ -6165,7 +6460,7 @@ diff --git a/src/types.rs b/src/types.rs
 diff --git a/src/types/builders.rs b/src/types/builders.rs
 --- a/src/types/builders.rs
 +++ b/src/types/builders.rs
-@@ -1,284 +1,729 @@
+@@ -1,294 +1,748 @@
  // Code generated by software.amazon.smithy.rust.codegen.smithy-rs. DO NOT EDIT.
 +#[cfg(any(
 +    feature = "op_create_compute_environment",
@@ -6317,6 +6612,12 @@ diff --git a/src/types/builders.rs b/src/types/builders.rs
 +))]
  pub use crate::types::_update_policy::UpdatePolicyBuilder;
 
++#[cfg(feature = "op_update_compute_environment")]
+ pub use crate::types::_eks_configuration_update::EksConfigurationUpdateBuilder;
+
++#[cfg(feature = "op_cancel_jobs")]
+ pub use crate::types::_cancel_jobs_error_detail::CancelJobsErrorDetailBuilder;
+
 +#[cfg(any(
 +    feature = "op_create_compute_environment",
 +    feature = "op_describe_compute_environments",
@@ -6336,6 +6637,13 @@ diff --git a/src/types/builders.rs b/src/types/builders.rs
 +    feature = "op_describe_compute_environments"
 +))]
  pub use crate::types::_managed_instances_provider::ManagedInstancesProviderBuilder;
+
++#[cfg(any(
++    feature = "op_create_compute_environment",
++    feature = "op_describe_compute_environments",
++    feature = "op_update_compute_environment"
++))]
+ pub use crate::types::_eks_access_entry::EksAccessEntryBuilder;
 
 +#[cfg(any(
 +    feature = "op_create_job_queue",
@@ -6493,6 +6801,12 @@ diff --git a/src/types/builders.rs b/src/types/builders.rs
 
 +#[cfg(feature = "op_submit_job")]
  pub use crate::types::_eks_pod_properties_override::EksPodPropertiesOverrideBuilder;
+
++#[cfg(feature = "op_terminate_jobs")]
+ pub use crate::types::_terminate_jobs_error_detail::TerminateJobsErrorDetailBuilder;
+
++#[cfg(feature = "op_terminate_service_jobs")]
+ pub use crate::types::_terminate_service_jobs_error_detail::TerminateServiceJobsErrorDetailBuilder;
 
 +#[cfg(feature = "op_update_compute_environment")]
  pub use crate::types::_update_managed_instances_provider_configuration::UpdateManagedInstancesProviderConfigurationBuilder;
@@ -6903,10 +7217,11 @@ diff --git a/src/types/builders.rs b/src/types/builders.rs
 diff --git a/src/types/error.rs b/src/types/error.rs
 --- a/src/types/error.rs
 +++ b/src/types/error.rs
-@@ -1,10 +1,198 @@
+@@ -1,10 +1,210 @@
  // Code generated by software.amazon.smithy.rust.codegen.smithy-rs. DO NOT EDIT.
 +#[cfg(any(
 +    feature = "op_cancel_job",
++    feature = "op_cancel_jobs",
 +    feature = "op_create_compute_environment",
 +    feature = "op_create_consumable_resource",
 +    feature = "op_create_job_queue",
@@ -6942,7 +7257,9 @@ diff --git a/src/types/error.rs b/src/types/error.rs
 +    feature = "op_submit_service_job",
 +    feature = "op_tag_resource",
 +    feature = "op_terminate_job",
++    feature = "op_terminate_jobs",
 +    feature = "op_terminate_service_job",
++    feature = "op_terminate_service_jobs",
 +    feature = "op_untag_resource",
 +    feature = "op_update_compute_environment",
 +    feature = "op_update_consumable_resource",
@@ -6956,6 +7273,7 @@ diff --git a/src/types/error.rs b/src/types/error.rs
 
 +#[cfg(any(
 +    feature = "op_cancel_job",
++    feature = "op_cancel_jobs",
 +    feature = "op_create_compute_environment",
 +    feature = "op_create_consumable_resource",
 +    feature = "op_create_job_queue",
@@ -6991,7 +7309,9 @@ diff --git a/src/types/error.rs b/src/types/error.rs
 +    feature = "op_submit_service_job",
 +    feature = "op_tag_resource",
 +    feature = "op_terminate_job",
++    feature = "op_terminate_jobs",
 +    feature = "op_terminate_service_job",
++    feature = "op_terminate_service_jobs",
 +    feature = "op_untag_resource",
 +    feature = "op_update_compute_environment",
 +    feature = "op_update_consumable_resource",
@@ -7005,6 +7325,7 @@ diff --git a/src/types/error.rs b/src/types/error.rs
 
 +#[cfg(any(
 +    feature = "op_cancel_job",
++    feature = "op_cancel_jobs",
 +    feature = "op_create_compute_environment",
 +    feature = "op_create_consumable_resource",
 +    feature = "op_create_job_queue",
@@ -7040,7 +7361,9 @@ diff --git a/src/types/error.rs b/src/types/error.rs
 +    feature = "op_submit_service_job",
 +    feature = "op_tag_resource",
 +    feature = "op_terminate_job",
++    feature = "op_terminate_jobs",
 +    feature = "op_terminate_service_job",
++    feature = "op_terminate_service_jobs",
 +    feature = "op_untag_resource",
 +    feature = "op_update_compute_environment",
 +    feature = "op_update_consumable_resource",
@@ -7054,6 +7377,7 @@ diff --git a/src/types/error.rs b/src/types/error.rs
 
 +#[cfg(any(
 +    feature = "op_cancel_job",
++    feature = "op_cancel_jobs",
 +    feature = "op_create_compute_environment",
 +    feature = "op_create_consumable_resource",
 +    feature = "op_create_job_queue",
@@ -7089,7 +7413,9 @@ diff --git a/src/types/error.rs b/src/types/error.rs
 +    feature = "op_submit_service_job",
 +    feature = "op_tag_resource",
 +    feature = "op_terminate_job",
++    feature = "op_terminate_jobs",
 +    feature = "op_terminate_service_job",
++    feature = "op_terminate_service_jobs",
 +    feature = "op_untag_resource",
 +    feature = "op_update_compute_environment",
 +    feature = "op_update_consumable_resource",
@@ -7110,10 +7436,11 @@ diff --git a/src/types/error.rs b/src/types/error.rs
 diff --git a/src/types/error/builders.rs b/src/types/error/builders.rs
 --- a/src/types/error/builders.rs
 +++ b/src/types/error/builders.rs
-@@ -1,4 +1,98 @@
+@@ -1,4 +1,104 @@
  // Code generated by software.amazon.smithy.rust.codegen.smithy-rs. DO NOT EDIT.
 +#[cfg(any(
 +    feature = "op_cancel_job",
++    feature = "op_cancel_jobs",
 +    feature = "op_create_compute_environment",
 +    feature = "op_create_consumable_resource",
 +    feature = "op_create_job_queue",
@@ -7149,7 +7476,9 @@ diff --git a/src/types/error/builders.rs b/src/types/error/builders.rs
 +    feature = "op_submit_service_job",
 +    feature = "op_tag_resource",
 +    feature = "op_terminate_job",
++    feature = "op_terminate_jobs",
 +    feature = "op_terminate_service_job",
++    feature = "op_terminate_service_jobs",
 +    feature = "op_untag_resource",
 +    feature = "op_update_compute_environment",
 +    feature = "op_update_consumable_resource",
@@ -7163,6 +7492,7 @@ diff --git a/src/types/error/builders.rs b/src/types/error/builders.rs
 
 +#[cfg(any(
 +    feature = "op_cancel_job",
++    feature = "op_cancel_jobs",
 +    feature = "op_create_compute_environment",
 +    feature = "op_create_consumable_resource",
 +    feature = "op_create_job_queue",
@@ -7198,7 +7528,9 @@ diff --git a/src/types/error/builders.rs b/src/types/error/builders.rs
 +    feature = "op_submit_service_job",
 +    feature = "op_tag_resource",
 +    feature = "op_terminate_job",
++    feature = "op_terminate_jobs",
 +    feature = "op_terminate_service_job",
++    feature = "op_terminate_service_jobs",
 +    feature = "op_untag_resource",
 +    feature = "op_update_compute_environment",
 +    feature = "op_update_consumable_resource",
@@ -7226,7 +7558,7 @@ diff --git a/Cargo.toml b/Cargo.toml
 
  [dependencies.aws-runtime]
 -path = "../aws-runtime"
- version = "1.9.2"
+ version = "1.10.0"
 
  [dependencies.aws-smithy-async]
 -path = "../aws-smithy-async"
@@ -7234,11 +7566,11 @@ diff --git a/Cargo.toml b/Cargo.toml
 
  [dependencies.aws-smithy-http]
 -path = "../aws-smithy-http"
- version = "0.64.0"
+ version = "0.64.1"
 
  [dependencies.aws-smithy-json]
 -path = "../aws-smithy-json"
- version = "0.63.0"
+ version = "0.63.1"
 
  [dependencies.aws-smithy-observability]
 -path = "../aws-smithy-observability"
@@ -7247,28 +7579,28 @@ diff --git a/Cargo.toml b/Cargo.toml
  [dependencies.aws-smithy-runtime]
 -path = "../aws-smithy-runtime"
  features = ["client"]
- version = "1.14.0"
+ version = "1.15.0"
 
  [dependencies.aws-smithy-runtime-api]
 -path = "../aws-smithy-runtime-api"
  features = ["client", "http-1x"]
- version = "1.16.0"
+ version = "1.18.0"
 
  [dependencies.aws-smithy-schema]
 -path = "../aws-smithy-schema"
- version = "0.2.0"
+ version = "0.2.1"
 
  [dependencies.aws-smithy-types]
 -path = "../aws-smithy-types"
  features = ["http-body-1-x"]
- version = "1.6.3"
+ version = "1.8.1"
 
  [dependencies.aws-types]
 -path = "../aws-types"
  version = "1.6.0"
 
  [dependencies.bytes]
-@@ -84,16 +73,13 @@
+@@ -81,16 +70,13 @@
  [dependencies.tracing]
  version = "0.1"
  [dev-dependencies.aws-config]
@@ -7285,11 +7617,12 @@ diff --git a/Cargo.toml b/Cargo.toml
  version = "0.64.0"
 
  [dev-dependencies.pretty_assertions]
-@@ -118,3 +104,48 @@
- test-util = ["aws-credential-types/test-util", "aws-smithy-runtime/legacy-test-util", "aws-smithy-runtime/test-util"]
+@@ -117,3 +103,51 @@
+ test-util = ["aws-credential-types/test-util"]
  gated-tests = []
  default = ["rustls", "default-https-client", "rt-tokio"]
 +op_cancel_job = []
++op_cancel_jobs = []
 +op_create_compute_environment = []
 +op_create_consumable_resource = []
 +op_create_job_queue = []
@@ -7325,7 +7658,9 @@ diff --git a/Cargo.toml b/Cargo.toml
 +op_submit_service_job = []
 +op_tag_resource = []
 +op_terminate_job = []
++op_terminate_jobs = []
 +op_terminate_service_job = []
++op_terminate_service_jobs = []
 +op_untag_resource = []
 +op_update_compute_environment = []
 +op_update_consumable_resource = []
@@ -7337,12 +7672,15 @@ diff --git a/Cargo.toml b/Cargo.toml
 diff --git a/src/client.rs b/src/client.rs
 --- a/src/client.rs
 +++ b/src/client.rs
-@@ -136,18 +136,25 @@
+@@ -136,20 +136,28 @@
      }
  }
 
 +#[cfg(feature = "op_cancel_job")]
  mod cancel_job;
+
++#[cfg(feature = "op_cancel_jobs")]
+ mod cancel_jobs;
 
 +#[cfg(feature = "op_create_compute_environment")]
  mod create_compute_environment;
@@ -7363,7 +7701,7 @@ diff --git a/src/client.rs b/src/client.rs
  mod create_service_environment;
 
  /// Operation customization and supporting types.
-@@ -177,78 +184,116 @@
+@@ -179,82 +187,122 @@
  /// ```
  pub mod customize;
 
@@ -7454,8 +7792,14 @@ diff --git a/src/client.rs b/src/client.rs
 +#[cfg(feature = "op_terminate_job")]
  mod terminate_job;
 
++#[cfg(feature = "op_terminate_jobs")]
+ mod terminate_jobs;
+
 +#[cfg(feature = "op_terminate_service_job")]
  mod terminate_service_job;
+
++#[cfg(feature = "op_terminate_service_jobs")]
+ mod terminate_service_jobs;
 
 +#[cfg(feature = "op_untag_resource")]
  mod untag_resource;
@@ -7483,12 +7827,13 @@ diff --git a/src/client.rs b/src/client.rs
 diff --git a/src/error_meta.rs b/src/error_meta.rs
 --- a/src/error_meta.rs
 +++ b/src/error_meta.rs
-@@ -3,8 +3,102 @@
+@@ -3,8 +3,108 @@
  #[non_exhaustive]
  #[derive(::std::fmt::Debug)]
  pub enum Error {
 +    #[cfg(any(
 +        feature = "op_cancel_job",
++        feature = "op_cancel_jobs",
 +        feature = "op_create_compute_environment",
 +        feature = "op_create_consumable_resource",
 +        feature = "op_create_job_queue",
@@ -7524,7 +7869,9 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
 +        feature = "op_submit_service_job",
 +        feature = "op_tag_resource",
 +        feature = "op_terminate_job",
++        feature = "op_terminate_jobs",
 +        feature = "op_terminate_service_job",
++        feature = "op_terminate_service_jobs",
 +        feature = "op_untag_resource",
 +        feature = "op_update_compute_environment",
 +        feature = "op_update_consumable_resource",
@@ -7538,6 +7885,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
      ClientException(crate::types::error::ClientException),
 +    #[cfg(any(
 +        feature = "op_cancel_job",
++        feature = "op_cancel_jobs",
 +        feature = "op_create_compute_environment",
 +        feature = "op_create_consumable_resource",
 +        feature = "op_create_job_queue",
@@ -7573,7 +7921,9 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
 +        feature = "op_submit_service_job",
 +        feature = "op_tag_resource",
 +        feature = "op_terminate_job",
++        feature = "op_terminate_jobs",
 +        feature = "op_terminate_service_job",
++        feature = "op_terminate_service_jobs",
 +        feature = "op_untag_resource",
 +        feature = "op_update_compute_environment",
 +        feature = "op_update_consumable_resource",
@@ -7586,12 +7936,13 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
      /// <p>These errors are usually caused by a server issue.</p>
      ServerException(crate::types::error::ServerException),
      /// An unexpected error occurred (e.g., invalid JSON returned by the service or an unknown error code).
-@@ -21,7 +115,101 @@
+@@ -21,7 +121,107 @@
  impl ::std::fmt::Display for Error {
      fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
          match self {
 +            #[cfg(any(
 +                feature = "op_cancel_job",
++                feature = "op_cancel_jobs",
 +                feature = "op_create_compute_environment",
 +                feature = "op_create_consumable_resource",
 +                feature = "op_create_job_queue",
@@ -7627,7 +7978,9 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
 +                feature = "op_submit_service_job",
 +                feature = "op_tag_resource",
 +                feature = "op_terminate_job",
++                feature = "op_terminate_jobs",
 +                feature = "op_terminate_service_job",
++                feature = "op_terminate_service_jobs",
 +                feature = "op_untag_resource",
 +                feature = "op_update_compute_environment",
 +                feature = "op_update_consumable_resource",
@@ -7640,6 +7993,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
              Error::ClientException(inner) => inner.fmt(f),
 +            #[cfg(any(
 +                feature = "op_cancel_job",
++                feature = "op_cancel_jobs",
 +                feature = "op_create_compute_environment",
 +                feature = "op_create_consumable_resource",
 +                feature = "op_create_job_queue",
@@ -7675,7 +8029,9 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
 +                feature = "op_submit_service_job",
 +                feature = "op_tag_resource",
 +                feature = "op_terminate_job",
++                feature = "op_terminate_jobs",
 +                feature = "op_terminate_service_job",
++                feature = "op_terminate_service_jobs",
 +                feature = "op_untag_resource",
 +                feature = "op_update_compute_environment",
 +                feature = "op_update_consumable_resource",
@@ -7688,12 +8044,13 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
              Error::ServerException(inner) => inner.fmt(f),
              Error::Unhandled(_) => {
                  if let ::std::option::Option::Some(code) =
-@@ -46,12 +234,107 @@
+@@ -46,12 +246,113 @@
  impl ::aws_smithy_types::error::metadata::ProvideErrorMetadata for Error {
      fn meta(&self) -> &::aws_smithy_types::error::metadata::ErrorMetadata {
          match self {
 +            #[cfg(any(
 +                feature = "op_cancel_job",
++                feature = "op_cancel_jobs",
 +                feature = "op_create_compute_environment",
 +                feature = "op_create_consumable_resource",
 +                feature = "op_create_job_queue",
@@ -7729,7 +8086,9 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
 +                feature = "op_submit_service_job",
 +                feature = "op_tag_resource",
 +                feature = "op_terminate_job",
++                feature = "op_terminate_jobs",
 +                feature = "op_terminate_service_job",
++                feature = "op_terminate_service_jobs",
 +                feature = "op_untag_resource",
 +                feature = "op_update_compute_environment",
 +                feature = "op_update_consumable_resource",
@@ -7742,6 +8101,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
              Self::ClientException(inner) => inner.meta(),
 +            #[cfg(any(
 +                feature = "op_cancel_job",
++                feature = "op_cancel_jobs",
 +                feature = "op_create_compute_environment",
 +                feature = "op_create_consumable_resource",
 +                feature = "op_create_job_queue",
@@ -7777,7 +8137,9 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
 +                feature = "op_submit_service_job",
 +                feature = "op_tag_resource",
 +                feature = "op_terminate_job",
++                feature = "op_terminate_jobs",
 +                feature = "op_terminate_service_job",
++                feature = "op_terminate_service_jobs",
 +                feature = "op_untag_resource",
 +                feature = "op_update_compute_environment",
 +                feature = "op_update_consumable_resource",
@@ -7796,7 +8158,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl<R> From<::aws_smithy_runtime_api::client::result::SdkError<crate::operation::cancel_job::CancelJobError, R>>
      for Error
  where
-@@ -69,6 +352,7 @@
+@@ -69,6 +370,7 @@
          }
      }
  }
@@ -7804,7 +8166,23 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl From<crate::operation::cancel_job::CancelJobError> for Error {
      fn from(err: crate::operation::cancel_job::CancelJobError) -> Self {
          match err {
-@@ -78,6 +362,7 @@
+@@ -78,6 +380,7 @@
+         }
+     }
+ }
++#[cfg(feature = "op_cancel_jobs")]
+ impl<R> From<::aws_smithy_runtime_api::client::result::SdkError<crate::operation::cancel_jobs::CancelJobsError, R>>
+     for Error
+ where
+@@ -95,6 +398,7 @@
+         }
+     }
+ }
++#[cfg(feature = "op_cancel_jobs")]
+ impl From<crate::operation::cancel_jobs::CancelJobsError> for Error {
+     fn from(err: crate::operation::cancel_jobs::CancelJobsError) -> Self {
+         match err {
+@@ -104,6 +408,7 @@
          }
      }
  }
@@ -7812,7 +8190,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl<R>
      From<
          ::aws_smithy_runtime_api::client::result::SdkError<
-@@ -103,6 +388,7 @@
+@@ -129,6 +434,7 @@
          }
      }
  }
@@ -7820,7 +8198,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl From<crate::operation::create_compute_environment::CreateComputeEnvironmentError> for Error {
      fn from(err: crate::operation::create_compute_environment::CreateComputeEnvironmentError) -> Self {
          match err {
-@@ -118,6 +404,7 @@
+@@ -144,6 +450,7 @@
          }
      }
  }
@@ -7828,7 +8206,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl<R>
      From<
          ::aws_smithy_runtime_api::client::result::SdkError<
-@@ -143,6 +430,7 @@
+@@ -169,6 +476,7 @@
          }
      }
  }
@@ -7836,7 +8214,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl From<crate::operation::create_consumable_resource::CreateConsumableResourceError> for Error {
      fn from(err: crate::operation::create_consumable_resource::CreateConsumableResourceError) -> Self {
          match err {
-@@ -158,6 +446,7 @@
+@@ -184,6 +492,7 @@
          }
      }
  }
@@ -7844,7 +8222,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl<R>
      From<::aws_smithy_runtime_api::client::result::SdkError<crate::operation::create_job_queue::CreateJobQueueError, R>>
      for Error
-@@ -179,6 +468,7 @@
+@@ -205,6 +514,7 @@
          }
      }
  }
@@ -7852,7 +8230,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl From<crate::operation::create_job_queue::CreateJobQueueError> for Error {
      fn from(err: crate::operation::create_job_queue::CreateJobQueueError) -> Self {
          match err {
-@@ -192,6 +482,7 @@
+@@ -218,6 +528,7 @@
          }
      }
  }
@@ -7860,7 +8238,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl<R>
      From<
          ::aws_smithy_runtime_api::client::result::SdkError<
-@@ -217,6 +508,7 @@
+@@ -243,6 +554,7 @@
          }
      }
  }
@@ -7868,7 +8246,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl From<crate::operation::create_quota_share::CreateQuotaShareError> for Error {
      fn from(err: crate::operation::create_quota_share::CreateQuotaShareError) -> Self {
          match err {
-@@ -230,6 +522,7 @@
+@@ -256,6 +568,7 @@
          }
      }
  }
@@ -7876,7 +8254,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl<R>
      From<
          ::aws_smithy_runtime_api::client::result::SdkError<
-@@ -255,6 +548,7 @@
+@@ -281,6 +594,7 @@
          }
      }
  }
@@ -7884,7 +8262,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl From<crate::operation::create_scheduling_policy::CreateSchedulingPolicyError> for Error {
      fn from(err: crate::operation::create_scheduling_policy::CreateSchedulingPolicyError) -> Self {
          match err {
-@@ -270,6 +564,7 @@
+@@ -296,6 +610,7 @@
          }
      }
  }
@@ -7892,7 +8270,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl<R>
      From<
          ::aws_smithy_runtime_api::client::result::SdkError<
-@@ -295,6 +590,7 @@
+@@ -321,6 +636,7 @@
          }
      }
  }
@@ -7900,7 +8278,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl From<crate::operation::create_service_environment::CreateServiceEnvironmentError> for Error {
      fn from(err: crate::operation::create_service_environment::CreateServiceEnvironmentError) -> Self {
          match err {
-@@ -310,6 +606,7 @@
+@@ -336,6 +652,7 @@
          }
      }
  }
@@ -7908,7 +8286,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl<R>
      From<
          ::aws_smithy_runtime_api::client::result::SdkError<
-@@ -335,6 +632,7 @@
+@@ -361,6 +678,7 @@
          }
      }
  }
@@ -7916,7 +8294,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl From<crate::operation::delete_compute_environment::DeleteComputeEnvironmentError> for Error {
      fn from(err: crate::operation::delete_compute_environment::DeleteComputeEnvironmentError) -> Self {
          match err {
-@@ -350,6 +648,7 @@
+@@ -376,6 +694,7 @@
          }
      }
  }
@@ -7924,7 +8302,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl<R>
      From<
          ::aws_smithy_runtime_api::client::result::SdkError<
-@@ -375,6 +674,7 @@
+@@ -401,6 +720,7 @@
          }
      }
  }
@@ -7932,7 +8310,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl From<crate::operation::delete_consumable_resource::DeleteConsumableResourceError> for Error {
      fn from(err: crate::operation::delete_consumable_resource::DeleteConsumableResourceError) -> Self {
          match err {
-@@ -390,6 +690,7 @@
+@@ -416,6 +736,7 @@
          }
      }
  }
@@ -7940,7 +8318,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl<R>
      From<::aws_smithy_runtime_api::client::result::SdkError<crate::operation::delete_job_queue::DeleteJobQueueError, R>>
      for Error
-@@ -411,6 +712,7 @@
+@@ -437,6 +758,7 @@
          }
      }
  }
@@ -7948,7 +8326,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl From<crate::operation::delete_job_queue::DeleteJobQueueError> for Error {
      fn from(err: crate::operation::delete_job_queue::DeleteJobQueueError) -> Self {
          match err {
-@@ -424,6 +726,7 @@
+@@ -450,6 +772,7 @@
          }
      }
  }
@@ -7956,7 +8334,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl<R>
      From<
          ::aws_smithy_runtime_api::client::result::SdkError<
-@@ -449,6 +752,7 @@
+@@ -475,6 +798,7 @@
          }
      }
  }
@@ -7964,7 +8342,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl From<crate::operation::delete_quota_share::DeleteQuotaShareError> for Error {
      fn from(err: crate::operation::delete_quota_share::DeleteQuotaShareError) -> Self {
          match err {
-@@ -462,6 +766,7 @@
+@@ -488,6 +812,7 @@
          }
      }
  }
@@ -7972,7 +8350,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl<R>
      From<
          ::aws_smithy_runtime_api::client::result::SdkError<
-@@ -487,6 +792,7 @@
+@@ -513,6 +838,7 @@
          }
      }
  }
@@ -7980,7 +8358,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl From<crate::operation::delete_scheduling_policy::DeleteSchedulingPolicyError> for Error {
      fn from(err: crate::operation::delete_scheduling_policy::DeleteSchedulingPolicyError) -> Self {
          match err {
-@@ -502,6 +808,7 @@
+@@ -528,6 +854,7 @@
          }
      }
  }
@@ -7988,7 +8366,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl<R>
      From<
          ::aws_smithy_runtime_api::client::result::SdkError<
-@@ -527,6 +834,7 @@
+@@ -553,6 +880,7 @@
          }
      }
  }
@@ -7996,7 +8374,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl From<crate::operation::delete_service_environment::DeleteServiceEnvironmentError> for Error {
      fn from(err: crate::operation::delete_service_environment::DeleteServiceEnvironmentError) -> Self {
          match err {
-@@ -542,6 +850,7 @@
+@@ -568,6 +896,7 @@
          }
      }
  }
@@ -8004,7 +8382,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl<R>
      From<
          ::aws_smithy_runtime_api::client::result::SdkError<
-@@ -567,6 +876,7 @@
+@@ -593,6 +922,7 @@
          }
      }
  }
@@ -8012,7 +8390,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl From<crate::operation::deregister_job_definition::DeregisterJobDefinitionError> for Error {
      fn from(err: crate::operation::deregister_job_definition::DeregisterJobDefinitionError) -> Self {
          match err {
-@@ -582,6 +892,7 @@
+@@ -608,6 +938,7 @@
          }
      }
  }
@@ -8020,7 +8398,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl<R>
      From<
          ::aws_smithy_runtime_api::client::result::SdkError<
-@@ -607,6 +918,7 @@
+@@ -633,6 +964,7 @@
          }
      }
  }
@@ -8028,7 +8406,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl From<crate::operation::describe_compute_environments::DescribeComputeEnvironmentsError> for Error {
      fn from(err: crate::operation::describe_compute_environments::DescribeComputeEnvironmentsError) -> Self {
          match err {
-@@ -622,6 +934,7 @@
+@@ -648,6 +980,7 @@
          }
      }
  }
@@ -8036,7 +8414,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl<R>
      From<
          ::aws_smithy_runtime_api::client::result::SdkError<
-@@ -647,6 +960,7 @@
+@@ -673,6 +1006,7 @@
          }
      }
  }
@@ -8044,7 +8422,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl From<crate::operation::describe_consumable_resource::DescribeConsumableResourceError> for Error {
      fn from(err: crate::operation::describe_consumable_resource::DescribeConsumableResourceError) -> Self {
          match err {
-@@ -662,6 +976,7 @@
+@@ -688,6 +1022,7 @@
          }
      }
  }
@@ -8052,7 +8430,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl<R>
      From<
          ::aws_smithy_runtime_api::client::result::SdkError<
-@@ -687,6 +1002,7 @@
+@@ -713,6 +1048,7 @@
          }
      }
  }
@@ -8060,7 +8438,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl From<crate::operation::describe_job_definitions::DescribeJobDefinitionsError> for Error {
      fn from(err: crate::operation::describe_job_definitions::DescribeJobDefinitionsError) -> Self {
          match err {
-@@ -702,6 +1018,7 @@
+@@ -728,6 +1064,7 @@
          }
      }
  }
@@ -8068,7 +8446,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl<R>
      From<
          ::aws_smithy_runtime_api::client::result::SdkError<
-@@ -727,6 +1044,7 @@
+@@ -753,6 +1090,7 @@
          }
      }
  }
@@ -8076,7 +8454,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl From<crate::operation::describe_job_queues::DescribeJobQueuesError> for Error {
      fn from(err: crate::operation::describe_job_queues::DescribeJobQueuesError) -> Self {
          match err {
-@@ -740,6 +1058,7 @@
+@@ -766,6 +1104,7 @@
          }
      }
  }
@@ -8084,7 +8462,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl<R> From<::aws_smithy_runtime_api::client::result::SdkError<crate::operation::describe_jobs::DescribeJobsError, R>>
      for Error
  where
-@@ -757,6 +1076,7 @@
+@@ -783,6 +1122,7 @@
          }
      }
  }
@@ -8092,7 +8470,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl From<crate::operation::describe_jobs::DescribeJobsError> for Error {
      fn from(err: crate::operation::describe_jobs::DescribeJobsError) -> Self {
          match err {
-@@ -766,6 +1086,7 @@
+@@ -792,6 +1132,7 @@
          }
      }
  }
@@ -8100,7 +8478,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl<R>
      From<
          ::aws_smithy_runtime_api::client::result::SdkError<
-@@ -791,6 +1112,7 @@
+@@ -817,6 +1158,7 @@
          }
      }
  }
@@ -8108,7 +8486,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl From<crate::operation::describe_quota_share::DescribeQuotaShareError> for Error {
      fn from(err: crate::operation::describe_quota_share::DescribeQuotaShareError) -> Self {
          match err {
-@@ -806,6 +1128,7 @@
+@@ -832,6 +1174,7 @@
          }
      }
  }
@@ -8116,7 +8494,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl<R>
      From<
          ::aws_smithy_runtime_api::client::result::SdkError<
-@@ -831,6 +1154,7 @@
+@@ -857,6 +1200,7 @@
          }
      }
  }
@@ -8124,7 +8502,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl From<crate::operation::describe_scheduling_policies::DescribeSchedulingPoliciesError> for Error {
      fn from(err: crate::operation::describe_scheduling_policies::DescribeSchedulingPoliciesError) -> Self {
          match err {
-@@ -846,6 +1170,7 @@
+@@ -872,6 +1216,7 @@
          }
      }
  }
@@ -8132,7 +8510,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl<R>
      From<
          ::aws_smithy_runtime_api::client::result::SdkError<
-@@ -871,6 +1196,7 @@
+@@ -897,6 +1242,7 @@
          }
      }
  }
@@ -8140,7 +8518,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl From<crate::operation::describe_service_environments::DescribeServiceEnvironmentsError> for Error {
      fn from(err: crate::operation::describe_service_environments::DescribeServiceEnvironmentsError) -> Self {
          match err {
-@@ -886,6 +1212,7 @@
+@@ -912,6 +1258,7 @@
          }
      }
  }
@@ -8148,7 +8526,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl<R>
      From<
          ::aws_smithy_runtime_api::client::result::SdkError<
-@@ -911,6 +1238,7 @@
+@@ -937,6 +1284,7 @@
          }
      }
  }
@@ -8156,7 +8534,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl From<crate::operation::describe_service_job::DescribeServiceJobError> for Error {
      fn from(err: crate::operation::describe_service_job::DescribeServiceJobError) -> Self {
          match err {
-@@ -926,6 +1254,7 @@
+@@ -952,6 +1300,7 @@
          }
      }
  }
@@ -8164,7 +8542,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl<R>
      From<
          ::aws_smithy_runtime_api::client::result::SdkError<
-@@ -951,6 +1280,7 @@
+@@ -977,6 +1326,7 @@
          }
      }
  }
@@ -8172,7 +8550,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl From<crate::operation::get_job_queue_snapshot::GetJobQueueSnapshotError> for Error {
      fn from(err: crate::operation::get_job_queue_snapshot::GetJobQueueSnapshotError) -> Self {
          match err {
-@@ -966,6 +1296,7 @@
+@@ -992,6 +1342,7 @@
          }
      }
  }
@@ -8180,7 +8558,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl<R>
      From<
          ::aws_smithy_runtime_api::client::result::SdkError<
-@@ -991,6 +1322,7 @@
+@@ -1017,6 +1368,7 @@
          }
      }
  }
@@ -8188,7 +8566,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl From<crate::operation::list_consumable_resources::ListConsumableResourcesError> for Error {
      fn from(err: crate::operation::list_consumable_resources::ListConsumableResourcesError) -> Self {
          match err {
-@@ -1006,6 +1338,7 @@
+@@ -1032,6 +1384,7 @@
          }
      }
  }
@@ -8196,7 +8574,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl<R> From<::aws_smithy_runtime_api::client::result::SdkError<crate::operation::list_jobs::ListJobsError, R>>
      for Error
  where
-@@ -1023,6 +1356,7 @@
+@@ -1049,6 +1402,7 @@
          }
      }
  }
@@ -8204,7 +8582,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl From<crate::operation::list_jobs::ListJobsError> for Error {
      fn from(err: crate::operation::list_jobs::ListJobsError) -> Self {
          match err {
-@@ -1032,6 +1366,7 @@
+@@ -1058,6 +1412,7 @@
          }
      }
  }
@@ -8212,7 +8590,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl<R>
      From<
          ::aws_smithy_runtime_api::client::result::SdkError<
-@@ -1057,6 +1392,7 @@
+@@ -1083,6 +1438,7 @@
          }
      }
  }
@@ -8220,7 +8598,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl From<crate::operation::list_jobs_by_consumable_resource::ListJobsByConsumableResourceError> for Error {
      fn from(err: crate::operation::list_jobs_by_consumable_resource::ListJobsByConsumableResourceError) -> Self {
          match err {
-@@ -1072,6 +1408,7 @@
+@@ -1098,6 +1454,7 @@
          }
      }
  }
@@ -8228,7 +8606,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl<R>
      From<
          ::aws_smithy_runtime_api::client::result::SdkError<
-@@ -1097,6 +1434,7 @@
+@@ -1123,6 +1480,7 @@
          }
      }
  }
@@ -8236,7 +8614,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl From<crate::operation::list_quota_shares::ListQuotaSharesError> for Error {
      fn from(err: crate::operation::list_quota_shares::ListQuotaSharesError) -> Self {
          match err {
-@@ -1110,6 +1448,7 @@
+@@ -1136,6 +1494,7 @@
          }
      }
  }
@@ -8244,7 +8622,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl<R>
      From<
          ::aws_smithy_runtime_api::client::result::SdkError<
-@@ -1135,6 +1474,7 @@
+@@ -1161,6 +1520,7 @@
          }
      }
  }
@@ -8252,7 +8630,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl From<crate::operation::list_scheduling_policies::ListSchedulingPoliciesError> for Error {
      fn from(err: crate::operation::list_scheduling_policies::ListSchedulingPoliciesError) -> Self {
          match err {
-@@ -1150,6 +1490,7 @@
+@@ -1176,6 +1536,7 @@
          }
      }
  }
@@ -8260,7 +8638,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl<R>
      From<
          ::aws_smithy_runtime_api::client::result::SdkError<
-@@ -1175,6 +1516,7 @@
+@@ -1201,6 +1562,7 @@
          }
      }
  }
@@ -8268,7 +8646,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl From<crate::operation::list_service_jobs::ListServiceJobsError> for Error {
      fn from(err: crate::operation::list_service_jobs::ListServiceJobsError) -> Self {
          match err {
-@@ -1188,6 +1530,7 @@
+@@ -1214,6 +1576,7 @@
          }
      }
  }
@@ -8276,7 +8654,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl<R>
      From<
          ::aws_smithy_runtime_api::client::result::SdkError<
-@@ -1213,6 +1556,7 @@
+@@ -1239,6 +1602,7 @@
          }
      }
  }
@@ -8284,7 +8662,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl From<crate::operation::list_tags_for_resource::ListTagsForResourceError> for Error {
      fn from(err: crate::operation::list_tags_for_resource::ListTagsForResourceError) -> Self {
          match err {
-@@ -1228,6 +1572,7 @@
+@@ -1254,6 +1618,7 @@
          }
      }
  }
@@ -8292,7 +8670,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl<R>
      From<
          ::aws_smithy_runtime_api::client::result::SdkError<
-@@ -1253,6 +1598,7 @@
+@@ -1279,6 +1644,7 @@
          }
      }
  }
@@ -8300,7 +8678,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl From<crate::operation::register_job_definition::RegisterJobDefinitionError> for Error {
      fn from(err: crate::operation::register_job_definition::RegisterJobDefinitionError) -> Self {
          match err {
-@@ -1268,6 +1614,7 @@
+@@ -1294,6 +1660,7 @@
          }
      }
  }
@@ -8308,7 +8686,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl<R> From<::aws_smithy_runtime_api::client::result::SdkError<crate::operation::submit_job::SubmitJobError, R>>
      for Error
  where
-@@ -1285,6 +1632,7 @@
+@@ -1311,6 +1678,7 @@
          }
      }
  }
@@ -8316,7 +8694,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl From<crate::operation::submit_job::SubmitJobError> for Error {
      fn from(err: crate::operation::submit_job::SubmitJobError) -> Self {
          match err {
-@@ -1294,6 +1642,7 @@
+@@ -1320,6 +1688,7 @@
          }
      }
  }
@@ -8324,7 +8702,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl<R>
      From<
          ::aws_smithy_runtime_api::client::result::SdkError<
-@@ -1319,6 +1668,7 @@
+@@ -1345,6 +1714,7 @@
          }
      }
  }
@@ -8332,7 +8710,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl From<crate::operation::submit_service_job::SubmitServiceJobError> for Error {
      fn from(err: crate::operation::submit_service_job::SubmitServiceJobError) -> Self {
          match err {
-@@ -1332,6 +1682,7 @@
+@@ -1358,6 +1728,7 @@
          }
      }
  }
@@ -8340,7 +8718,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl<R> From<::aws_smithy_runtime_api::client::result::SdkError<crate::operation::tag_resource::TagResourceError, R>>
      for Error
  where
-@@ -1349,6 +1700,7 @@
+@@ -1375,6 +1746,7 @@
          }
      }
  }
@@ -8348,7 +8726,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl From<crate::operation::tag_resource::TagResourceError> for Error {
      fn from(err: crate::operation::tag_resource::TagResourceError) -> Self {
          match err {
-@@ -1358,6 +1710,7 @@
+@@ -1384,6 +1756,7 @@
          }
      }
  }
@@ -8356,7 +8734,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl<R> From<::aws_smithy_runtime_api::client::result::SdkError<crate::operation::terminate_job::TerminateJobError, R>>
      for Error
  where
-@@ -1375,6 +1728,7 @@
+@@ -1401,6 +1774,7 @@
          }
      }
  }
@@ -8364,7 +8742,23 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl From<crate::operation::terminate_job::TerminateJobError> for Error {
      fn from(err: crate::operation::terminate_job::TerminateJobError) -> Self {
          match err {
-@@ -1384,6 +1738,7 @@
+@@ -1410,6 +1784,7 @@
+         }
+     }
+ }
++#[cfg(feature = "op_terminate_jobs")]
+ impl<R>
+     From<::aws_smithy_runtime_api::client::result::SdkError<crate::operation::terminate_jobs::TerminateJobsError, R>>
+     for Error
+@@ -1431,6 +1806,7 @@
+         }
+     }
+ }
++#[cfg(feature = "op_terminate_jobs")]
+ impl From<crate::operation::terminate_jobs::TerminateJobsError> for Error {
+     fn from(err: crate::operation::terminate_jobs::TerminateJobsError) -> Self {
+         match err {
+@@ -1444,6 +1820,7 @@
          }
      }
  }
@@ -8372,7 +8766,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl<R>
      From<
          ::aws_smithy_runtime_api::client::result::SdkError<
-@@ -1409,6 +1764,7 @@
+@@ -1469,6 +1846,7 @@
          }
      }
  }
@@ -8380,7 +8774,23 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl From<crate::operation::terminate_service_job::TerminateServiceJobError> for Error {
      fn from(err: crate::operation::terminate_service_job::TerminateServiceJobError) -> Self {
          match err {
-@@ -1424,6 +1780,7 @@
+@@ -1484,6 +1862,7 @@
+         }
+     }
+ }
++#[cfg(feature = "op_terminate_service_jobs")]
+ impl<R>
+     From<
+         ::aws_smithy_runtime_api::client::result::SdkError<
+@@ -1509,6 +1888,7 @@
+         }
+     }
+ }
++#[cfg(feature = "op_terminate_service_jobs")]
+ impl From<crate::operation::terminate_service_jobs::TerminateServiceJobsError> for Error {
+     fn from(err: crate::operation::terminate_service_jobs::TerminateServiceJobsError) -> Self {
+         match err {
+@@ -1524,6 +1904,7 @@
          }
      }
  }
@@ -8388,7 +8798,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl<R>
      From<::aws_smithy_runtime_api::client::result::SdkError<crate::operation::untag_resource::UntagResourceError, R>>
      for Error
-@@ -1445,6 +1802,7 @@
+@@ -1545,6 +1926,7 @@
          }
      }
  }
@@ -8396,7 +8806,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl From<crate::operation::untag_resource::UntagResourceError> for Error {
      fn from(err: crate::operation::untag_resource::UntagResourceError) -> Self {
          match err {
-@@ -1458,6 +1816,7 @@
+@@ -1558,6 +1940,7 @@
          }
      }
  }
@@ -8404,7 +8814,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl<R>
      From<
          ::aws_smithy_runtime_api::client::result::SdkError<
-@@ -1483,6 +1842,7 @@
+@@ -1583,6 +1966,7 @@
          }
      }
  }
@@ -8412,7 +8822,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl From<crate::operation::update_compute_environment::UpdateComputeEnvironmentError> for Error {
      fn from(err: crate::operation::update_compute_environment::UpdateComputeEnvironmentError) -> Self {
          match err {
-@@ -1498,6 +1858,7 @@
+@@ -1598,6 +1982,7 @@
          }
      }
  }
@@ -8420,7 +8830,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl<R>
      From<
          ::aws_smithy_runtime_api::client::result::SdkError<
-@@ -1523,6 +1884,7 @@
+@@ -1623,6 +2008,7 @@
          }
      }
  }
@@ -8428,7 +8838,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl From<crate::operation::update_consumable_resource::UpdateConsumableResourceError> for Error {
      fn from(err: crate::operation::update_consumable_resource::UpdateConsumableResourceError) -> Self {
          match err {
-@@ -1538,6 +1900,7 @@
+@@ -1638,6 +2024,7 @@
          }
      }
  }
@@ -8436,7 +8846,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl<R>
      From<::aws_smithy_runtime_api::client::result::SdkError<crate::operation::update_job_queue::UpdateJobQueueError, R>>
      for Error
-@@ -1559,6 +1922,7 @@
+@@ -1659,6 +2046,7 @@
          }
      }
  }
@@ -8444,7 +8854,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl From<crate::operation::update_job_queue::UpdateJobQueueError> for Error {
      fn from(err: crate::operation::update_job_queue::UpdateJobQueueError) -> Self {
          match err {
-@@ -1572,6 +1936,7 @@
+@@ -1672,6 +2060,7 @@
          }
      }
  }
@@ -8452,7 +8862,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl<R>
      From<
          ::aws_smithy_runtime_api::client::result::SdkError<
-@@ -1597,6 +1962,7 @@
+@@ -1697,6 +2086,7 @@
          }
      }
  }
@@ -8460,7 +8870,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl From<crate::operation::update_quota_share::UpdateQuotaShareError> for Error {
      fn from(err: crate::operation::update_quota_share::UpdateQuotaShareError) -> Self {
          match err {
-@@ -1610,6 +1976,7 @@
+@@ -1710,6 +2100,7 @@
          }
      }
  }
@@ -8468,7 +8878,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl<R>
      From<
          ::aws_smithy_runtime_api::client::result::SdkError<
-@@ -1635,6 +2002,7 @@
+@@ -1735,6 +2126,7 @@
          }
      }
  }
@@ -8476,7 +8886,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl From<crate::operation::update_scheduling_policy::UpdateSchedulingPolicyError> for Error {
      fn from(err: crate::operation::update_scheduling_policy::UpdateSchedulingPolicyError) -> Self {
          match err {
-@@ -1650,6 +2018,7 @@
+@@ -1750,6 +2142,7 @@
          }
      }
  }
@@ -8484,7 +8894,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl<R>
      From<
          ::aws_smithy_runtime_api::client::result::SdkError<
-@@ -1675,6 +2044,7 @@
+@@ -1775,6 +2168,7 @@
          }
      }
  }
@@ -8492,7 +8902,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl From<crate::operation::update_service_environment::UpdateServiceEnvironmentError> for Error {
      fn from(err: crate::operation::update_service_environment::UpdateServiceEnvironmentError) -> Self {
          match err {
-@@ -1690,6 +2060,7 @@
+@@ -1790,6 +2184,7 @@
          }
      }
  }
@@ -8500,7 +8910,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl<R>
      From<
          ::aws_smithy_runtime_api::client::result::SdkError<
-@@ -1715,6 +2086,7 @@
+@@ -1815,6 +2210,7 @@
          }
      }
  }
@@ -8508,12 +8918,13 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
  impl From<crate::operation::update_service_job::UpdateServiceJobError> for Error {
      fn from(err: crate::operation::update_service_job::UpdateServiceJobError) -> Self {
          match err {
-@@ -1731,7 +2103,101 @@
+@@ -1831,7 +2227,107 @@
  impl ::std::error::Error for Error {
      fn source(&self) -> std::option::Option<&(dyn ::std::error::Error + 'static)> {
          match self {
 +            #[cfg(any(
 +                feature = "op_cancel_job",
++                feature = "op_cancel_jobs",
 +                feature = "op_create_compute_environment",
 +                feature = "op_create_consumable_resource",
 +                feature = "op_create_job_queue",
@@ -8549,7 +8960,9 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
 +                feature = "op_submit_service_job",
 +                feature = "op_tag_resource",
 +                feature = "op_terminate_job",
++                feature = "op_terminate_jobs",
 +                feature = "op_terminate_service_job",
++                feature = "op_terminate_service_jobs",
 +                feature = "op_untag_resource",
 +                feature = "op_update_compute_environment",
 +                feature = "op_update_consumable_resource",
@@ -8562,6 +8975,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
              Error::ClientException(inner) => inner.source(),
 +            #[cfg(any(
 +                feature = "op_cancel_job",
++                feature = "op_cancel_jobs",
 +                feature = "op_create_compute_environment",
 +                feature = "op_create_consumable_resource",
 +                feature = "op_create_job_queue",
@@ -8597,7 +9011,9 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
 +                feature = "op_submit_service_job",
 +                feature = "op_tag_resource",
 +                feature = "op_terminate_job",
++                feature = "op_terminate_jobs",
 +                feature = "op_terminate_service_job",
++                feature = "op_terminate_service_jobs",
 +                feature = "op_untag_resource",
 +                feature = "op_update_compute_environment",
 +                feature = "op_update_consumable_resource",
@@ -8610,12 +9026,13 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
              Error::ServerException(inner) => inner.source(),
              Error::Unhandled(inner) => ::std::option::Option::Some(&*inner.source),
          }
-@@ -1740,7 +2206,101 @@
+@@ -1840,7 +2336,107 @@
  impl ::aws_types::request_id::RequestId for Error {
      fn request_id(&self) -> Option<&str> {
          match self {
 +            #[cfg(any(
 +                feature = "op_cancel_job",
++                feature = "op_cancel_jobs",
 +                feature = "op_create_compute_environment",
 +                feature = "op_create_consumable_resource",
 +                feature = "op_create_job_queue",
@@ -8651,7 +9068,9 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
 +                feature = "op_submit_service_job",
 +                feature = "op_tag_resource",
 +                feature = "op_terminate_job",
++                feature = "op_terminate_jobs",
 +                feature = "op_terminate_service_job",
++                feature = "op_terminate_service_jobs",
 +                feature = "op_untag_resource",
 +                feature = "op_update_compute_environment",
 +                feature = "op_update_consumable_resource",
@@ -8664,6 +9083,7 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
              Self::ClientException(e) => e.request_id(),
 +            #[cfg(any(
 +                feature = "op_cancel_job",
++                feature = "op_cancel_jobs",
 +                feature = "op_create_compute_environment",
 +                feature = "op_create_consumable_resource",
 +                feature = "op_create_job_queue",
@@ -8699,7 +9119,9 @@ diff --git a/src/error_meta.rs b/src/error_meta.rs
 +                feature = "op_submit_service_job",
 +                feature = "op_tag_resource",
 +                feature = "op_terminate_job",
++                feature = "op_terminate_jobs",
 +                feature = "op_terminate_service_job",
++                feature = "op_terminate_service_jobs",
 +                feature = "op_untag_resource",
 +                feature = "op_update_compute_environment",
 +                feature = "op_update_consumable_resource",
@@ -8876,13 +9298,17 @@ diff --git a/src/lens.rs b/src/lens.rs
 diff --git a/src/operation.rs b/src/operation.rs
 --- a/src/operation.rs
 +++ b/src/operation.rs
-@@ -1,137 +1,182 @@
+@@ -1,146 +1,194 @@
  // Code generated by software.amazon.smithy.rust.codegen.smithy-rs. DO NOT EDIT.
  pub use ::aws_types::request_id::RequestId;
 
 +#[cfg(feature = "op_cancel_job")]
  /// Types for the `CancelJob` operation.
  pub mod cancel_job;
+
++#[cfg(feature = "op_cancel_jobs")]
+ /// Types for the `CancelJobs` operation.
+ pub mod cancel_jobs;
 
 +#[cfg(feature = "op_create_compute_environment")]
  /// Types for the `CreateComputeEnvironment` operation.
@@ -9024,9 +9450,17 @@ diff --git a/src/operation.rs b/src/operation.rs
  /// Types for the `TerminateJob` operation.
  pub mod terminate_job;
 
++#[cfg(feature = "op_terminate_jobs")]
+ /// Types for the `TerminateJobs` operation.
+ pub mod terminate_jobs;
+
 +#[cfg(feature = "op_terminate_service_job")]
  /// Types for the `TerminateServiceJob` operation.
  pub mod terminate_service_job;
+
++#[cfg(feature = "op_terminate_service_jobs")]
+ /// Types for the `TerminateServiceJobs` operation.
+ pub mod terminate_service_jobs;
 
 +#[cfg(feature = "op_untag_resource")]
  /// Types for the `UntagResource` operation.
@@ -9062,10 +9496,11 @@ diff --git a/src/operation.rs b/src/operation.rs
 diff --git a/src/protocol_serde.rs b/src/protocol_serde.rs
 --- a/src/protocol_serde.rs
 +++ b/src/protocol_serde.rs
-@@ -1,4 +1,51 @@
+@@ -1,4 +1,54 @@
  // Code generated by software.amazon.smithy.rust.codegen.smithy-rs. DO NOT EDIT.
 +#[cfg(any(
 +    feature = "op_cancel_job",
++    feature = "op_cancel_jobs",
 +    feature = "op_create_compute_environment",
 +    feature = "op_create_consumable_resource",
 +    feature = "op_create_job_queue",
@@ -9101,7 +9536,9 @@ diff --git a/src/protocol_serde.rs b/src/protocol_serde.rs
 +    feature = "op_submit_service_job",
 +    feature = "op_tag_resource",
 +    feature = "op_terminate_job",
++    feature = "op_terminate_jobs",
 +    feature = "op_terminate_service_job",
++    feature = "op_terminate_service_jobs",
 +    feature = "op_untag_resource",
 +    feature = "op_update_compute_environment",
 +    feature = "op_update_consumable_resource",
@@ -9114,12 +9551,13 @@ diff --git a/src/protocol_serde.rs b/src/protocol_serde.rs
  pub(crate) fn type_erase_result<O, E>(
      result: ::std::result::Result<O, E>,
  ) -> ::std::result::Result<
-@@ -17,6 +64,53 @@
+@@ -17,6 +67,56 @@
          .map_err(::std::convert::Into::into)
  }
 
 +#[cfg(any(
 +    feature = "op_cancel_job",
++    feature = "op_cancel_jobs",
 +    feature = "op_create_compute_environment",
 +    feature = "op_create_consumable_resource",
 +    feature = "op_create_job_queue",
@@ -9155,7 +9593,9 @@ diff --git a/src/protocol_serde.rs b/src/protocol_serde.rs
 +    feature = "op_submit_service_job",
 +    feature = "op_tag_resource",
 +    feature = "op_terminate_job",
++    feature = "op_terminate_jobs",
 +    feature = "op_terminate_service_job",
++    feature = "op_terminate_service_jobs",
 +    feature = "op_untag_resource",
 +    feature = "op_update_compute_environment",
 +    feature = "op_update_consumable_resource",
@@ -9168,12 +9608,15 @@ diff --git a/src/protocol_serde.rs b/src/protocol_serde.rs
  pub fn parse_http_error_metadata(
      _response_status: u16,
      response_headers: &::aws_smithy_runtime_api::http::Headers,
-@@ -28,98 +122,191 @@
+@@ -28,104 +128,203 @@
      crate::json_errors::parse_error_metadata(response_body, response_headers)
  }
 
 +#[cfg(feature = "op_cancel_job")]
  pub(crate) mod shape_cancel_job;
+
++#[cfg(feature = "op_cancel_jobs")]
+ pub(crate) mod shape_cancel_jobs;
 
 +#[cfg(feature = "op_create_compute_environment")]
  pub(crate) mod shape_create_compute_environment;
@@ -9280,8 +9723,14 @@ diff --git a/src/protocol_serde.rs b/src/protocol_serde.rs
 +#[cfg(feature = "op_terminate_job")]
  pub(crate) mod shape_terminate_job;
 
++#[cfg(feature = "op_terminate_jobs")]
+ pub(crate) mod shape_terminate_jobs;
+
 +#[cfg(feature = "op_terminate_service_job")]
  pub(crate) mod shape_terminate_service_job;
+
++#[cfg(feature = "op_terminate_service_jobs")]
+ pub(crate) mod shape_terminate_service_jobs;
 
 +#[cfg(feature = "op_untag_resource")]
  pub(crate) mod shape_untag_resource;
@@ -9312,6 +9761,7 @@ diff --git a/src/protocol_serde.rs b/src/protocol_serde.rs
 
 +#[cfg(any(
 +    feature = "op_cancel_job",
++    feature = "op_cancel_jobs",
 +    feature = "op_create_compute_environment",
 +    feature = "op_create_consumable_resource",
 +    feature = "op_create_job_queue",
@@ -9347,7 +9797,9 @@ diff --git a/src/protocol_serde.rs b/src/protocol_serde.rs
 +    feature = "op_submit_service_job",
 +    feature = "op_tag_resource",
 +    feature = "op_terminate_job",
++    feature = "op_terminate_jobs",
 +    feature = "op_terminate_service_job",
++    feature = "op_terminate_service_jobs",
 +    feature = "op_untag_resource",
 +    feature = "op_update_compute_environment",
 +    feature = "op_update_consumable_resource",
@@ -9360,12 +9812,16 @@ diff --git a/src/protocol_serde.rs b/src/protocol_serde.rs
  pub(crate) fn or_empty_doc(data: &[u8]) -> &[u8] {
      if data.is_empty() {
          b"{}"
-@@ -128,526 +315,1327 @@
+@@ -134,548 +333,1373 @@
      }
  }
 
++#[cfg(feature = "op_cancel_jobs")]
+ pub(crate) mod shape_cancel_jobs_input;
+
 +#[cfg(any(
 +    feature = "op_cancel_job",
++    feature = "op_cancel_jobs",
 +    feature = "op_create_compute_environment",
 +    feature = "op_create_consumable_resource",
 +    feature = "op_create_job_queue",
@@ -9401,7 +9857,9 @@ diff --git a/src/protocol_serde.rs b/src/protocol_serde.rs
 +    feature = "op_submit_service_job",
 +    feature = "op_tag_resource",
 +    feature = "op_terminate_job",
++    feature = "op_terminate_jobs",
 +    feature = "op_terminate_service_job",
++    feature = "op_terminate_service_jobs",
 +    feature = "op_untag_resource",
 +    feature = "op_update_compute_environment",
 +    feature = "op_update_consumable_resource",
@@ -9505,6 +9963,7 @@ diff --git a/src/protocol_serde.rs b/src/protocol_serde.rs
 
 +#[cfg(any(
 +    feature = "op_cancel_job",
++    feature = "op_cancel_jobs",
 +    feature = "op_create_compute_environment",
 +    feature = "op_create_consumable_resource",
 +    feature = "op_create_job_queue",
@@ -9540,7 +9999,9 @@ diff --git a/src/protocol_serde.rs b/src/protocol_serde.rs
 +    feature = "op_submit_service_job",
 +    feature = "op_tag_resource",
 +    feature = "op_terminate_job",
++    feature = "op_terminate_jobs",
 +    feature = "op_terminate_service_job",
++    feature = "op_terminate_service_jobs",
 +    feature = "op_untag_resource",
 +    feature = "op_update_compute_environment",
 +    feature = "op_update_consumable_resource",
@@ -9564,8 +10025,14 @@ diff --git a/src/protocol_serde.rs b/src/protocol_serde.rs
 +#[cfg(feature = "op_terminate_job")]
  pub(crate) mod shape_terminate_job_input;
 
++#[cfg(feature = "op_terminate_jobs")]
+ pub(crate) mod shape_terminate_jobs_input;
+
 +#[cfg(feature = "op_terminate_service_job")]
  pub(crate) mod shape_terminate_service_job_input;
+
++#[cfg(feature = "op_terminate_service_jobs")]
+ pub(crate) mod shape_terminate_service_jobs_input;
 
 +#[cfg(feature = "op_update_compute_environment")]
  pub(crate) mod shape_update_compute_environment_input;
@@ -9590,6 +10057,9 @@ diff --git a/src/protocol_serde.rs b/src/protocol_serde.rs
 
 +#[cfg(feature = "op_submit_job")]
  pub(crate) mod shape_array_properties;
+
++#[cfg(feature = "op_cancel_jobs")]
+ pub(crate) mod shape_cancel_jobs_error_detail_list;
 
 +#[cfg(any(
 +    feature = "op_create_service_environment",
@@ -9661,6 +10131,9 @@ diff --git a/src/protocol_serde.rs b/src/protocol_serde.rs
 +    feature = "op_describe_compute_environments"
 +))]
  pub(crate) mod shape_eks_configuration;
+
++#[cfg(feature = "op_update_compute_environment")]
+ pub(crate) mod shape_eks_configuration_update;
 
 +#[cfg(any(
 +    feature = "op_describe_job_definitions",
@@ -9825,6 +10298,19 @@ diff --git a/src/protocol_serde.rs b/src/protocol_serde.rs
  pub(crate) mod shape_service_job_timeout;
 
 +#[cfg(any(
++    feature = "op_cancel_jobs",
++    feature = "op_create_compute_environment",
++    feature = "op_describe_compute_environments",
++    feature = "op_describe_job_definitions",
++    feature = "op_describe_jobs",
++    feature = "op_register_job_definition",
++    feature = "op_terminate_jobs",
++    feature = "op_terminate_service_jobs",
++    feature = "op_update_compute_environment"
++))]
+ pub(crate) mod shape_string_list;
+
++#[cfg(any(
 +    feature = "op_create_compute_environment",
 +    feature = "op_describe_compute_environments",
 +    feature = "op_describe_consumable_resource",
@@ -9839,11 +10325,20 @@ diff --git a/src/protocol_serde.rs b/src/protocol_serde.rs
 +))]
  pub(crate) mod shape_tagris_tags_map;
 
++#[cfg(feature = "op_terminate_jobs")]
+ pub(crate) mod shape_terminate_jobs_error_detail_list;
+
++#[cfg(feature = "op_terminate_service_jobs")]
+ pub(crate) mod shape_terminate_service_jobs_error_detail_list;
+
 +#[cfg(any(
 +    feature = "op_describe_compute_environments",
 +    feature = "op_update_compute_environment"
 +))]
  pub(crate) mod shape_update_policy;
+
++#[cfg(feature = "op_cancel_jobs")]
+ pub(crate) mod shape_cancel_jobs_error_detail;
 
 +#[cfg(feature = "op_describe_compute_environments")]
  pub(crate) mod shape_compute_environment_detail;
@@ -9880,6 +10375,13 @@ diff --git a/src/protocol_serde.rs b/src/protocol_serde.rs
 +    feature = "op_register_job_definition"
 +))]
  pub(crate) mod shape_ecs_task_properties;
+
++#[cfg(any(
++    feature = "op_create_compute_environment",
++    feature = "op_describe_compute_environments",
++    feature = "op_update_compute_environment"
++))]
+ pub(crate) mod shape_eks_access_entry;
 
 +#[cfg(any(
 +    feature = "op_describe_job_definitions",
@@ -10073,6 +10575,12 @@ diff --git a/src/protocol_serde.rs b/src/protocol_serde.rs
 
 +#[cfg(feature = "op_submit_job")]
  pub(crate) mod shape_task_properties_override;
+
++#[cfg(feature = "op_terminate_jobs")]
+ pub(crate) mod shape_terminate_jobs_error_detail;
+
++#[cfg(feature = "op_terminate_service_jobs")]
+ pub(crate) mod shape_terminate_service_jobs_error_detail;
 
 +#[cfg(any(
 +    feature = "op_describe_job_definitions",
@@ -10480,16 +10988,6 @@ diff --git a/src/protocol_serde.rs b/src/protocol_serde.rs
 
 +#[cfg(any(
 +    feature = "op_create_compute_environment",
-+    feature = "op_describe_compute_environments",
-+    feature = "op_describe_job_definitions",
-+    feature = "op_describe_jobs",
-+    feature = "op_register_job_definition",
-+    feature = "op_update_compute_environment"
-+))]
- pub(crate) mod shape_string_list;
-
-+#[cfg(any(
-+    feature = "op_create_compute_environment",
 +    feature = "op_describe_compute_environments"
 +))]
  pub(crate) mod shape_tags_map;
@@ -10693,11 +11191,19 @@ diff --git a/src/serde_util.rs b/src/serde_util.rs
 +++ b/src/serde_util.rs
 @@ -1,4 +1,5 @@
  // Code generated by software.amazon.smithy.rust.codegen.smithy-rs. DO NOT EDIT.
++#[cfg(feature = "op_cancel_jobs")]
+ pub(crate) fn cancel_jobs_output_output_correct_errors(
+     mut builder: crate::operation::cancel_jobs::builders::CancelJobsOutputBuilder,
+ ) -> crate::operation::cancel_jobs::builders::CancelJobsOutputBuilder {
+@@ -11,6 +12,7 @@
+     builder
+ }
+
 +#[cfg(feature = "op_create_consumable_resource")]
  pub(crate) fn create_consumable_resource_output_output_correct_errors(
      mut builder: crate::operation::create_consumable_resource::builders::CreateConsumableResourceOutputBuilder,
  ) -> crate::operation::create_consumable_resource::builders::CreateConsumableResourceOutputBuilder {
-@@ -11,6 +12,7 @@
+@@ -23,6 +25,7 @@
      builder
  }
 
@@ -10705,7 +11211,7 @@ diff --git a/src/serde_util.rs b/src/serde_util.rs
  pub(crate) fn create_job_queue_output_output_correct_errors(
      mut builder: crate::operation::create_job_queue::builders::CreateJobQueueOutputBuilder,
  ) -> crate::operation::create_job_queue::builders::CreateJobQueueOutputBuilder {
-@@ -23,6 +25,7 @@
+@@ -35,6 +38,7 @@
      builder
  }
 
@@ -10713,7 +11219,7 @@ diff --git a/src/serde_util.rs b/src/serde_util.rs
  pub(crate) fn create_scheduling_policy_output_output_correct_errors(
      mut builder: crate::operation::create_scheduling_policy::builders::CreateSchedulingPolicyOutputBuilder,
  ) -> crate::operation::create_scheduling_policy::builders::CreateSchedulingPolicyOutputBuilder {
-@@ -35,6 +38,7 @@
+@@ -47,6 +51,7 @@
      builder
  }
 
@@ -10721,7 +11227,7 @@ diff --git a/src/serde_util.rs b/src/serde_util.rs
  pub(crate) fn create_service_environment_output_output_correct_errors(
      mut builder: crate::operation::create_service_environment::builders::CreateServiceEnvironmentOutputBuilder,
  ) -> crate::operation::create_service_environment::builders::CreateServiceEnvironmentOutputBuilder {
-@@ -47,6 +51,7 @@
+@@ -59,6 +64,7 @@
      builder
  }
 
@@ -10729,7 +11235,7 @@ diff --git a/src/serde_util.rs b/src/serde_util.rs
  pub(crate) fn describe_consumable_resource_output_output_correct_errors(
      mut builder: crate::operation::describe_consumable_resource::builders::DescribeConsumableResourceOutputBuilder,
  ) -> crate::operation::describe_consumable_resource::builders::DescribeConsumableResourceOutputBuilder {
-@@ -59,6 +64,7 @@
+@@ -71,6 +77,7 @@
      builder
  }
 
@@ -10737,7 +11243,7 @@ diff --git a/src/serde_util.rs b/src/serde_util.rs
  pub(crate) fn describe_service_job_output_output_correct_errors(
      mut builder: crate::operation::describe_service_job::builders::DescribeServiceJobOutputBuilder,
  ) -> crate::operation::describe_service_job::builders::DescribeServiceJobOutputBuilder {
-@@ -83,6 +89,7 @@
+@@ -95,6 +102,7 @@
      builder
  }
 
@@ -10745,7 +11251,7 @@ diff --git a/src/serde_util.rs b/src/serde_util.rs
  pub(crate) fn list_consumable_resources_output_output_correct_errors(
      mut builder: crate::operation::list_consumable_resources::builders::ListConsumableResourcesOutputBuilder,
  ) -> crate::operation::list_consumable_resources::builders::ListConsumableResourcesOutputBuilder {
-@@ -92,6 +99,7 @@
+@@ -104,6 +112,7 @@
      builder
  }
 
@@ -10753,7 +11259,7 @@ diff --git a/src/serde_util.rs b/src/serde_util.rs
  pub(crate) fn list_jobs_output_output_correct_errors(
      mut builder: crate::operation::list_jobs::builders::ListJobsOutputBuilder,
  ) -> crate::operation::list_jobs::builders::ListJobsOutputBuilder {
-@@ -101,6 +109,7 @@
+@@ -113,6 +122,7 @@
      builder
  }
 
@@ -10761,7 +11267,7 @@ diff --git a/src/serde_util.rs b/src/serde_util.rs
  pub(crate) fn list_jobs_by_consumable_resource_output_output_correct_errors(
      mut builder: crate::operation::list_jobs_by_consumable_resource::builders::ListJobsByConsumableResourceOutputBuilder,
  ) -> crate::operation::list_jobs_by_consumable_resource::builders::ListJobsByConsumableResourceOutputBuilder {
-@@ -110,6 +119,7 @@
+@@ -122,6 +132,7 @@
      builder
  }
 
@@ -10769,7 +11275,7 @@ diff --git a/src/serde_util.rs b/src/serde_util.rs
  pub(crate) fn list_service_jobs_output_output_correct_errors(
      mut builder: crate::operation::list_service_jobs::builders::ListServiceJobsOutputBuilder,
  ) -> crate::operation::list_service_jobs::builders::ListServiceJobsOutputBuilder {
-@@ -119,6 +129,7 @@
+@@ -131,6 +142,7 @@
      builder
  }
 
@@ -10777,7 +11283,7 @@ diff --git a/src/serde_util.rs b/src/serde_util.rs
  pub(crate) fn register_job_definition_output_output_correct_errors(
      mut builder: crate::operation::register_job_definition::builders::RegisterJobDefinitionOutputBuilder,
  ) -> crate::operation::register_job_definition::builders::RegisterJobDefinitionOutputBuilder {
-@@ -134,6 +145,7 @@
+@@ -146,6 +158,7 @@
      builder
  }
 
@@ -10785,7 +11291,7 @@ diff --git a/src/serde_util.rs b/src/serde_util.rs
  pub(crate) fn submit_job_output_output_correct_errors(
      mut builder: crate::operation::submit_job::builders::SubmitJobOutputBuilder,
  ) -> crate::operation::submit_job::builders::SubmitJobOutputBuilder {
-@@ -146,6 +158,7 @@
+@@ -158,6 +171,7 @@
      builder
  }
 
@@ -10793,7 +11299,23 @@ diff --git a/src/serde_util.rs b/src/serde_util.rs
  pub(crate) fn submit_service_job_output_output_correct_errors(
      mut builder: crate::operation::submit_service_job::builders::SubmitServiceJobOutputBuilder,
  ) -> crate::operation::submit_service_job::builders::SubmitServiceJobOutputBuilder {
-@@ -158,6 +171,7 @@
+@@ -170,6 +184,7 @@
+     builder
+ }
+
++#[cfg(feature = "op_terminate_jobs")]
+ pub(crate) fn terminate_jobs_output_output_correct_errors(
+     mut builder: crate::operation::terminate_jobs::builders::TerminateJobsOutputBuilder,
+ ) -> crate::operation::terminate_jobs::builders::TerminateJobsOutputBuilder {
+@@ -182,6 +197,7 @@
+     builder
+ }
+
++#[cfg(feature = "op_terminate_service_jobs")]
+ pub(crate) fn terminate_service_jobs_output_output_correct_errors(
+     mut builder: crate::operation::terminate_service_jobs::builders::TerminateServiceJobsOutputBuilder,
+ ) -> crate::operation::terminate_service_jobs::builders::TerminateServiceJobsOutputBuilder {
+@@ -194,6 +210,7 @@
      builder
  }
 
@@ -10801,7 +11323,7 @@ diff --git a/src/serde_util.rs b/src/serde_util.rs
  pub(crate) fn update_consumable_resource_output_output_correct_errors(
      mut builder: crate::operation::update_consumable_resource::builders::UpdateConsumableResourceOutputBuilder,
  ) -> crate::operation::update_consumable_resource::builders::UpdateConsumableResourceOutputBuilder {
-@@ -170,6 +184,7 @@
+@@ -206,6 +223,7 @@
      builder
  }
 
@@ -10809,7 +11331,7 @@ diff --git a/src/serde_util.rs b/src/serde_util.rs
  pub(crate) fn update_service_environment_output_output_correct_errors(
      mut builder: crate::operation::update_service_environment::builders::UpdateServiceEnvironmentOutputBuilder,
  ) -> crate::operation::update_service_environment::builders::UpdateServiceEnvironmentOutputBuilder {
-@@ -182,6 +197,12 @@
+@@ -218,6 +236,12 @@
      builder
  }
 
@@ -10822,7 +11344,7 @@ diff --git a/src/serde_util.rs b/src/serde_util.rs
  pub(crate) fn quota_share_preemption_configuration_correct_errors(
      mut builder: crate::types::builders::QuotaSharePreemptionConfigurationBuilder,
  ) -> crate::types::builders::QuotaSharePreemptionConfigurationBuilder {
-@@ -193,6 +214,12 @@
+@@ -229,6 +253,12 @@
      builder
  }
 
@@ -10835,7 +11357,7 @@ diff --git a/src/serde_util.rs b/src/serde_util.rs
  pub(crate) fn quota_share_resource_sharing_configuration_correct_errors(
      mut builder: crate::types::builders::QuotaShareResourceSharingConfigurationBuilder,
  ) -> crate::types::builders::QuotaShareResourceSharingConfigurationBuilder {
-@@ -204,6 +231,7 @@
+@@ -240,6 +270,7 @@
      builder
  }
 
@@ -10843,7 +11365,15 @@ diff --git a/src/serde_util.rs b/src/serde_util.rs
  pub(crate) fn service_job_retry_strategy_correct_errors(
      mut builder: crate::types::builders::ServiceJobRetryStrategyBuilder,
  ) -> crate::types::builders::ServiceJobRetryStrategyBuilder {
-@@ -213,6 +241,7 @@
+@@ -249,6 +280,7 @@
+     builder
+ }
+
++#[cfg(feature = "op_cancel_jobs")]
+ pub(crate) fn cancel_jobs_error_detail_correct_errors(
+     mut builder: crate::types::builders::CancelJobsErrorDetailBuilder,
+ ) -> crate::types::builders::CancelJobsErrorDetailBuilder {
+@@ -264,6 +296,7 @@
      builder
  }
 
@@ -10851,7 +11381,7 @@ diff --git a/src/serde_util.rs b/src/serde_util.rs
  pub(crate) fn compute_environment_detail_correct_errors(
      mut builder: crate::types::builders::ComputeEnvironmentDetailBuilder,
  ) -> crate::types::builders::ComputeEnvironmentDetailBuilder {
-@@ -225,6 +254,7 @@
+@@ -276,6 +309,7 @@
      builder
  }
 
@@ -10859,7 +11389,7 @@ diff --git a/src/serde_util.rs b/src/serde_util.rs
  pub(crate) fn consumable_resource_summary_correct_errors(
      mut builder: crate::types::builders::ConsumableResourceSummaryBuilder,
  ) -> crate::types::builders::ConsumableResourceSummaryBuilder {
-@@ -237,6 +267,7 @@
+@@ -288,6 +322,7 @@
      builder
  }
 
@@ -10867,7 +11397,7 @@ diff --git a/src/serde_util.rs b/src/serde_util.rs
  pub(crate) fn job_definition_correct_errors(
      mut builder: crate::types::builders::JobDefinitionBuilder,
  ) -> crate::types::builders::JobDefinitionBuilder {
-@@ -255,6 +286,7 @@
+@@ -306,6 +341,7 @@
      builder
  }
 
@@ -10875,7 +11405,7 @@ diff --git a/src/serde_util.rs b/src/serde_util.rs
  pub(crate) fn job_detail_correct_errors(
      mut builder: crate::types::builders::JobDetailBuilder,
  ) -> crate::types::builders::JobDetailBuilder {
-@@ -279,6 +311,7 @@
+@@ -330,6 +366,7 @@
      builder
  }
 
@@ -10883,7 +11413,7 @@ diff --git a/src/serde_util.rs b/src/serde_util.rs
  pub(crate) fn job_queue_detail_correct_errors(
      mut builder: crate::types::builders::JobQueueDetailBuilder,
  ) -> crate::types::builders::JobQueueDetailBuilder {
-@@ -300,6 +333,7 @@
+@@ -351,6 +388,7 @@
      builder
  }
 
@@ -10891,7 +11421,7 @@ diff --git a/src/serde_util.rs b/src/serde_util.rs
  pub(crate) fn job_summary_correct_errors(
      mut builder: crate::types::builders::JobSummaryBuilder,
  ) -> crate::types::builders::JobSummaryBuilder {
-@@ -312,6 +346,7 @@
+@@ -363,6 +401,7 @@
      builder
  }
 
@@ -10899,7 +11429,7 @@ diff --git a/src/serde_util.rs b/src/serde_util.rs
  pub(crate) fn list_jobs_by_consumable_resource_summary_correct_errors(
      mut builder: crate::types::builders::ListJobsByConsumableResourceSummaryBuilder,
  ) -> crate::types::builders::ListJobsByConsumableResourceSummaryBuilder {
-@@ -342,6 +377,12 @@
+@@ -393,6 +432,12 @@
      builder
  }
 
@@ -10912,7 +11442,7 @@ diff --git a/src/serde_util.rs b/src/serde_util.rs
  pub(crate) fn quota_share_capacity_limit_correct_errors(
      mut builder: crate::types::builders::QuotaShareCapacityLimitBuilder,
  ) -> crate::types::builders::QuotaShareCapacityLimitBuilder {
-@@ -354,6 +395,7 @@
+@@ -405,6 +450,7 @@
      builder
  }
 
@@ -10920,7 +11450,7 @@ diff --git a/src/serde_util.rs b/src/serde_util.rs
  pub(crate) fn scheduling_policy_detail_correct_errors(
      mut builder: crate::types::builders::SchedulingPolicyDetailBuilder,
  ) -> crate::types::builders::SchedulingPolicyDetailBuilder {
-@@ -366,6 +408,7 @@
+@@ -417,6 +463,7 @@
      builder
  }
 
@@ -10928,7 +11458,7 @@ diff --git a/src/serde_util.rs b/src/serde_util.rs
  pub(crate) fn scheduling_policy_listing_detail_correct_errors(
      mut builder: crate::types::builders::SchedulingPolicyListingDetailBuilder,
  ) -> crate::types::builders::SchedulingPolicyListingDetailBuilder {
-@@ -375,6 +418,7 @@
+@@ -426,6 +473,7 @@
      builder
  }
 
@@ -10936,7 +11466,7 @@ diff --git a/src/serde_util.rs b/src/serde_util.rs
  pub(crate) fn service_environment_detail_correct_errors(
      mut builder: crate::types::builders::ServiceEnvironmentDetailBuilder,
  ) -> crate::types::builders::ServiceEnvironmentDetailBuilder {
-@@ -393,6 +437,7 @@
+@@ -444,6 +492,7 @@
      builder
  }
 
@@ -10944,7 +11474,7 @@ diff --git a/src/serde_util.rs b/src/serde_util.rs
  pub(crate) fn service_job_summary_correct_errors(
      mut builder: crate::types::builders::ServiceJobSummaryBuilder,
  ) -> crate::types::builders::ServiceJobSummaryBuilder {
-@@ -408,6 +453,7 @@
+@@ -459,6 +508,7 @@
      builder
  }
 
@@ -10952,7 +11482,23 @@ diff --git a/src/serde_util.rs b/src/serde_util.rs
  pub(crate) fn service_resource_id_correct_errors(
      mut builder: crate::types::builders::ServiceResourceIdBuilder,
  ) -> crate::types::builders::ServiceResourceIdBuilder {
-@@ -420,6 +466,10 @@
+@@ -471,6 +521,7 @@
+     builder
+ }
+
++#[cfg(feature = "op_terminate_jobs")]
+ pub(crate) fn terminate_jobs_error_detail_correct_errors(
+     mut builder: crate::types::builders::TerminateJobsErrorDetailBuilder,
+ ) -> crate::types::builders::TerminateJobsErrorDetailBuilder {
+@@ -486,6 +537,7 @@
+     builder
+ }
+
++#[cfg(feature = "op_terminate_service_jobs")]
+ pub(crate) fn terminate_service_jobs_error_detail_correct_errors(
+     mut builder: crate::types::builders::TerminateServiceJobsErrorDetailBuilder,
+ ) -> crate::types::builders::TerminateServiceJobsErrorDetailBuilder {
+@@ -501,6 +553,10 @@
      builder
  }
 
@@ -10963,7 +11509,7 @@ diff --git a/src/serde_util.rs b/src/serde_util.rs
  pub(crate) fn compute_resource_correct_errors(
      mut builder: crate::types::builders::ComputeResourceBuilder,
  ) -> crate::types::builders::ComputeResourceBuilder {
-@@ -432,6 +482,11 @@
+@@ -513,6 +569,11 @@
      builder
  }
 
@@ -10975,7 +11521,7 @@ diff --git a/src/serde_util.rs b/src/serde_util.rs
  pub(crate) fn ecs_properties_correct_errors(
      mut builder: crate::types::builders::EcsPropertiesBuilder,
  ) -> crate::types::builders::EcsPropertiesBuilder {
-@@ -441,6 +496,10 @@
+@@ -522,6 +583,10 @@
      builder
  }
 
@@ -10986,7 +11532,7 @@ diff --git a/src/serde_util.rs b/src/serde_util.rs
  pub(crate) fn eks_configuration_correct_errors(
      mut builder: crate::types::builders::EksConfigurationBuilder,
  ) -> crate::types::builders::EksConfigurationBuilder {
-@@ -453,6 +512,11 @@
+@@ -534,6 +599,11 @@
      builder
  }
 
@@ -10998,7 +11544,7 @@ diff --git a/src/serde_util.rs b/src/serde_util.rs
  pub(crate) fn node_properties_correct_errors(
      mut builder: crate::types::builders::NodePropertiesBuilder,
  ) -> crate::types::builders::NodePropertiesBuilder {
-@@ -468,6 +532,11 @@
+@@ -549,6 +619,11 @@
      builder
  }
 
@@ -11010,7 +11556,7 @@ diff --git a/src/serde_util.rs b/src/serde_util.rs
  pub(crate) fn quota_share_policy_correct_errors(
      mut builder: crate::types::builders::QuotaSharePolicyBuilder,
  ) -> crate::types::builders::QuotaSharePolicyBuilder {
-@@ -479,6 +548,11 @@
+@@ -560,6 +635,11 @@
      builder
  }
 
@@ -11022,7 +11568,19 @@ diff --git a/src/serde_util.rs b/src/serde_util.rs
  pub(crate) fn compute_environment_order_correct_errors(
      mut builder: crate::types::builders::ComputeEnvironmentOrderBuilder,
  ) -> crate::types::builders::ComputeEnvironmentOrderBuilder {
-@@ -491,6 +565,11 @@
+@@ -572,6 +652,11 @@
+     builder
+ }
+
++#[cfg(any(
++    feature = "op_create_compute_environment",
++    feature = "op_describe_compute_environments",
++    feature = "op_update_compute_environment"
++))]
+ pub(crate) fn eks_access_entry_correct_errors(
+     mut builder: crate::types::builders::EksAccessEntryBuilder,
+ ) -> crate::types::builders::EksAccessEntryBuilder {
+@@ -583,6 +668,11 @@
      builder
  }
 
@@ -11034,7 +11592,7 @@ diff --git a/src/serde_util.rs b/src/serde_util.rs
  pub(crate) fn ephemeral_storage_correct_errors(
      mut builder: crate::types::builders::EphemeralStorageBuilder,
  ) -> crate::types::builders::EphemeralStorageBuilder {
-@@ -500,6 +579,11 @@
+@@ -592,6 +682,11 @@
      builder
  }
 
@@ -11046,7 +11604,7 @@ diff --git a/src/serde_util.rs b/src/serde_util.rs
  pub(crate) fn job_state_time_limit_action_correct_errors(
      mut builder: crate::types::builders::JobStateTimeLimitActionBuilder,
  ) -> crate::types::builders::JobStateTimeLimitActionBuilder {
-@@ -522,6 +606,11 @@
+@@ -614,6 +709,11 @@
      builder
  }
 
@@ -11058,7 +11616,7 @@ diff --git a/src/serde_util.rs b/src/serde_util.rs
  pub(crate) fn log_configuration_correct_errors(
      mut builder: crate::types::builders::LogConfigurationBuilder,
  ) -> crate::types::builders::LogConfigurationBuilder {
-@@ -531,6 +620,10 @@
+@@ -623,6 +723,10 @@
      builder
  }
 
@@ -11069,7 +11627,7 @@ diff --git a/src/serde_util.rs b/src/serde_util.rs
  pub(crate) fn managed_instances_provider_correct_errors(
      mut builder: crate::types::builders::ManagedInstancesProviderBuilder,
  ) -> crate::types::builders::ManagedInstancesProviderBuilder {
-@@ -546,6 +639,11 @@
+@@ -638,6 +742,11 @@
      builder
  }
 
@@ -11081,7 +11639,7 @@ diff --git a/src/serde_util.rs b/src/serde_util.rs
  pub(crate) fn repository_credentials_correct_errors(
      mut builder: crate::types::builders::RepositoryCredentialsBuilder,
  ) -> crate::types::builders::RepositoryCredentialsBuilder {
-@@ -555,6 +653,11 @@
+@@ -647,6 +756,11 @@
      builder
  }
 
@@ -11093,7 +11651,7 @@ diff --git a/src/serde_util.rs b/src/serde_util.rs
  pub(crate) fn service_environment_order_correct_errors(
      mut builder: crate::types::builders::ServiceEnvironmentOrderBuilder,
  ) -> crate::types::builders::ServiceEnvironmentOrderBuilder {
-@@ -567,6 +670,11 @@
+@@ -659,6 +773,11 @@
      builder
  }
 
@@ -11105,7 +11663,7 @@ diff --git a/src/serde_util.rs b/src/serde_util.rs
  pub(crate) fn ec2_configuration_correct_errors(
      mut builder: crate::types::builders::Ec2ConfigurationBuilder,
  ) -> crate::types::builders::Ec2ConfigurationBuilder {
-@@ -576,6 +684,11 @@
+@@ -668,6 +787,11 @@
      builder
  }
 
@@ -11117,7 +11675,7 @@ diff --git a/src/serde_util.rs b/src/serde_util.rs
  pub(crate) fn ecs_task_properties_correct_errors(
      mut builder: crate::types::builders::EcsTaskPropertiesBuilder,
  ) -> crate::types::builders::EcsTaskPropertiesBuilder {
-@@ -585,6 +698,12 @@
+@@ -677,6 +801,12 @@
      builder
  }
 
@@ -11130,7 +11688,7 @@ diff --git a/src/serde_util.rs b/src/serde_util.rs
  pub(crate) fn evaluate_on_exit_correct_errors(
      mut builder: crate::types::builders::EvaluateOnExitBuilder,
  ) -> crate::types::builders::EvaluateOnExitBuilder {
-@@ -594,6 +713,10 @@
+@@ -686,6 +816,10 @@
      builder
  }
 
@@ -11141,7 +11699,7 @@ diff --git a/src/serde_util.rs b/src/serde_util.rs
  pub(crate) fn instance_launch_template_correct_errors(
      mut builder: crate::types::builders::InstanceLaunchTemplateBuilder,
  ) -> crate::types::builders::InstanceLaunchTemplateBuilder {
-@@ -609,6 +732,11 @@
+@@ -701,6 +835,11 @@
      builder
  }
 
@@ -11153,7 +11711,7 @@ diff --git a/src/serde_util.rs b/src/serde_util.rs
  pub(crate) fn node_range_property_correct_errors(
      mut builder: crate::types::builders::NodeRangePropertyBuilder,
  ) -> crate::types::builders::NodeRangePropertyBuilder {
-@@ -618,6 +746,12 @@
+@@ -710,6 +849,12 @@
      builder
  }
 
@@ -11166,7 +11724,7 @@ diff --git a/src/serde_util.rs b/src/serde_util.rs
  pub(crate) fn resource_requirement_correct_errors(
      mut builder: crate::types::builders::ResourceRequirementBuilder,
  ) -> crate::types::builders::ResourceRequirementBuilder {
-@@ -630,6 +764,11 @@
+@@ -722,6 +867,11 @@
      builder
  }
 
@@ -11178,7 +11736,7 @@ diff --git a/src/serde_util.rs b/src/serde_util.rs
  pub(crate) fn secret_correct_errors(
      mut builder: crate::types::builders::SecretBuilder,
  ) -> crate::types::builders::SecretBuilder {
-@@ -642,6 +781,11 @@
+@@ -734,6 +884,11 @@
      builder
  }
 
@@ -11190,7 +11748,7 @@ diff --git a/src/serde_util.rs b/src/serde_util.rs
  pub(crate) fn share_attributes_correct_errors(
      mut builder: crate::types::builders::ShareAttributesBuilder,
  ) -> crate::types::builders::ShareAttributesBuilder {
-@@ -651,6 +795,11 @@
+@@ -743,6 +898,11 @@
      builder
  }
 
@@ -11202,7 +11760,7 @@ diff --git a/src/serde_util.rs b/src/serde_util.rs
  pub(crate) fn ulimit_correct_errors(
      mut builder: crate::types::builders::UlimitBuilder,
  ) -> crate::types::builders::UlimitBuilder {
-@@ -666,6 +815,11 @@
+@@ -758,6 +918,11 @@
      builder
  }
 
@@ -11214,7 +11772,7 @@ diff --git a/src/serde_util.rs b/src/serde_util.rs
  pub(crate) fn device_correct_errors(
      mut builder: crate::types::builders::DeviceBuilder,
  ) -> crate::types::builders::DeviceBuilder {
-@@ -675,6 +829,11 @@
+@@ -767,6 +932,11 @@
      builder
  }
 
@@ -11226,7 +11784,7 @@ diff --git a/src/serde_util.rs b/src/serde_util.rs
  pub(crate) fn efs_volume_configuration_correct_errors(
      mut builder: crate::types::builders::EfsVolumeConfigurationBuilder,
  ) -> crate::types::builders::EfsVolumeConfigurationBuilder {
-@@ -684,6 +843,11 @@
+@@ -776,6 +946,11 @@
      builder
  }
 
@@ -11238,7 +11796,7 @@ diff --git a/src/serde_util.rs b/src/serde_util.rs
  pub(crate) fn eks_container_correct_errors(
      mut builder: crate::types::builders::EksContainerBuilder,
  ) -> crate::types::builders::EksContainerBuilder {
-@@ -693,6 +857,11 @@
+@@ -785,6 +960,11 @@
      builder
  }
 
@@ -11250,7 +11808,7 @@ diff --git a/src/serde_util.rs b/src/serde_util.rs
  pub(crate) fn eks_volume_correct_errors(
      mut builder: crate::types::builders::EksVolumeBuilder,
  ) -> crate::types::builders::EksVolumeBuilder {
-@@ -702,6 +871,11 @@
+@@ -794,6 +974,11 @@
      builder
  }
 
@@ -11262,7 +11820,7 @@ diff --git a/src/serde_util.rs b/src/serde_util.rs
  pub(crate) fn image_pull_secret_correct_errors(
      mut builder: crate::types::builders::ImagePullSecretBuilder,
  ) -> crate::types::builders::ImagePullSecretBuilder {
-@@ -711,6 +885,11 @@
+@@ -803,6 +988,11 @@
      builder
  }
 
@@ -11274,7 +11832,7 @@ diff --git a/src/serde_util.rs b/src/serde_util.rs
  pub(crate) fn managed_instances_network_configuration_correct_errors(
      mut builder: crate::types::builders::ManagedInstancesNetworkConfigurationBuilder,
  ) -> crate::types::builders::ManagedInstancesNetworkConfigurationBuilder {
-@@ -723,6 +902,11 @@
+@@ -815,6 +1005,11 @@
      builder
  }
 
@@ -11286,7 +11844,7 @@ diff --git a/src/serde_util.rs b/src/serde_util.rs
  pub(crate) fn s3_files_volume_configuration_correct_errors(
      mut builder: crate::types::builders::S3FilesVolumeConfigurationBuilder,
  ) -> crate::types::builders::S3FilesVolumeConfigurationBuilder {
-@@ -732,6 +916,11 @@
+@@ -824,6 +1019,11 @@
      builder
  }
 
@@ -11298,7 +11856,7 @@ diff --git a/src/serde_util.rs b/src/serde_util.rs
  pub(crate) fn tmpfs_correct_errors(
      mut builder: crate::types::builders::TmpfsBuilder,
  ) -> crate::types::builders::TmpfsBuilder {
-@@ -744,6 +933,11 @@
+@@ -836,6 +1036,11 @@
      builder
  }
 
@@ -11310,7 +11868,7 @@ diff --git a/src/serde_util.rs b/src/serde_util.rs
  pub(crate) fn eks_persistent_volume_claim_correct_errors(
      mut builder: crate::types::builders::EksPersistentVolumeClaimBuilder,
  ) -> crate::types::builders::EksPersistentVolumeClaimBuilder {
-@@ -753,6 +947,11 @@
+@@ -845,6 +1050,11 @@
      builder
  }
 
@@ -11322,7 +11880,7 @@ diff --git a/src/serde_util.rs b/src/serde_util.rs
  pub(crate) fn eks_secret_correct_errors(
      mut builder: crate::types::builders::EksSecretBuilder,
  ) -> crate::types::builders::EksSecretBuilder {
-@@ -762,6 +961,11 @@
+@@ -854,6 +1064,11 @@
      builder
  }
 
@@ -11334,7 +11892,7 @@ diff --git a/src/serde_util.rs b/src/serde_util.rs
  pub(crate) fn task_container_properties_correct_errors(
      mut builder: crate::types::builders::TaskContainerPropertiesBuilder,
  ) -> crate::types::builders::TaskContainerPropertiesBuilder {
-@@ -771,6 +975,12 @@
+@@ -863,6 +1078,12 @@
      builder
  }
 
@@ -11347,7 +11905,7 @@ diff --git a/src/serde_util.rs b/src/serde_util.rs
  pub(crate) fn eks_container_environment_variable_correct_errors(
      mut builder: crate::types::builders::EksContainerEnvironmentVariableBuilder,
  ) -> crate::types::builders::EksContainerEnvironmentVariableBuilder {
-@@ -780,6 +990,11 @@
+@@ -872,6 +1093,11 @@
      builder
  }
 
@@ -11362,7 +11920,7 @@ diff --git a/src/serde_util.rs b/src/serde_util.rs
 diff --git a/src/types.rs b/src/types.rs
 --- a/src/types.rs
 +++ b/src/types.rs
-@@ -1,722 +1,1898 @@
+@@ -1,750 +1,1964 @@
  // Code generated by software.amazon.smithy.rust.codegen.smithy-rs. DO NOT EDIT.
 +#[cfg(any(
 +    feature = "op_create_compute_environment",
@@ -11577,6 +12135,12 @@ diff --git a/src/types.rs b/src/types.rs
 +))]
  pub use crate::types::_update_policy::UpdatePolicy;
 
++#[cfg(feature = "op_update_compute_environment")]
+ pub use crate::types::_eks_configuration_update::EksConfigurationUpdate;
+
++#[cfg(feature = "op_cancel_jobs")]
+ pub use crate::types::_cancel_jobs_error_detail::CancelJobsErrorDetail;
+
 +#[cfg(any(
 +    feature = "op_create_compute_environment",
 +    feature = "op_describe_compute_environments",
@@ -11609,6 +12173,13 @@ diff --git a/src/types.rs b/src/types.rs
 +    feature = "op_describe_compute_environments"
 +))]
  pub use crate::types::_managed_instances_provider::ManagedInstancesProvider;
+
++#[cfg(any(
++    feature = "op_create_compute_environment",
++    feature = "op_describe_compute_environments",
++    feature = "op_update_compute_environment"
++))]
+ pub use crate::types::_eks_access_entry::EksAccessEntry;
 
 +#[cfg(any(
 +    feature = "op_create_compute_environment",
@@ -11804,6 +12375,12 @@ diff --git a/src/types.rs b/src/types.rs
 +#[cfg(feature = "op_submit_job")]
  pub use crate::types::_eks_pod_properties_override::EksPodPropertiesOverride;
 
++#[cfg(feature = "op_terminate_jobs")]
+ pub use crate::types::_terminate_jobs_error_detail::TerminateJobsErrorDetail;
+
++#[cfg(feature = "op_terminate_service_jobs")]
+ pub use crate::types::_terminate_service_jobs_error_detail::TerminateServiceJobsErrorDetail;
+
 +#[cfg(feature = "op_update_compute_environment")]
  pub use crate::types::_cr_update_allocation_strategy::CrUpdateAllocationStrategy;
 
@@ -11836,6 +12413,20 @@ diff --git a/src/types.rs b/src/types.rs
 +    feature = "op_update_compute_environment"
 +))]
  pub use crate::types::_infrastructure_optimization::InfrastructureOptimization;
+
++#[cfg(any(
++    feature = "op_create_compute_environment",
++    feature = "op_describe_compute_environments",
++    feature = "op_update_compute_environment"
++))]
+ pub use crate::types::_eks_access_entry_desired_state::EksAccessEntryDesiredState;
+
++#[cfg(any(
++    feature = "op_create_compute_environment",
++    feature = "op_describe_compute_environments",
++    feature = "op_update_compute_environment"
++))]
+ pub use crate::types::_eks_access_entry_status::EksAccessEntryStatus;
 
 +#[cfg(any(
 +    feature = "op_create_job_queue",
@@ -12343,6 +12934,9 @@ diff --git a/src/types.rs b/src/types.rs
 +#[cfg(feature = "op_describe_jobs")]
  mod _attempt_task_container_details;
 
++#[cfg(feature = "op_cancel_jobs")]
+ mod _cancel_jobs_error_detail;
+
 +#[cfg(any(
 +    feature = "op_create_service_environment",
 +    feature = "op_describe_service_environments",
@@ -12538,6 +13132,27 @@ diff --git a/src/types.rs b/src/types.rs
 +))]
  mod _efs_volume_configuration;
 
++#[cfg(any(
++    feature = "op_create_compute_environment",
++    feature = "op_describe_compute_environments",
++    feature = "op_update_compute_environment"
++))]
+ mod _eks_access_entry;
+
++#[cfg(any(
++    feature = "op_create_compute_environment",
++    feature = "op_describe_compute_environments",
++    feature = "op_update_compute_environment"
++))]
+ mod _eks_access_entry_desired_state;
+
++#[cfg(any(
++    feature = "op_create_compute_environment",
++    feature = "op_describe_compute_environments",
++    feature = "op_update_compute_environment"
++))]
+ mod _eks_access_entry_status;
+
 +#[cfg(feature = "op_describe_jobs")]
  mod _eks_attempt_container_detail;
 
@@ -12549,6 +13164,9 @@ diff --git a/src/types.rs b/src/types.rs
 +    feature = "op_describe_compute_environments"
 +))]
  mod _eks_configuration;
+
++#[cfg(feature = "op_update_compute_environment")]
+ mod _eks_configuration_update;
 
 +#[cfg(any(
 +    feature = "op_describe_job_definitions",
@@ -13223,6 +13841,12 @@ diff --git a/src/types.rs b/src/types.rs
 +#[cfg(feature = "op_submit_job")]
  mod _task_properties_override;
 
++#[cfg(feature = "op_terminate_jobs")]
+ mod _terminate_jobs_error_detail;
+
++#[cfg(feature = "op_terminate_service_jobs")]
+ mod _terminate_service_jobs_error_detail;
+
 +#[cfg(any(
 +    feature = "op_describe_job_definitions",
 +    feature = "op_describe_jobs",
@@ -13264,7 +13888,7 @@ diff --git a/src/types.rs b/src/types.rs
 diff --git a/src/types/builders.rs b/src/types/builders.rs
 --- a/src/types/builders.rs
 +++ b/src/types/builders.rs
-@@ -1,284 +1,729 @@
+@@ -1,294 +1,748 @@
  // Code generated by software.amazon.smithy.rust.codegen.smithy-rs. DO NOT EDIT.
 +#[cfg(any(
 +    feature = "op_create_compute_environment",
@@ -13416,6 +14040,12 @@ diff --git a/src/types/builders.rs b/src/types/builders.rs
 +))]
  pub use crate::types::_update_policy::UpdatePolicyBuilder;
 
++#[cfg(feature = "op_update_compute_environment")]
+ pub use crate::types::_eks_configuration_update::EksConfigurationUpdateBuilder;
+
++#[cfg(feature = "op_cancel_jobs")]
+ pub use crate::types::_cancel_jobs_error_detail::CancelJobsErrorDetailBuilder;
+
 +#[cfg(any(
 +    feature = "op_create_compute_environment",
 +    feature = "op_describe_compute_environments",
@@ -13435,6 +14065,13 @@ diff --git a/src/types/builders.rs b/src/types/builders.rs
 +    feature = "op_describe_compute_environments"
 +))]
  pub use crate::types::_managed_instances_provider::ManagedInstancesProviderBuilder;
+
++#[cfg(any(
++    feature = "op_create_compute_environment",
++    feature = "op_describe_compute_environments",
++    feature = "op_update_compute_environment"
++))]
+ pub use crate::types::_eks_access_entry::EksAccessEntryBuilder;
 
 +#[cfg(any(
 +    feature = "op_create_job_queue",
@@ -13592,6 +14229,12 @@ diff --git a/src/types/builders.rs b/src/types/builders.rs
 
 +#[cfg(feature = "op_submit_job")]
  pub use crate::types::_eks_pod_properties_override::EksPodPropertiesOverrideBuilder;
+
++#[cfg(feature = "op_terminate_jobs")]
+ pub use crate::types::_terminate_jobs_error_detail::TerminateJobsErrorDetailBuilder;
+
++#[cfg(feature = "op_terminate_service_jobs")]
+ pub use crate::types::_terminate_service_jobs_error_detail::TerminateServiceJobsErrorDetailBuilder;
 
 +#[cfg(feature = "op_update_compute_environment")]
  pub use crate::types::_update_managed_instances_provider_configuration::UpdateManagedInstancesProviderConfigurationBuilder;
@@ -13997,10 +14640,11 @@ diff --git a/src/types/builders.rs b/src/types/builders.rs
 diff --git a/src/types/error.rs b/src/types/error.rs
 --- a/src/types/error.rs
 +++ b/src/types/error.rs
-@@ -1,10 +1,198 @@
+@@ -1,10 +1,210 @@
  // Code generated by software.amazon.smithy.rust.codegen.smithy-rs. DO NOT EDIT.
 +#[cfg(any(
 +    feature = "op_cancel_job",
++    feature = "op_cancel_jobs",
 +    feature = "op_create_compute_environment",
 +    feature = "op_create_consumable_resource",
 +    feature = "op_create_job_queue",
@@ -14036,7 +14680,9 @@ diff --git a/src/types/error.rs b/src/types/error.rs
 +    feature = "op_submit_service_job",
 +    feature = "op_tag_resource",
 +    feature = "op_terminate_job",
++    feature = "op_terminate_jobs",
 +    feature = "op_terminate_service_job",
++    feature = "op_terminate_service_jobs",
 +    feature = "op_untag_resource",
 +    feature = "op_update_compute_environment",
 +    feature = "op_update_consumable_resource",
@@ -14050,6 +14696,7 @@ diff --git a/src/types/error.rs b/src/types/error.rs
 
 +#[cfg(any(
 +    feature = "op_cancel_job",
++    feature = "op_cancel_jobs",
 +    feature = "op_create_compute_environment",
 +    feature = "op_create_consumable_resource",
 +    feature = "op_create_job_queue",
@@ -14085,7 +14732,9 @@ diff --git a/src/types/error.rs b/src/types/error.rs
 +    feature = "op_submit_service_job",
 +    feature = "op_tag_resource",
 +    feature = "op_terminate_job",
++    feature = "op_terminate_jobs",
 +    feature = "op_terminate_service_job",
++    feature = "op_terminate_service_jobs",
 +    feature = "op_untag_resource",
 +    feature = "op_update_compute_environment",
 +    feature = "op_update_consumable_resource",
@@ -14099,6 +14748,7 @@ diff --git a/src/types/error.rs b/src/types/error.rs
 
 +#[cfg(any(
 +    feature = "op_cancel_job",
++    feature = "op_cancel_jobs",
 +    feature = "op_create_compute_environment",
 +    feature = "op_create_consumable_resource",
 +    feature = "op_create_job_queue",
@@ -14134,7 +14784,9 @@ diff --git a/src/types/error.rs b/src/types/error.rs
 +    feature = "op_submit_service_job",
 +    feature = "op_tag_resource",
 +    feature = "op_terminate_job",
++    feature = "op_terminate_jobs",
 +    feature = "op_terminate_service_job",
++    feature = "op_terminate_service_jobs",
 +    feature = "op_untag_resource",
 +    feature = "op_update_compute_environment",
 +    feature = "op_update_consumable_resource",
@@ -14148,6 +14800,7 @@ diff --git a/src/types/error.rs b/src/types/error.rs
 
 +#[cfg(any(
 +    feature = "op_cancel_job",
++    feature = "op_cancel_jobs",
 +    feature = "op_create_compute_environment",
 +    feature = "op_create_consumable_resource",
 +    feature = "op_create_job_queue",
@@ -14183,7 +14836,9 @@ diff --git a/src/types/error.rs b/src/types/error.rs
 +    feature = "op_submit_service_job",
 +    feature = "op_tag_resource",
 +    feature = "op_terminate_job",
++    feature = "op_terminate_jobs",
 +    feature = "op_terminate_service_job",
++    feature = "op_terminate_service_jobs",
 +    feature = "op_untag_resource",
 +    feature = "op_update_compute_environment",
 +    feature = "op_update_consumable_resource",
@@ -14199,10 +14854,11 @@ diff --git a/src/types/error.rs b/src/types/error.rs
 diff --git a/src/types/error/builders.rs b/src/types/error/builders.rs
 --- a/src/types/error/builders.rs
 +++ b/src/types/error/builders.rs
-@@ -1,4 +1,98 @@
+@@ -1,4 +1,104 @@
  // Code generated by software.amazon.smithy.rust.codegen.smithy-rs. DO NOT EDIT.
 +#[cfg(any(
 +    feature = "op_cancel_job",
++    feature = "op_cancel_jobs",
 +    feature = "op_create_compute_environment",
 +    feature = "op_create_consumable_resource",
 +    feature = "op_create_job_queue",
@@ -14238,7 +14894,9 @@ diff --git a/src/types/error/builders.rs b/src/types/error/builders.rs
 +    feature = "op_submit_service_job",
 +    feature = "op_tag_resource",
 +    feature = "op_terminate_job",
++    feature = "op_terminate_jobs",
 +    feature = "op_terminate_service_job",
++    feature = "op_terminate_service_jobs",
 +    feature = "op_untag_resource",
 +    feature = "op_update_compute_environment",
 +    feature = "op_update_consumable_resource",
@@ -14252,6 +14910,7 @@ diff --git a/src/types/error/builders.rs b/src/types/error/builders.rs
 
 +#[cfg(any(
 +    feature = "op_cancel_job",
++    feature = "op_cancel_jobs",
 +    feature = "op_create_compute_environment",
 +    feature = "op_create_consumable_resource",
 +    feature = "op_create_job_queue",
@@ -14287,7 +14946,9 @@ diff --git a/src/types/error/builders.rs b/src/types/error/builders.rs
 +    feature = "op_submit_service_job",
 +    feature = "op_tag_resource",
 +    feature = "op_terminate_job",
++    feature = "op_terminate_jobs",
 +    feature = "op_terminate_service_job",
++    feature = "op_terminate_service_jobs",
 +    feature = "op_untag_resource",
 +    feature = "op_update_compute_environment",
 +    feature = "op_update_consumable_resource",

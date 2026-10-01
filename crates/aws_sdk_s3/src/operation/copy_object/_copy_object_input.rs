@@ -333,11 +333,11 @@ pub struct CopyObjectInput {
     /// <p>This functionality is not supported for directory buckets.</p>
     /// </note>
     pub object_lock_event_hold: ::std::option::Option<crate::types::ObjectLockEventHold>,
-    /// <p>The event hold duration in days to apply to the object copy.</p><note>
+    /// <p>The event hold duration in days to apply to the object copy. You cannot specify a duration in both days and years.</p><note>
     /// <p>This functionality is not supported for directory buckets.</p>
     /// </note>
     pub object_lock_event_hold_duration_days: ::std::option::Option<i32>,
-    /// <p>The event hold duration in years to apply to the object copy.</p><note>
+    /// <p>The event hold duration in years to apply to the object copy. You cannot specify a duration in both days and years.</p><note>
     /// <p>This functionality is not supported for directory buckets.</p>
     /// </note>
     pub object_lock_event_hold_duration_years: ::std::option::Option<i32>,
@@ -765,13 +765,13 @@ impl CopyObjectInput {
     pub fn object_lock_event_hold(&self) -> ::std::option::Option<&crate::types::ObjectLockEventHold> {
         self.object_lock_event_hold.as_ref()
     }
-    /// <p>The event hold duration in days to apply to the object copy.</p><note>
+    /// <p>The event hold duration in days to apply to the object copy. You cannot specify a duration in both days and years.</p><note>
     /// <p>This functionality is not supported for directory buckets.</p>
     /// </note>
     pub fn object_lock_event_hold_duration_days(&self) -> ::std::option::Option<i32> {
         self.object_lock_event_hold_duration_days
     }
-    /// <p>The event hold duration in years to apply to the object copy.</p><note>
+    /// <p>The event hold duration in years to apply to the object copy. You cannot specify a duration in both days and years.</p><note>
     /// <p>This functionality is not supported for directory buckets.</p>
     /// </note>
     pub fn object_lock_event_hold_duration_years(&self) -> ::std::option::Option<i32> {
@@ -2288,41 +2288,41 @@ impl CopyObjectInputBuilder {
     pub fn get_object_lock_event_hold(&self) -> &::std::option::Option<crate::types::ObjectLockEventHold> {
         &self.object_lock_event_hold
     }
-    /// <p>The event hold duration in days to apply to the object copy.</p><note>
+    /// <p>The event hold duration in days to apply to the object copy. You cannot specify a duration in both days and years.</p><note>
     /// <p>This functionality is not supported for directory buckets.</p>
     /// </note>
     pub fn object_lock_event_hold_duration_days(mut self, input: i32) -> Self {
         self.object_lock_event_hold_duration_days = ::std::option::Option::Some(input);
         self
     }
-    /// <p>The event hold duration in days to apply to the object copy.</p><note>
+    /// <p>The event hold duration in days to apply to the object copy. You cannot specify a duration in both days and years.</p><note>
     /// <p>This functionality is not supported for directory buckets.</p>
     /// </note>
     pub fn set_object_lock_event_hold_duration_days(mut self, input: ::std::option::Option<i32>) -> Self {
         self.object_lock_event_hold_duration_days = input;
         self
     }
-    /// <p>The event hold duration in days to apply to the object copy.</p><note>
+    /// <p>The event hold duration in days to apply to the object copy. You cannot specify a duration in both days and years.</p><note>
     /// <p>This functionality is not supported for directory buckets.</p>
     /// </note>
     pub fn get_object_lock_event_hold_duration_days(&self) -> &::std::option::Option<i32> {
         &self.object_lock_event_hold_duration_days
     }
-    /// <p>The event hold duration in years to apply to the object copy.</p><note>
+    /// <p>The event hold duration in years to apply to the object copy. You cannot specify a duration in both days and years.</p><note>
     /// <p>This functionality is not supported for directory buckets.</p>
     /// </note>
     pub fn object_lock_event_hold_duration_years(mut self, input: i32) -> Self {
         self.object_lock_event_hold_duration_years = ::std::option::Option::Some(input);
         self
     }
-    /// <p>The event hold duration in years to apply to the object copy.</p><note>
+    /// <p>The event hold duration in years to apply to the object copy. You cannot specify a duration in both days and years.</p><note>
     /// <p>This functionality is not supported for directory buckets.</p>
     /// </note>
     pub fn set_object_lock_event_hold_duration_years(mut self, input: ::std::option::Option<i32>) -> Self {
         self.object_lock_event_hold_duration_years = input;
         self
     }
-    /// <p>The event hold duration in years to apply to the object copy.</p><note>
+    /// <p>The event hold duration in years to apply to the object copy. You cannot specify a duration in both days and years.</p><note>
     /// <p>This functionality is not supported for directory buckets.</p>
     /// </note>
     pub fn get_object_lock_event_hold_duration_years(&self) -> &::std::option::Option<i32> {

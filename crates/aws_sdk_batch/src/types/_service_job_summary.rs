@@ -32,6 +32,8 @@ pub struct ServiceJobSummary {
     pub started_at: ::std::option::Option<i64>,
     /// <p>The Unix timestamp (in milliseconds) for when the service job stopped running.</p>
     pub stopped_at: ::std::option::Option<i64>,
+    /// <p>Indicates whether a termination request has been accepted for the service job. This field is only present when the value is <code>true</code>.</p>
+    pub is_terminated: ::std::option::Option<bool>,
 }
 impl ServiceJobSummary {
     /// <p>Information about the latest attempt for the service job.</p>
@@ -92,6 +94,10 @@ impl ServiceJobSummary {
     pub fn stopped_at(&self) -> ::std::option::Option<i64> {
         self.stopped_at
     }
+    /// <p>Indicates whether a termination request has been accepted for the service job. This field is only present when the value is <code>true</code>.</p>
+    pub fn is_terminated(&self) -> ::std::option::Option<bool> {
+        self.is_terminated
+    }
 }
 impl ServiceJobSummary {
     /// Creates a new builder-style object to manufacture [`ServiceJobSummary`](crate::types::ServiceJobSummary).
@@ -118,6 +124,7 @@ pub struct ServiceJobSummaryBuilder {
     pub(crate) status_reason: ::std::option::Option<::std::string::String>,
     pub(crate) started_at: ::std::option::Option<i64>,
     pub(crate) stopped_at: ::std::option::Option<i64>,
+    pub(crate) is_terminated: ::std::option::Option<bool>,
 }
 impl ServiceJobSummaryBuilder {
     /// <p>Information about the latest attempt for the service job.</p>
@@ -330,6 +337,20 @@ impl ServiceJobSummaryBuilder {
     pub fn get_stopped_at(&self) -> &::std::option::Option<i64> {
         &self.stopped_at
     }
+    /// <p>Indicates whether a termination request has been accepted for the service job. This field is only present when the value is <code>true</code>.</p>
+    pub fn is_terminated(mut self, input: bool) -> Self {
+        self.is_terminated = ::std::option::Option::Some(input);
+        self
+    }
+    /// <p>Indicates whether a termination request has been accepted for the service job. This field is only present when the value is <code>true</code>.</p>
+    pub fn set_is_terminated(mut self, input: ::std::option::Option<bool>) -> Self {
+        self.is_terminated = input;
+        self
+    }
+    /// <p>Indicates whether a termination request has been accepted for the service job. This field is only present when the value is <code>true</code>.</p>
+    pub fn get_is_terminated(&self) -> &::std::option::Option<bool> {
+        &self.is_terminated
+    }
     /// Consumes the builder and constructs a [`ServiceJobSummary`](crate::types::ServiceJobSummary).
     pub fn build(self) -> crate::types::ServiceJobSummary {
         crate::types::ServiceJobSummary {
@@ -347,6 +368,7 @@ impl ServiceJobSummaryBuilder {
             status_reason: self.status_reason,
             started_at: self.started_at,
             stopped_at: self.stopped_at,
+            is_terminated: self.is_terminated,
         }
     }
 }

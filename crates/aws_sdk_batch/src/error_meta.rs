@@ -5,6 +5,7 @@
 pub enum Error {
     #[cfg(any(
         feature = "op_cancel_job",
+        feature = "op_cancel_jobs",
         feature = "op_create_compute_environment",
         feature = "op_create_consumable_resource",
         feature = "op_create_job_queue",
@@ -40,7 +41,9 @@ pub enum Error {
         feature = "op_submit_service_job",
         feature = "op_tag_resource",
         feature = "op_terminate_job",
+        feature = "op_terminate_jobs",
         feature = "op_terminate_service_job",
+        feature = "op_terminate_service_jobs",
         feature = "op_untag_resource",
         feature = "op_update_compute_environment",
         feature = "op_update_consumable_resource",
@@ -54,6 +57,7 @@ pub enum Error {
     ClientException(crate::types::error::ClientException),
     #[cfg(any(
         feature = "op_cancel_job",
+        feature = "op_cancel_jobs",
         feature = "op_create_compute_environment",
         feature = "op_create_consumable_resource",
         feature = "op_create_job_queue",
@@ -89,7 +93,9 @@ pub enum Error {
         feature = "op_submit_service_job",
         feature = "op_tag_resource",
         feature = "op_terminate_job",
+        feature = "op_terminate_jobs",
         feature = "op_terminate_service_job",
+        feature = "op_terminate_service_jobs",
         feature = "op_untag_resource",
         feature = "op_update_compute_environment",
         feature = "op_update_consumable_resource",
@@ -117,6 +123,7 @@ impl ::std::fmt::Display for Error {
         match self {
             #[cfg(any(
                 feature = "op_cancel_job",
+                feature = "op_cancel_jobs",
                 feature = "op_create_compute_environment",
                 feature = "op_create_consumable_resource",
                 feature = "op_create_job_queue",
@@ -152,7 +159,9 @@ impl ::std::fmt::Display for Error {
                 feature = "op_submit_service_job",
                 feature = "op_tag_resource",
                 feature = "op_terminate_job",
+                feature = "op_terminate_jobs",
                 feature = "op_terminate_service_job",
+                feature = "op_terminate_service_jobs",
                 feature = "op_untag_resource",
                 feature = "op_update_compute_environment",
                 feature = "op_update_consumable_resource",
@@ -165,6 +174,7 @@ impl ::std::fmt::Display for Error {
             Error::ClientException(inner) => inner.fmt(f),
             #[cfg(any(
                 feature = "op_cancel_job",
+                feature = "op_cancel_jobs",
                 feature = "op_create_compute_environment",
                 feature = "op_create_consumable_resource",
                 feature = "op_create_job_queue",
@@ -200,7 +210,9 @@ impl ::std::fmt::Display for Error {
                 feature = "op_submit_service_job",
                 feature = "op_tag_resource",
                 feature = "op_terminate_job",
+                feature = "op_terminate_jobs",
                 feature = "op_terminate_service_job",
+                feature = "op_terminate_service_jobs",
                 feature = "op_untag_resource",
                 feature = "op_update_compute_environment",
                 feature = "op_update_consumable_resource",
@@ -236,6 +248,7 @@ impl ::aws_smithy_types::error::metadata::ProvideErrorMetadata for Error {
         match self {
             #[cfg(any(
                 feature = "op_cancel_job",
+                feature = "op_cancel_jobs",
                 feature = "op_create_compute_environment",
                 feature = "op_create_consumable_resource",
                 feature = "op_create_job_queue",
@@ -271,7 +284,9 @@ impl ::aws_smithy_types::error::metadata::ProvideErrorMetadata for Error {
                 feature = "op_submit_service_job",
                 feature = "op_tag_resource",
                 feature = "op_terminate_job",
+                feature = "op_terminate_jobs",
                 feature = "op_terminate_service_job",
+                feature = "op_terminate_service_jobs",
                 feature = "op_untag_resource",
                 feature = "op_update_compute_environment",
                 feature = "op_update_consumable_resource",
@@ -284,6 +299,7 @@ impl ::aws_smithy_types::error::metadata::ProvideErrorMetadata for Error {
             Self::ClientException(inner) => inner.meta(),
             #[cfg(any(
                 feature = "op_cancel_job",
+                feature = "op_cancel_jobs",
                 feature = "op_create_compute_environment",
                 feature = "op_create_consumable_resource",
                 feature = "op_create_job_queue",
@@ -319,7 +335,9 @@ impl ::aws_smithy_types::error::metadata::ProvideErrorMetadata for Error {
                 feature = "op_submit_service_job",
                 feature = "op_tag_resource",
                 feature = "op_terminate_job",
+                feature = "op_terminate_jobs",
                 feature = "op_terminate_service_job",
+                feature = "op_terminate_service_jobs",
                 feature = "op_untag_resource",
                 feature = "op_update_compute_environment",
                 feature = "op_update_consumable_resource",
@@ -359,6 +377,34 @@ impl From<crate::operation::cancel_job::CancelJobError> for Error {
             crate::operation::cancel_job::CancelJobError::ClientException(inner) => Error::ClientException(inner),
             crate::operation::cancel_job::CancelJobError::ServerException(inner) => Error::ServerException(inner),
             crate::operation::cancel_job::CancelJobError::Unhandled(inner) => Error::Unhandled(inner),
+        }
+    }
+}
+#[cfg(feature = "op_cancel_jobs")]
+impl<R> From<::aws_smithy_runtime_api::client::result::SdkError<crate::operation::cancel_jobs::CancelJobsError, R>>
+    for Error
+where
+    R: Send + Sync + std::fmt::Debug + 'static,
+{
+    fn from(
+        err: ::aws_smithy_runtime_api::client::result::SdkError<crate::operation::cancel_jobs::CancelJobsError, R>,
+    ) -> Self {
+        match err {
+            ::aws_smithy_runtime_api::client::result::SdkError::ServiceError(context) => Self::from(context.into_err()),
+            _ => Error::Unhandled(crate::error::sealed_unhandled::Unhandled {
+                meta: ::aws_smithy_types::error::metadata::ProvideErrorMetadata::meta(&err).clone(),
+                source: err.into(),
+            }),
+        }
+    }
+}
+#[cfg(feature = "op_cancel_jobs")]
+impl From<crate::operation::cancel_jobs::CancelJobsError> for Error {
+    fn from(err: crate::operation::cancel_jobs::CancelJobsError) -> Self {
+        match err {
+            crate::operation::cancel_jobs::CancelJobsError::ClientException(inner) => Error::ClientException(inner),
+            crate::operation::cancel_jobs::CancelJobsError::ServerException(inner) => Error::ServerException(inner),
+            crate::operation::cancel_jobs::CancelJobsError::Unhandled(inner) => Error::Unhandled(inner),
         }
     }
 }
@@ -1738,6 +1784,42 @@ impl From<crate::operation::terminate_job::TerminateJobError> for Error {
         }
     }
 }
+#[cfg(feature = "op_terminate_jobs")]
+impl<R>
+    From<::aws_smithy_runtime_api::client::result::SdkError<crate::operation::terminate_jobs::TerminateJobsError, R>>
+    for Error
+where
+    R: Send + Sync + std::fmt::Debug + 'static,
+{
+    fn from(
+        err: ::aws_smithy_runtime_api::client::result::SdkError<
+            crate::operation::terminate_jobs::TerminateJobsError,
+            R,
+        >,
+    ) -> Self {
+        match err {
+            ::aws_smithy_runtime_api::client::result::SdkError::ServiceError(context) => Self::from(context.into_err()),
+            _ => Error::Unhandled(crate::error::sealed_unhandled::Unhandled {
+                meta: ::aws_smithy_types::error::metadata::ProvideErrorMetadata::meta(&err).clone(),
+                source: err.into(),
+            }),
+        }
+    }
+}
+#[cfg(feature = "op_terminate_jobs")]
+impl From<crate::operation::terminate_jobs::TerminateJobsError> for Error {
+    fn from(err: crate::operation::terminate_jobs::TerminateJobsError) -> Self {
+        match err {
+            crate::operation::terminate_jobs::TerminateJobsError::ClientException(inner) => {
+                Error::ClientException(inner)
+            }
+            crate::operation::terminate_jobs::TerminateJobsError::ServerException(inner) => {
+                Error::ServerException(inner)
+            }
+            crate::operation::terminate_jobs::TerminateJobsError::Unhandled(inner) => Error::Unhandled(inner),
+        }
+    }
+}
 #[cfg(feature = "op_terminate_service_job")]
 impl<R>
     From<
@@ -1775,6 +1857,48 @@ impl From<crate::operation::terminate_service_job::TerminateServiceJobError> for
                 Error::ServerException(inner)
             }
             crate::operation::terminate_service_job::TerminateServiceJobError::Unhandled(inner) => {
+                Error::Unhandled(inner)
+            }
+        }
+    }
+}
+#[cfg(feature = "op_terminate_service_jobs")]
+impl<R>
+    From<
+        ::aws_smithy_runtime_api::client::result::SdkError<
+            crate::operation::terminate_service_jobs::TerminateServiceJobsError,
+            R,
+        >,
+    > for Error
+where
+    R: Send + Sync + std::fmt::Debug + 'static,
+{
+    fn from(
+        err: ::aws_smithy_runtime_api::client::result::SdkError<
+            crate::operation::terminate_service_jobs::TerminateServiceJobsError,
+            R,
+        >,
+    ) -> Self {
+        match err {
+            ::aws_smithy_runtime_api::client::result::SdkError::ServiceError(context) => Self::from(context.into_err()),
+            _ => Error::Unhandled(crate::error::sealed_unhandled::Unhandled {
+                meta: ::aws_smithy_types::error::metadata::ProvideErrorMetadata::meta(&err).clone(),
+                source: err.into(),
+            }),
+        }
+    }
+}
+#[cfg(feature = "op_terminate_service_jobs")]
+impl From<crate::operation::terminate_service_jobs::TerminateServiceJobsError> for Error {
+    fn from(err: crate::operation::terminate_service_jobs::TerminateServiceJobsError) -> Self {
+        match err {
+            crate::operation::terminate_service_jobs::TerminateServiceJobsError::ClientException(inner) => {
+                Error::ClientException(inner)
+            }
+            crate::operation::terminate_service_jobs::TerminateServiceJobsError::ServerException(inner) => {
+                Error::ServerException(inner)
+            }
+            crate::operation::terminate_service_jobs::TerminateServiceJobsError::Unhandled(inner) => {
                 Error::Unhandled(inner)
             }
         }
@@ -2105,6 +2229,7 @@ impl ::std::error::Error for Error {
         match self {
             #[cfg(any(
                 feature = "op_cancel_job",
+                feature = "op_cancel_jobs",
                 feature = "op_create_compute_environment",
                 feature = "op_create_consumable_resource",
                 feature = "op_create_job_queue",
@@ -2140,7 +2265,9 @@ impl ::std::error::Error for Error {
                 feature = "op_submit_service_job",
                 feature = "op_tag_resource",
                 feature = "op_terminate_job",
+                feature = "op_terminate_jobs",
                 feature = "op_terminate_service_job",
+                feature = "op_terminate_service_jobs",
                 feature = "op_untag_resource",
                 feature = "op_update_compute_environment",
                 feature = "op_update_consumable_resource",
@@ -2153,6 +2280,7 @@ impl ::std::error::Error for Error {
             Error::ClientException(inner) => inner.source(),
             #[cfg(any(
                 feature = "op_cancel_job",
+                feature = "op_cancel_jobs",
                 feature = "op_create_compute_environment",
                 feature = "op_create_consumable_resource",
                 feature = "op_create_job_queue",
@@ -2188,7 +2316,9 @@ impl ::std::error::Error for Error {
                 feature = "op_submit_service_job",
                 feature = "op_tag_resource",
                 feature = "op_terminate_job",
+                feature = "op_terminate_jobs",
                 feature = "op_terminate_service_job",
+                feature = "op_terminate_service_jobs",
                 feature = "op_untag_resource",
                 feature = "op_update_compute_environment",
                 feature = "op_update_consumable_resource",
@@ -2208,6 +2338,7 @@ impl ::aws_types::request_id::RequestId for Error {
         match self {
             #[cfg(any(
                 feature = "op_cancel_job",
+                feature = "op_cancel_jobs",
                 feature = "op_create_compute_environment",
                 feature = "op_create_consumable_resource",
                 feature = "op_create_job_queue",
@@ -2243,7 +2374,9 @@ impl ::aws_types::request_id::RequestId for Error {
                 feature = "op_submit_service_job",
                 feature = "op_tag_resource",
                 feature = "op_terminate_job",
+                feature = "op_terminate_jobs",
                 feature = "op_terminate_service_job",
+                feature = "op_terminate_service_jobs",
                 feature = "op_untag_resource",
                 feature = "op_update_compute_environment",
                 feature = "op_update_consumable_resource",
@@ -2256,6 +2389,7 @@ impl ::aws_types::request_id::RequestId for Error {
             Self::ClientException(e) => e.request_id(),
             #[cfg(any(
                 feature = "op_cancel_job",
+                feature = "op_cancel_jobs",
                 feature = "op_create_compute_environment",
                 feature = "op_create_consumable_resource",
                 feature = "op_create_job_queue",
@@ -2291,7 +2425,9 @@ impl ::aws_types::request_id::RequestId for Error {
                 feature = "op_submit_service_job",
                 feature = "op_tag_resource",
                 feature = "op_terminate_job",
+                feature = "op_terminate_jobs",
                 feature = "op_terminate_service_job",
+                feature = "op_terminate_service_jobs",
                 feature = "op_untag_resource",
                 feature = "op_update_compute_environment",
                 feature = "op_update_consumable_resource",

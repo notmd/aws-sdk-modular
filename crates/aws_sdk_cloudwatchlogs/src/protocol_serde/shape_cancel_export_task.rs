@@ -4,6 +4,7 @@ pub fn de_cancel_export_task_http_error(
     _response_status: u16,
     _response_headers: &::aws_smithy_runtime_api::http::Headers,
     _response_body: &[u8],
+    _cfg: &::aws_smithy_types::config_bag::ConfigBag,
 ) -> std::result::Result<
     crate::operation::cancel_export_task::CancelExportTaskOutput,
     crate::operation::cancel_export_task::CancelExportTaskError,
@@ -103,6 +104,7 @@ pub fn de_cancel_export_task_http_response(
     _response_status: u16,
     _response_headers: &::aws_smithy_runtime_api::http::Headers,
     _response_body: &[u8],
+    _cfg: &::aws_smithy_types::config_bag::ConfigBag,
 ) -> std::result::Result<
     crate::operation::cancel_export_task::CancelExportTaskOutput,
     crate::operation::cancel_export_task::CancelExportTaskError,

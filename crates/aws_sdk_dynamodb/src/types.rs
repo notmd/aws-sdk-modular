@@ -273,6 +273,9 @@ pub use crate::types::_export_type::ExportType;
 #[cfg(any(feature = "op_describe_export", feature = "op_export_table_to_point_in_time"))]
 pub use crate::types::_incremental_export_specification::IncrementalExportSpecification;
 
+#[cfg(any(feature = "op_describe_export", feature = "op_export_table_to_point_in_time"))]
+pub use crate::types::_filter_specification::FilterSpecification;
+
 #[cfg(any(
     feature = "op_describe_import",
     feature = "op_import_table",
@@ -593,8 +596,10 @@ pub use crate::types::_source_table_feature_details::SourceTableFeatureDetails;
     feature = "op_batch_get_item",
     feature = "op_batch_write_item",
     feature = "op_delete_item",
+    feature = "op_describe_export",
     feature = "op_execute_statement",
     feature = "op_execute_transaction",
+    feature = "op_export_table_to_point_in_time",
     feature = "op_get_item",
     feature = "op_put_item",
     feature = "op_query",
@@ -1211,8 +1216,10 @@ mod _attribute_definition;
     feature = "op_batch_get_item",
     feature = "op_batch_write_item",
     feature = "op_delete_item",
+    feature = "op_describe_export",
     feature = "op_execute_statement",
     feature = "op_execute_transaction",
+    feature = "op_export_table_to_point_in_time",
     feature = "op_get_item",
     feature = "op_put_item",
     feature = "op_query",
@@ -1519,6 +1526,9 @@ mod _export_view_type;
 
 #[cfg(feature = "op_describe_contributor_insights")]
 mod _failure_exception;
+
+#[cfg(any(feature = "op_describe_export", feature = "op_export_table_to_point_in_time"))]
+mod _filter_specification;
 
 #[cfg(feature = "op_transact_get_items")]
 mod _get;

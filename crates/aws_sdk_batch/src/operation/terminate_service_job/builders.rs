@@ -128,17 +128,17 @@ impl TerminateServiceJobFluentBuilder {
     pub fn get_job_id(&self) -> &::std::option::Option<::std::string::String> {
         self.inner.get_job_id()
     }
-    /// <p>A message to attach to the service job that explains the reason for canceling it. This message is returned by <code>DescribeServiceJob</code> operations on the service job.</p>
+    /// <p>A message to attach to the service job that explains the reason for terminating it. This message is returned by <code>DescribeServiceJob</code> operations on the service job.</p>
     pub fn reason(mut self, input: impl ::std::convert::Into<::std::string::String>) -> Self {
         self.inner = self.inner.reason(input.into());
         self
     }
-    /// <p>A message to attach to the service job that explains the reason for canceling it. This message is returned by <code>DescribeServiceJob</code> operations on the service job.</p>
+    /// <p>A message to attach to the service job that explains the reason for terminating it. This message is returned by <code>DescribeServiceJob</code> operations on the service job.</p>
     pub fn set_reason(mut self, input: ::std::option::Option<::std::string::String>) -> Self {
         self.inner = self.inner.set_reason(input);
         self
     }
-    /// <p>A message to attach to the service job that explains the reason for canceling it. This message is returned by <code>DescribeServiceJob</code> operations on the service job.</p>
+    /// <p>A message to attach to the service job that explains the reason for terminating it. This message is returned by <code>DescribeServiceJob</code> operations on the service job.</p>
     pub fn get_reason(&self) -> &::std::option::Option<::std::string::String> {
         self.inner.get_reason()
     }

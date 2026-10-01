@@ -2,16 +2,16 @@
 
 ## batch
 
-- total: 45
-- transformed: 45
+- total: 48
+- transformed: 48
 - missing: 0
 - ambiguous: 0
-- coverage delta: +0
+- coverage delta: +3
 - changed files: 11
 - feature selections:
   - zero: `[]`
-  - singleton: `[op_cancel_job], [op_create_compute_environment], [op_create_consumable_resource], [op_create_job_queue], [op_create_quota_share], [op_create_scheduling_policy], [op_create_service_environment], [op_delete_compute_environment], [op_delete_consumable_resource], [op_delete_job_queue], [op_delete_quota_share], [op_delete_scheduling_policy], [op_delete_service_environment], [op_deregister_job_definition], [op_describe_compute_environments], [op_describe_consumable_resource], [op_describe_job_definitions], [op_describe_job_queues], [op_describe_jobs], [op_describe_quota_share], [op_describe_scheduling_policies], [op_describe_service_environments], [op_describe_service_job], [op_get_job_queue_snapshot], [op_list_consumable_resources], [op_list_jobs], [op_list_jobs_by_consumable_resource], [op_list_quota_shares], [op_list_scheduling_policies], [op_list_service_jobs], [op_list_tags_for_resource], [op_register_job_definition], [op_submit_job], [op_submit_service_job], [op_tag_resource], [op_terminate_job], [op_terminate_service_job], [op_untag_resource], [op_update_compute_environment], [op_update_consumable_resource], [op_update_job_queue], [op_update_quota_share], [op_update_scheduling_policy], [op_update_service_environment], [op_update_service_job]`
-  - all: `[op_cancel_job, op_create_compute_environment, op_create_consumable_resource, op_create_job_queue, op_create_quota_share, op_create_scheduling_policy, op_create_service_environment, op_delete_compute_environment, op_delete_consumable_resource, op_delete_job_queue, op_delete_quota_share, op_delete_scheduling_policy, op_delete_service_environment, op_deregister_job_definition, op_describe_compute_environments, op_describe_consumable_resource, op_describe_job_definitions, op_describe_job_queues, op_describe_jobs, op_describe_quota_share, op_describe_scheduling_policies, op_describe_service_environments, op_describe_service_job, op_get_job_queue_snapshot, op_list_consumable_resources, op_list_jobs, op_list_jobs_by_consumable_resource, op_list_quota_shares, op_list_scheduling_policies, op_list_service_jobs, op_list_tags_for_resource, op_register_job_definition, op_submit_job, op_submit_service_job, op_tag_resource, op_terminate_job, op_terminate_service_job, op_untag_resource, op_update_compute_environment, op_update_consumable_resource, op_update_job_queue, op_update_quota_share, op_update_scheduling_policy, op_update_service_environment, op_update_service_job]`
+  - singleton: `[op_cancel_job], [op_cancel_jobs], [op_create_compute_environment], [op_create_consumable_resource], [op_create_job_queue], [op_create_quota_share], [op_create_scheduling_policy], [op_create_service_environment], [op_delete_compute_environment], [op_delete_consumable_resource], [op_delete_job_queue], [op_delete_quota_share], [op_delete_scheduling_policy], [op_delete_service_environment], [op_deregister_job_definition], [op_describe_compute_environments], [op_describe_consumable_resource], [op_describe_job_definitions], [op_describe_job_queues], [op_describe_jobs], [op_describe_quota_share], [op_describe_scheduling_policies], [op_describe_service_environments], [op_describe_service_job], [op_get_job_queue_snapshot], [op_list_consumable_resources], [op_list_jobs], [op_list_jobs_by_consumable_resource], [op_list_quota_shares], [op_list_scheduling_policies], [op_list_service_jobs], [op_list_tags_for_resource], [op_register_job_definition], [op_submit_job], [op_submit_service_job], [op_tag_resource], [op_terminate_job], [op_terminate_jobs], [op_terminate_service_job], [op_terminate_service_jobs], [op_untag_resource], [op_update_compute_environment], [op_update_consumable_resource], [op_update_job_queue], [op_update_quota_share], [op_update_scheduling_policy], [op_update_service_environment], [op_update_service_job]`
+  - all: `[op_cancel_job, op_cancel_jobs, op_create_compute_environment, op_create_consumable_resource, op_create_job_queue, op_create_quota_share, op_create_scheduling_policy, op_create_service_environment, op_delete_compute_environment, op_delete_consumable_resource, op_delete_job_queue, op_delete_quota_share, op_delete_scheduling_policy, op_delete_service_environment, op_deregister_job_definition, op_describe_compute_environments, op_describe_consumable_resource, op_describe_job_definitions, op_describe_job_queues, op_describe_jobs, op_describe_quota_share, op_describe_scheduling_policies, op_describe_service_environments, op_describe_service_job, op_get_job_queue_snapshot, op_list_consumable_resources, op_list_jobs, op_list_jobs_by_consumable_resource, op_list_quota_shares, op_list_scheduling_policies, op_list_service_jobs, op_list_tags_for_resource, op_register_job_definition, op_submit_job, op_submit_service_job, op_tag_resource, op_terminate_job, op_terminate_jobs, op_terminate_service_job, op_terminate_service_jobs, op_untag_resource, op_update_compute_environment, op_update_consumable_resource, op_update_job_queue, op_update_quota_share, op_update_scheduling_policy, op_update_service_environment, op_update_service_job]`
   - shared groups: `none`
 
 ## bedrockruntime
@@ -62,7 +62,7 @@
 - transformed: 132
 - missing: 0
 - ambiguous: 0
-- coverage delta: +3
+- coverage delta: +0
 - changed files: 11
 - feature selections:
   - zero: `[]`
@@ -160,7 +160,7 @@
 - transformed: 116
 - missing: 0
 - ambiguous: 0
-- coverage delta: +4
+- coverage delta: +0
 - changed files: 11
 - feature selections:
   - zero: `[]`

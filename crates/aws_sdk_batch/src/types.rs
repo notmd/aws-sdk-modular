@@ -212,6 +212,12 @@ pub use crate::types::_compute_resource_update::ComputeResourceUpdate;
 ))]
 pub use crate::types::_update_policy::UpdatePolicy;
 
+#[cfg(feature = "op_update_compute_environment")]
+pub use crate::types::_eks_configuration_update::EksConfigurationUpdate;
+
+#[cfg(feature = "op_cancel_jobs")]
+pub use crate::types::_cancel_jobs_error_detail::CancelJobsErrorDetail;
+
 #[cfg(any(
     feature = "op_create_compute_environment",
     feature = "op_describe_compute_environments",
@@ -244,6 +250,13 @@ pub use crate::types::_compute_scaling_policy::ComputeScalingPolicy;
     feature = "op_describe_compute_environments"
 ))]
 pub use crate::types::_managed_instances_provider::ManagedInstancesProvider;
+
+#[cfg(any(
+    feature = "op_create_compute_environment",
+    feature = "op_describe_compute_environments",
+    feature = "op_update_compute_environment"
+))]
+pub use crate::types::_eks_access_entry::EksAccessEntry;
 
 #[cfg(any(
     feature = "op_create_compute_environment",
@@ -439,6 +452,12 @@ pub use crate::types::_job_dependency::JobDependency;
 #[cfg(feature = "op_submit_job")]
 pub use crate::types::_eks_pod_properties_override::EksPodPropertiesOverride;
 
+#[cfg(feature = "op_terminate_jobs")]
+pub use crate::types::_terminate_jobs_error_detail::TerminateJobsErrorDetail;
+
+#[cfg(feature = "op_terminate_service_jobs")]
+pub use crate::types::_terminate_service_jobs_error_detail::TerminateServiceJobsErrorDetail;
+
 #[cfg(feature = "op_update_compute_environment")]
 pub use crate::types::_cr_update_allocation_strategy::CrUpdateAllocationStrategy;
 
@@ -471,6 +490,20 @@ pub use crate::types::_instance_launch_template::InstanceLaunchTemplate;
     feature = "op_update_compute_environment"
 ))]
 pub use crate::types::_infrastructure_optimization::InfrastructureOptimization;
+
+#[cfg(any(
+    feature = "op_create_compute_environment",
+    feature = "op_describe_compute_environments",
+    feature = "op_update_compute_environment"
+))]
+pub use crate::types::_eks_access_entry_desired_state::EksAccessEntryDesiredState;
+
+#[cfg(any(
+    feature = "op_create_compute_environment",
+    feature = "op_describe_compute_environments",
+    feature = "op_update_compute_environment"
+))]
+pub use crate::types::_eks_access_entry_status::EksAccessEntryStatus;
 
 #[cfg(any(
     feature = "op_create_job_queue",
@@ -978,6 +1011,9 @@ mod _attempt_ecs_task_details;
 #[cfg(feature = "op_describe_jobs")]
 mod _attempt_task_container_details;
 
+#[cfg(feature = "op_cancel_jobs")]
+mod _cancel_jobs_error_detail;
+
 #[cfg(any(
     feature = "op_create_service_environment",
     feature = "op_describe_service_environments",
@@ -1173,6 +1209,27 @@ mod _efs_transit_encryption;
 ))]
 mod _efs_volume_configuration;
 
+#[cfg(any(
+    feature = "op_create_compute_environment",
+    feature = "op_describe_compute_environments",
+    feature = "op_update_compute_environment"
+))]
+mod _eks_access_entry;
+
+#[cfg(any(
+    feature = "op_create_compute_environment",
+    feature = "op_describe_compute_environments",
+    feature = "op_update_compute_environment"
+))]
+mod _eks_access_entry_desired_state;
+
+#[cfg(any(
+    feature = "op_create_compute_environment",
+    feature = "op_describe_compute_environments",
+    feature = "op_update_compute_environment"
+))]
+mod _eks_access_entry_status;
+
 #[cfg(feature = "op_describe_jobs")]
 mod _eks_attempt_container_detail;
 
@@ -1184,6 +1241,9 @@ mod _eks_attempt_detail;
     feature = "op_describe_compute_environments"
 ))]
 mod _eks_configuration;
+
+#[cfg(feature = "op_update_compute_environment")]
+mod _eks_configuration_update;
 
 #[cfg(any(
     feature = "op_describe_job_definitions",
@@ -1857,6 +1917,12 @@ mod _task_container_properties;
 
 #[cfg(feature = "op_submit_job")]
 mod _task_properties_override;
+
+#[cfg(feature = "op_terminate_jobs")]
+mod _terminate_jobs_error_detail;
+
+#[cfg(feature = "op_terminate_service_jobs")]
+mod _terminate_service_jobs_error_detail;
 
 #[cfg(any(
     feature = "op_describe_job_definitions",

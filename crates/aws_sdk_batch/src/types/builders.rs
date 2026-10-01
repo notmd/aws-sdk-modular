@@ -149,6 +149,12 @@ pub use crate::types::_compute_resource_update::ComputeResourceUpdateBuilder;
 ))]
 pub use crate::types::_update_policy::UpdatePolicyBuilder;
 
+#[cfg(feature = "op_update_compute_environment")]
+pub use crate::types::_eks_configuration_update::EksConfigurationUpdateBuilder;
+
+#[cfg(feature = "op_cancel_jobs")]
+pub use crate::types::_cancel_jobs_error_detail::CancelJobsErrorDetailBuilder;
+
 #[cfg(any(
     feature = "op_create_compute_environment",
     feature = "op_describe_compute_environments",
@@ -168,6 +174,13 @@ pub use crate::types::_compute_scaling_policy::ComputeScalingPolicyBuilder;
     feature = "op_describe_compute_environments"
 ))]
 pub use crate::types::_managed_instances_provider::ManagedInstancesProviderBuilder;
+
+#[cfg(any(
+    feature = "op_create_compute_environment",
+    feature = "op_describe_compute_environments",
+    feature = "op_update_compute_environment"
+))]
+pub use crate::types::_eks_access_entry::EksAccessEntryBuilder;
 
 #[cfg(any(
     feature = "op_create_job_queue",
@@ -325,6 +338,12 @@ pub use crate::types::_job_dependency::JobDependencyBuilder;
 
 #[cfg(feature = "op_submit_job")]
 pub use crate::types::_eks_pod_properties_override::EksPodPropertiesOverrideBuilder;
+
+#[cfg(feature = "op_terminate_jobs")]
+pub use crate::types::_terminate_jobs_error_detail::TerminateJobsErrorDetailBuilder;
+
+#[cfg(feature = "op_terminate_service_jobs")]
+pub use crate::types::_terminate_service_jobs_error_detail::TerminateServiceJobsErrorDetailBuilder;
 
 #[cfg(feature = "op_update_compute_environment")]
 pub use crate::types::_update_managed_instances_provider_configuration::UpdateManagedInstancesProviderConfigurationBuilder;

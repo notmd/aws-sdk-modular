@@ -139,6 +139,9 @@ impl Client {
 #[cfg(feature = "op_cancel_job")]
 mod cancel_job;
 
+#[cfg(feature = "op_cancel_jobs")]
+mod cancel_jobs;
+
 #[cfg(feature = "op_create_compute_environment")]
 mod create_compute_environment;
 
@@ -271,8 +274,14 @@ mod tag_resource;
 #[cfg(feature = "op_terminate_job")]
 mod terminate_job;
 
+#[cfg(feature = "op_terminate_jobs")]
+mod terminate_jobs;
+
 #[cfg(feature = "op_terminate_service_job")]
 mod terminate_service_job;
+
+#[cfg(feature = "op_terminate_service_jobs")]
+mod terminate_service_jobs;
 
 #[cfg(feature = "op_untag_resource")]
 mod untag_resource;

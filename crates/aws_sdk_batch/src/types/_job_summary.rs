@@ -36,6 +36,10 @@ pub struct JobSummary {
     pub node_properties: ::std::option::Option<crate::types::NodePropertiesSummary>,
     /// <p>The Amazon Resource Name (ARN) of the job definition.</p>
     pub job_definition: ::std::option::Option<::std::string::String>,
+    /// <p>Indicates whether a cancellation request has been accepted for the job. This field is only present when the value is <code>true</code>.</p>
+    pub is_cancelled: ::std::option::Option<bool>,
+    /// <p>Indicates whether a termination request has been accepted for the job. This field is only present when the value is <code>true</code>.</p>
+    pub is_terminated: ::std::option::Option<bool>,
 }
 impl JobSummary {
     /// <p>The Amazon Resource Name (ARN) of the job.</p>
@@ -102,6 +106,14 @@ impl JobSummary {
     pub fn job_definition(&self) -> ::std::option::Option<&str> {
         self.job_definition.as_deref()
     }
+    /// <p>Indicates whether a cancellation request has been accepted for the job. This field is only present when the value is <code>true</code>.</p>
+    pub fn is_cancelled(&self) -> ::std::option::Option<bool> {
+        self.is_cancelled
+    }
+    /// <p>Indicates whether a termination request has been accepted for the job. This field is only present when the value is <code>true</code>.</p>
+    pub fn is_terminated(&self) -> ::std::option::Option<bool> {
+        self.is_terminated
+    }
 }
 impl JobSummary {
     /// Creates a new builder-style object to manufacture [`JobSummary`](crate::types::JobSummary).
@@ -129,6 +141,8 @@ pub struct JobSummaryBuilder {
     pub(crate) array_properties: ::std::option::Option<crate::types::ArrayPropertiesSummary>,
     pub(crate) node_properties: ::std::option::Option<crate::types::NodePropertiesSummary>,
     pub(crate) job_definition: ::std::option::Option<::std::string::String>,
+    pub(crate) is_cancelled: ::std::option::Option<bool>,
+    pub(crate) is_terminated: ::std::option::Option<bool>,
 }
 impl JobSummaryBuilder {
     /// <p>The Amazon Resource Name (ARN) of the job.</p>
@@ -358,6 +372,34 @@ impl JobSummaryBuilder {
     pub fn get_job_definition(&self) -> &::std::option::Option<::std::string::String> {
         &self.job_definition
     }
+    /// <p>Indicates whether a cancellation request has been accepted for the job. This field is only present when the value is <code>true</code>.</p>
+    pub fn is_cancelled(mut self, input: bool) -> Self {
+        self.is_cancelled = ::std::option::Option::Some(input);
+        self
+    }
+    /// <p>Indicates whether a cancellation request has been accepted for the job. This field is only present when the value is <code>true</code>.</p>
+    pub fn set_is_cancelled(mut self, input: ::std::option::Option<bool>) -> Self {
+        self.is_cancelled = input;
+        self
+    }
+    /// <p>Indicates whether a cancellation request has been accepted for the job. This field is only present when the value is <code>true</code>.</p>
+    pub fn get_is_cancelled(&self) -> &::std::option::Option<bool> {
+        &self.is_cancelled
+    }
+    /// <p>Indicates whether a termination request has been accepted for the job. This field is only present when the value is <code>true</code>.</p>
+    pub fn is_terminated(mut self, input: bool) -> Self {
+        self.is_terminated = ::std::option::Option::Some(input);
+        self
+    }
+    /// <p>Indicates whether a termination request has been accepted for the job. This field is only present when the value is <code>true</code>.</p>
+    pub fn set_is_terminated(mut self, input: ::std::option::Option<bool>) -> Self {
+        self.is_terminated = input;
+        self
+    }
+    /// <p>Indicates whether a termination request has been accepted for the job. This field is only present when the value is <code>true</code>.</p>
+    pub fn get_is_terminated(&self) -> &::std::option::Option<bool> {
+        &self.is_terminated
+    }
     /// Consumes the builder and constructs a [`JobSummary`](crate::types::JobSummary).
     pub fn build(self) -> crate::types::JobSummary {
         crate::types::JobSummary {
@@ -376,6 +418,8 @@ impl JobSummaryBuilder {
             array_properties: self.array_properties,
             node_properties: self.node_properties,
             job_definition: self.job_definition,
+            is_cancelled: self.is_cancelled,
+            is_terminated: self.is_terminated,
         }
     }
 }

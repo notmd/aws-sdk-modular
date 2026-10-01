@@ -4,7 +4,7 @@ impl super::Client {
     ///
     /// - The fluent builder is configurable:
     ///   - [`job_id(impl Into<String>)`](crate::operation::terminate_service_job::builders::TerminateServiceJobFluentBuilder::job_id) / [`set_job_id(Option<String>)`](crate::operation::terminate_service_job::builders::TerminateServiceJobFluentBuilder::set_job_id):<br>required: **true**<br><p>The service job ID of the service job to terminate.</p><br>
-    ///   - [`reason(impl Into<String>)`](crate::operation::terminate_service_job::builders::TerminateServiceJobFluentBuilder::reason) / [`set_reason(Option<String>)`](crate::operation::terminate_service_job::builders::TerminateServiceJobFluentBuilder::set_reason):<br>required: **true**<br><p>A message to attach to the service job that explains the reason for canceling it. This message is returned by <code>DescribeServiceJob</code> operations on the service job.</p><br>
+    ///   - [`reason(impl Into<String>)`](crate::operation::terminate_service_job::builders::TerminateServiceJobFluentBuilder::reason) / [`set_reason(Option<String>)`](crate::operation::terminate_service_job::builders::TerminateServiceJobFluentBuilder::set_reason):<br>required: **true**<br><p>A message to attach to the service job that explains the reason for terminating it. This message is returned by <code>DescribeServiceJob</code> operations on the service job.</p><br>
     /// - On success, responds with [`TerminateServiceJobOutput`](crate::operation::terminate_service_job::TerminateServiceJobOutput)
     /// - On failure, responds with [`SdkError<TerminateServiceJobError>`](crate::operation::terminate_service_job::TerminateServiceJobError)
     pub fn terminate_service_job(

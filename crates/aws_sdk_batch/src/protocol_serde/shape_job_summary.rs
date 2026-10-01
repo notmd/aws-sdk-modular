@@ -140,6 +140,16 @@ where
                                         .transpose()?,
                                 );
                             }
+                            "isCancelled" => {
+                                builder = builder.set_is_cancelled(
+                                    ::aws_smithy_json::deserialize::token::expect_bool_or_null(tokens.next())?,
+                                );
+                            }
+                            "isTerminated" => {
+                                builder = builder.set_is_terminated(
+                                    ::aws_smithy_json::deserialize::token::expect_bool_or_null(tokens.next())?,
+                                );
+                            }
                             _ => ::aws_smithy_json::deserialize::token::skip_value(tokens)?,
                         }
                     }

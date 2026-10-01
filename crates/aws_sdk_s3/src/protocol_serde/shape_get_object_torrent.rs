@@ -2,6 +2,7 @@
 #[allow(clippy::unnecessary_wraps)]
 pub fn de_get_object_torrent_http_response(
     response: &mut ::aws_smithy_runtime_api::http::Response,
+    _cfg: &::aws_smithy_types::config_bag::ConfigBag,
 ) -> std::result::Result<
     crate::operation::get_object_torrent::GetObjectTorrentOutput,
     crate::operation::get_object_torrent::GetObjectTorrentError,
@@ -19,12 +20,27 @@ pub fn de_get_object_torrent_http_response(
             crate::protocol_serde::shape_get_object_torrent_output::de_body_payload(_response_body)?,
         ));
         output = output.set_request_charged(
-            crate::protocol_serde::shape_get_object_torrent_output::de_request_charged_header(_response_headers)
-                .map_err(|_| {
-                    crate::operation::get_object_torrent::GetObjectTorrentError::unhandled(
-                        "Failed to parse RequestCharged from header `x-amz-request-charged",
-                    )
-                })?,
+            match crate::protocol_serde::shape_get_object_torrent_output::de_request_charged_header(_response_headers) {
+                ::std::result::Result::Ok(value) => value,
+                ::std::result::Result::Err(err) => {
+                    let _ = &err;
+                    let has_unreadable_value = _response_headers
+                        .get_all_bytes("x-amz-request-charged")
+                        .any(|value| std::str::from_utf8(value).is_err());
+                    if has_unreadable_value
+                        && _cfg.load::<::aws_smithy_runtime_api::http::NonUtf8HeaderHandling>()
+                            == ::std::option::Option::Some(&::aws_smithy_runtime_api::http::NonUtf8HeaderHandling::Skip)
+                    {
+                        ::std::option::Option::None
+                    } else {
+                        return ::std::result::Result::Err(
+                            crate::operation::get_object_torrent::GetObjectTorrentError::unhandled(
+                                "Failed to parse RequestCharged from header `x-amz-request-charged`",
+                            ),
+                        );
+                    }
+                }
+            },
         );
         output._set_extended_request_id(
             crate::s3_request_id::RequestIdExt::extended_request_id(_response_headers).map(str::to_string),
@@ -39,6 +55,7 @@ pub fn de_get_object_torrent_http_error(
     _response_status: u16,
     _response_headers: &::aws_smithy_runtime_api::http::Headers,
     _response_body: &[u8],
+    _cfg: &::aws_smithy_types::config_bag::ConfigBag,
 ) -> std::result::Result<
     crate::operation::get_object_torrent::GetObjectTorrentOutput,
     crate::operation::get_object_torrent::GetObjectTorrentError,

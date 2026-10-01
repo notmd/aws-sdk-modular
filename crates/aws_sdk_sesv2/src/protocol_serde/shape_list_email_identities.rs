@@ -4,6 +4,7 @@ pub fn de_list_email_identities_http_error(
     _response_status: u16,
     _response_headers: &::aws_smithy_runtime_api::http::Headers,
     _response_body: &[u8],
+    _cfg: &::aws_smithy_types::config_bag::ConfigBag,
 ) -> std::result::Result<
     crate::operation::list_email_identities::ListEmailIdentitiesOutput,
     crate::operation::list_email_identities::ListEmailIdentitiesError,
@@ -67,6 +68,7 @@ pub fn de_list_email_identities_http_response(
     _response_status: u16,
     _response_headers: &::aws_smithy_runtime_api::http::Headers,
     _response_body: &[u8],
+    _cfg: &::aws_smithy_types::config_bag::ConfigBag,
 ) -> std::result::Result<
     crate::operation::list_email_identities::ListEmailIdentitiesOutput,
     crate::operation::list_email_identities::ListEmailIdentitiesError,
@@ -79,6 +81,20 @@ pub fn de_list_email_identities_http_response(
         output._set_request_id(::aws_types::request_id::RequestId::request_id(_response_headers).map(str::to_string));
         output.build()
     })
+}
+
+pub fn ser_list_email_identities_input(
+    input: &crate::operation::list_email_identities::ListEmailIdentitiesInput,
+) -> ::std::result::Result<::aws_smithy_types::body::SdkBody, ::aws_smithy_types::error::operation::SerializationError>
+{
+    let mut out = String::new();
+    let mut object = ::aws_smithy_json::serialize::JsonObjectWriter::new(&mut out);
+    crate::protocol_serde::shape_list_email_identities_input::ser_list_email_identities_input_input(
+        &mut object,
+        input,
+    )?;
+    object.finish();
+    Ok(::aws_smithy_types::body::SdkBody::from(out))
 }
 
 pub(crate) fn de_list_email_identities(

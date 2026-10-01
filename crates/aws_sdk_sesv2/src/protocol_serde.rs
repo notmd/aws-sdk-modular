@@ -1003,8 +1003,14 @@ pub(crate) mod shape_invalid_next_token_exception;
 ))]
 pub(crate) mod shape_limit_exceeded_exception;
 
+#[cfg(feature = "op_list_configuration_sets")]
+pub(crate) mod shape_list_configuration_sets_input;
+
 #[cfg(feature = "op_list_contacts")]
 pub(crate) mod shape_list_contacts_input;
+
+#[cfg(feature = "op_list_email_identities")]
+pub(crate) mod shape_list_email_identities_input;
 
 #[cfg(feature = "op_list_email_identity_certificates")]
 pub(crate) mod shape_list_email_identity_certificates_input;
@@ -2090,6 +2096,9 @@ pub(crate) mod shape_last_delivery_event_list;
 
 #[cfg(any(feature = "op_create_export_job", feature = "op_get_export_job"))]
 pub(crate) mod shape_last_engagement_event_list;
+
+#[cfg(any(feature = "op_create_export_job", feature = "op_get_export_job"))]
+pub(crate) mod shape_tenant_name_filter_list;
 
 #[cfg(feature = "op_get_message_insights")]
 pub(crate) mod shape_event_details;

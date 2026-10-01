@@ -72,7 +72,7 @@ pub struct JobDetail {
     pub eks_attempts: ::std::option::Option<::std::vec::Vec<crate::types::EksAttemptDetail>>,
     /// <p>An object with properties that are specific to Amazon ECS-based jobs.</p>
     pub ecs_properties: ::std::option::Option<crate::types::EcsPropertiesDetail>,
-    /// <p>Indicates whether the job is canceled.</p>
+    /// <p>Indicates whether the job is cancelled.</p>
     pub is_cancelled: ::std::option::Option<bool>,
     /// <p>Indicates whether the job is terminated.</p>
     pub is_terminated: ::std::option::Option<bool>,
@@ -214,7 +214,7 @@ impl JobDetail {
     pub fn ecs_properties(&self) -> ::std::option::Option<&crate::types::EcsPropertiesDetail> {
         self.ecs_properties.as_ref()
     }
-    /// <p>Indicates whether the job is canceled.</p>
+    /// <p>Indicates whether the job is cancelled.</p>
     pub fn is_cancelled(&self) -> ::std::option::Option<bool> {
         self.is_cancelled
     }
@@ -762,17 +762,17 @@ impl JobDetailBuilder {
     pub fn get_ecs_properties(&self) -> &::std::option::Option<crate::types::EcsPropertiesDetail> {
         &self.ecs_properties
     }
-    /// <p>Indicates whether the job is canceled.</p>
+    /// <p>Indicates whether the job is cancelled.</p>
     pub fn is_cancelled(mut self, input: bool) -> Self {
         self.is_cancelled = ::std::option::Option::Some(input);
         self
     }
-    /// <p>Indicates whether the job is canceled.</p>
+    /// <p>Indicates whether the job is cancelled.</p>
     pub fn set_is_cancelled(mut self, input: ::std::option::Option<bool>) -> Self {
         self.is_cancelled = input;
         self
     }
-    /// <p>Indicates whether the job is canceled.</p>
+    /// <p>Indicates whether the job is cancelled.</p>
     pub fn get_is_cancelled(&self) -> &::std::option::Option<bool> {
         &self.is_cancelled
     }

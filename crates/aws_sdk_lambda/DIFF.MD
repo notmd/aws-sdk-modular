@@ -1,7 +1,7 @@
 # AWS SDK modularizer diff
 
 - repository: `https://github.com/awslabs/aws-sdk-rust`
-- revision: `26155f26ed36d90263a2c9058a67b08543c96f85`
+- revision: `c7775434628c96f7e0fc72fb83af0f5ad5dd6c9f`
 - service: `sdk/lambda`
 - model: `aws-models/lambda.json`
 - package: `aws-sdk-lambda`
@@ -152,7 +152,7 @@ diff --git a/Cargo.toml b/Cargo.toml
  [dependencies.aws-runtime]
 -path = "../aws-runtime"
  features = ["event-stream"]
- version = "1.9.2"
+ version = "1.10.0"
 
  [dependencies.aws-smithy-async]
 -path = "../aws-smithy-async"
@@ -160,16 +160,16 @@ diff --git a/Cargo.toml b/Cargo.toml
 
  [dependencies.aws-smithy-eventstream]
 -path = "../aws-smithy-eventstream"
- version = "0.61.2"
+ version = "0.61.4"
 
  [dependencies.aws-smithy-http]
 -path = "../aws-smithy-http"
  features = ["event-stream"]
- version = "0.64.0"
+ version = "0.64.1"
 
  [dependencies.aws-smithy-json]
 -path = "../aws-smithy-json"
- version = "0.63.0"
+ version = "0.63.1"
 
  [dependencies.aws-smithy-observability]
 -path = "../aws-smithy-observability"
@@ -178,28 +178,28 @@ diff --git a/Cargo.toml b/Cargo.toml
  [dependencies.aws-smithy-runtime]
 -path = "../aws-smithy-runtime"
  features = ["client"]
- version = "1.14.0"
+ version = "1.15.0"
 
  [dependencies.aws-smithy-runtime-api]
 -path = "../aws-smithy-runtime-api"
  features = ["client", "http-1x"]
- version = "1.16.0"
+ version = "1.18.0"
 
  [dependencies.aws-smithy-schema]
 -path = "../aws-smithy-schema"
- version = "0.2.0"
+ version = "0.2.1"
 
  [dependencies.aws-smithy-types]
 -path = "../aws-smithy-types"
  features = ["http-body-1-x"]
- version = "1.6.3"
+ version = "1.8.1"
 
  [dependencies.aws-types]
 -path = "../aws-types"
  version = "1.6.0"
 
  [dependencies.bytes]
-@@ -90,50 +78,40 @@
+@@ -87,50 +75,40 @@
  [dependencies.tracing]
  version = "0.1"
  [dev-dependencies.aws-config]
@@ -214,7 +214,7 @@ diff --git a/Cargo.toml b/Cargo.toml
  [dev-dependencies.aws-runtime]
 -path = "../aws-runtime"
  features = ["test-util"]
- version = "1.9.2"
+ version = "1.10.0"
 
  [dev-dependencies.aws-smithy-async]
 -path = "../aws-smithy-async"
@@ -224,12 +224,12 @@ diff --git a/Cargo.toml b/Cargo.toml
  [dev-dependencies.aws-smithy-eventstream]
 -path = "../aws-smithy-eventstream"
  features = ["test-util"]
- version = "0.61.2"
+ version = "0.61.4"
 
  [dev-dependencies.aws-smithy-http-client]
 -path = "../aws-smithy-http-client"
- features = ["test-util", "wire-mock"]
- version = "1.4.0"
+ features = ["test-util", "wire-mock", "legacy-test-util"]
+ version = "1.4.2"
 
  [dev-dependencies.aws-smithy-protocol-test]
 -path = "../aws-smithy-protocol-test"
@@ -238,19 +238,19 @@ diff --git a/Cargo.toml b/Cargo.toml
  [dev-dependencies.aws-smithy-runtime]
 -path = "../aws-smithy-runtime"
  features = ["test-util"]
- version = "1.14.0"
+ version = "1.15.0"
 
  [dev-dependencies.aws-smithy-runtime-api]
 -path = "../aws-smithy-runtime-api"
  features = ["test-util"]
- version = "1.16.0"
+ version = "1.18.0"
 
  [dev-dependencies.aws-smithy-types]
 -path = "../aws-smithy-types"
  features = ["http-body-1-x", "test-util"]
- version = "1.6.3"
+ version = "1.8.1"
 
-@@ -164,6 +142,91 @@
+@@ -163,6 +141,91 @@
  rt-tokio = ["aws-smithy-async/rt-tokio", "aws-smithy-types/http-body-1-x", "aws-smithy-types/rt-tokio"]
  gated-tests = []
  default = ["rustls", "default-https-client", "rt-tokio"]
@@ -6584,11 +6584,11 @@ diff --git a/src/operation/create_code_signing_config.rs b/src/operation/create_
 -        ::tracing::debug!(request_id = ?::aws_types::request_id::RequestId::request_id(response));
 -        let parse_result = if !success && status != 201 || force_error {
 -            crate::protocol_serde::shape_create_code_signing_config::de_create_code_signing_config_http_error(
--                status, headers, body,
+-                status, headers, body, _cfg,
 -            )
 -        } else {
 -            crate::protocol_serde::shape_create_code_signing_config::de_create_code_signing_config_http_response(
--                status, headers, body,
+-                status, headers, body, _cfg,
 -            )
 -        };
 -        crate::protocol_serde::type_erase_result(parse_result)
@@ -7534,11 +7534,11 @@ diff --git a/src/operation/create_event_source_mapping.rs b/src/operation/create
 -        ::tracing::debug!(request_id = ?::aws_types::request_id::RequestId::request_id(response));
 -        let parse_result = if !success && status != 202 || force_error {
 -            crate::protocol_serde::shape_create_event_source_mapping::de_create_event_source_mapping_http_error(
--                status, headers, body,
+-                status, headers, body, _cfg,
 -            )
 -        } else {
 -            crate::protocol_serde::shape_create_event_source_mapping::de_create_event_source_mapping_http_response(
--                status, headers, body,
+-                status, headers, body, _cfg,
 -            )
 -        };
 -        crate::protocol_serde::type_erase_result(parse_result)
@@ -10773,9 +10773,9 @@ diff --git a/src/operation/publish_version.rs b/src/operation/publish_version.rs
 -        let mut force_error = false;
 -        ::tracing::debug!(request_id = ?::aws_types::request_id::RequestId::request_id(response));
 -        let parse_result = if !success && status != 201 || force_error {
--            crate::protocol_serde::shape_publish_version::de_publish_version_http_error(status, headers, body)
+-            crate::protocol_serde::shape_publish_version::de_publish_version_http_error(status, headers, body, _cfg)
 -        } else {
--            crate::protocol_serde::shape_publish_version::de_publish_version_http_response(status, headers, body)
+-            crate::protocol_serde::shape_publish_version::de_publish_version_http_response(status, headers, body, _cfg)
 -        };
 -        crate::protocol_serde::type_erase_result(parse_result)
 -    }
@@ -15095,13 +15095,14 @@ diff --git a/src/protocol_serde.rs b/src/protocol_serde.rs
 diff --git a/src/protocol_serde/shape_create_code_signing_config.rs b/src/protocol_serde/shape_create_code_signing_config.rs
 --- a/src/protocol_serde/shape_create_code_signing_config.rs
 +++ b/src/protocol_serde/shape_create_code_signing_config.rs
-@@ -1,151 +0,0 @@
+@@ -1,153 +0,0 @@
 -// Code generated by software.amazon.smithy.rust.codegen.smithy-rs. DO NOT EDIT.
 -#[allow(clippy::unnecessary_wraps)]
 -pub fn de_create_code_signing_config_http_error(
 -    _response_status: u16,
 -    _response_headers: &::aws_smithy_runtime_api::http::Headers,
 -    _response_body: &[u8],
+-    _cfg: &::aws_smithy_types::config_bag::ConfigBag,
 -) -> std::result::Result<
 -    crate::operation::create_code_signing_config::CreateCodeSigningConfigOutput,
 -    crate::operation::create_code_signing_config::CreateCodeSigningConfigError,
@@ -15173,6 +15174,7 @@ diff --git a/src/protocol_serde/shape_create_code_signing_config.rs b/src/protoc
 -    _response_status: u16,
 -    _response_headers: &::aws_smithy_runtime_api::http::Headers,
 -    _response_body: &[u8],
+-    _cfg: &::aws_smithy_types::config_bag::ConfigBag,
 -) -> std::result::Result<
 -    crate::operation::create_code_signing_config::CreateCodeSigningConfigOutput,
 -    crate::operation::create_code_signing_config::CreateCodeSigningConfigError,
@@ -15296,13 +15298,14 @@ diff --git a/src/protocol_serde/shape_create_code_signing_config_input.rs b/src/
 diff --git a/src/protocol_serde/shape_create_event_source_mapping.rs b/src/protocol_serde/shape_create_event_source_mapping.rs
 --- a/src/protocol_serde/shape_create_event_source_mapping.rs
 +++ b/src/protocol_serde/shape_create_event_source_mapping.rs
-@@ -1,452 +0,0 @@
+@@ -1,467 +0,0 @@
 -// Code generated by software.amazon.smithy.rust.codegen.smithy-rs. DO NOT EDIT.
 -#[allow(clippy::unnecessary_wraps)]
 -pub fn de_create_event_source_mapping_http_error(
 -    _response_status: u16,
 -    _response_headers: &::aws_smithy_runtime_api::http::Headers,
 -    _response_body: &[u8],
+-    _cfg: &::aws_smithy_types::config_bag::ConfigBag,
 -) -> std::result::Result<
 -    crate::operation::create_event_source_mapping::CreateEventSourceMappingOutput,
 -    crate::operation::create_event_source_mapping::CreateEventSourceMappingError,
@@ -15410,15 +15413,28 @@ diff --git a/src/protocol_serde/shape_create_event_source_mapping.rs b/src/proto
 -                    output = crate::protocol_serde::shape_too_many_requests_exception::de_too_many_requests_exception_json_err(_response_body, output)
 -                    .map_err(crate::operation::create_event_source_mapping::CreateEventSourceMappingError::unhandled)?;
 -                    output = output.set_retry_after_seconds(
--                        crate::protocol_serde::shape_too_many_requests_exception::de_retry_after_seconds_header(
--                            _response_headers,
--                        )
--                        .map_err(|_| {
--                            crate::operation::create_event_source_mapping::CreateEventSourceMappingError::unhandled(
--                                "Failed to parse retryAfterSeconds from header `Retry-After",
--                            )
--                        })?,
--                    );
+-                    match crate::protocol_serde::shape_too_many_requests_exception::de_retry_after_seconds_header(_response_headers) {
+-                        ::std::result::Result::Ok(value) => value,
+-                        ::std::result::Result::Err(err) => {
+-                            let _ = &err;
+-                            let has_unreadable_value = _response_headers
+-                                .get_all_bytes("Retry-After")
+-                                .any(|value| std::str::from_utf8(value).is_err());
+-                            if has_unreadable_value
+-                                && _cfg.load::<::aws_smithy_runtime_api::http::NonUtf8HeaderHandling>()
+-                                    == ::std::option::Option::Some(&::aws_smithy_runtime_api::http::NonUtf8HeaderHandling::Skip)
+-                            {
+-                                ::std::option::Option::None
+-                            } else {
+-                                return ::std::result::Result::Err(
+-                                    crate::operation::create_event_source_mapping::CreateEventSourceMappingError::unhandled(
+-                                        "Failed to parse retryAfterSeconds from header `Retry-After`",
+-                                    ),
+-                                );
+-                            }
+-                        }
+-                    },
+-                );
 -                    let output = output.meta(generic);
 -                    output.build()
 -                };
@@ -15437,6 +15453,7 @@ diff --git a/src/protocol_serde/shape_create_event_source_mapping.rs b/src/proto
 -    _response_status: u16,
 -    _response_headers: &::aws_smithy_runtime_api::http::Headers,
 -    _response_body: &[u8],
+-    _cfg: &::aws_smithy_types::config_bag::ConfigBag,
 -) -> std::result::Result<
 -    crate::operation::create_event_source_mapping::CreateEventSourceMappingOutput,
 -    crate::operation::create_event_source_mapping::CreateEventSourceMappingError,
@@ -15953,13 +15970,14 @@ diff --git a/src/protocol_serde/shape_create_event_source_mapping_input.rs b/src
 diff --git a/src/protocol_serde/shape_publish_version.rs b/src/protocol_serde/shape_publish_version.rs
 --- a/src/protocol_serde/shape_publish_version.rs
 +++ b/src/protocol_serde/shape_publish_version.rs
-@@ -1,534 +0,0 @@
+@@ -1,550 +0,0 @@
 -// Code generated by software.amazon.smithy.rust.codegen.smithy-rs. DO NOT EDIT.
 -#[allow(clippy::unnecessary_wraps)]
 -pub fn de_publish_version_http_error(
 -    _response_status: u16,
 -    _response_headers: &::aws_smithy_runtime_api::http::Headers,
 -    _response_body: &[u8],
+-    _cfg: &::aws_smithy_types::config_bag::ConfigBag,
 -) -> std::result::Result<
 -    crate::operation::publish_version::PublishVersionOutput,
 -    crate::operation::publish_version::PublishVersionError,
@@ -16100,11 +16118,25 @@ diff --git a/src/protocol_serde/shape_publish_version.rs b/src/protocol_serde/sh
 -                output = crate::protocol_serde::shape_too_many_requests_exception::de_too_many_requests_exception_json_err(_response_body, output)
 -                    .map_err(crate::operation::publish_version::PublishVersionError::unhandled)?;
 -                output = output.set_retry_after_seconds(
--                    crate::protocol_serde::shape_too_many_requests_exception::de_retry_after_seconds_header(_response_headers).map_err(|_| {
--                        crate::operation::publish_version::PublishVersionError::unhandled(
--                            "Failed to parse retryAfterSeconds from header `Retry-After",
--                        )
--                    })?,
+-                    match crate::protocol_serde::shape_too_many_requests_exception::de_retry_after_seconds_header(_response_headers) {
+-                        ::std::result::Result::Ok(value) => value,
+-                        ::std::result::Result::Err(err) => {
+-                            let _ = &err;
+-                            let has_unreadable_value = _response_headers
+-                                .get_all_bytes("Retry-After")
+-                                .any(|value| std::str::from_utf8(value).is_err());
+-                            if has_unreadable_value
+-                                && _cfg.load::<::aws_smithy_runtime_api::http::NonUtf8HeaderHandling>()
+-                                    == ::std::option::Option::Some(&::aws_smithy_runtime_api::http::NonUtf8HeaderHandling::Skip)
+-                            {
+-                                ::std::option::Option::None
+-                            } else {
+-                                return ::std::result::Result::Err(crate::operation::publish_version::PublishVersionError::unhandled(
+-                                    "Failed to parse retryAfterSeconds from header `Retry-After`",
+-                                ));
+-                            }
+-                        }
+-                    },
 -                );
 -                let output = output.meta(generic);
 -                output.build()
@@ -16123,6 +16155,7 @@ diff --git a/src/protocol_serde/shape_publish_version.rs b/src/protocol_serde/sh
 -    _response_status: u16,
 -    _response_headers: &::aws_smithy_runtime_api::http::Headers,
 -    _response_body: &[u8],
+-    _cfg: &::aws_smithy_types::config_bag::ConfigBag,
 -) -> std::result::Result<
 -    crate::operation::publish_version::PublishVersionOutput,
 -    crate::operation::publish_version::PublishVersionError,
@@ -22670,7 +22703,7 @@ diff --git a/Cargo.toml b/Cargo.toml
  [dependencies.aws-runtime]
 -path = "../aws-runtime"
  features = ["event-stream"]
- version = "1.9.2"
+ version = "1.10.0"
 
  [dependencies.aws-smithy-async]
 -path = "../aws-smithy-async"
@@ -22678,16 +22711,16 @@ diff --git a/Cargo.toml b/Cargo.toml
 
  [dependencies.aws-smithy-eventstream]
 -path = "../aws-smithy-eventstream"
- version = "0.61.2"
+ version = "0.61.4"
 
  [dependencies.aws-smithy-http]
 -path = "../aws-smithy-http"
  features = ["event-stream"]
- version = "0.64.0"
+ version = "0.64.1"
 
  [dependencies.aws-smithy-json]
 -path = "../aws-smithy-json"
- version = "0.63.0"
+ version = "0.63.1"
 
  [dependencies.aws-smithy-observability]
 -path = "../aws-smithy-observability"
@@ -22696,28 +22729,28 @@ diff --git a/Cargo.toml b/Cargo.toml
  [dependencies.aws-smithy-runtime]
 -path = "../aws-smithy-runtime"
  features = ["client"]
- version = "1.14.0"
+ version = "1.15.0"
 
  [dependencies.aws-smithy-runtime-api]
 -path = "../aws-smithy-runtime-api"
  features = ["client", "http-1x"]
- version = "1.16.0"
+ version = "1.18.0"
 
  [dependencies.aws-smithy-schema]
 -path = "../aws-smithy-schema"
- version = "0.2.0"
+ version = "0.2.1"
 
  [dependencies.aws-smithy-types]
 -path = "../aws-smithy-types"
  features = ["http-body-1-x"]
- version = "1.6.3"
+ version = "1.8.1"
 
  [dependencies.aws-types]
 -path = "../aws-types"
  version = "1.6.0"
 
  [dependencies.bytes]
-@@ -90,50 +78,40 @@
+@@ -87,50 +75,40 @@
  [dependencies.tracing]
  version = "0.1"
  [dev-dependencies.aws-config]
@@ -22732,7 +22765,7 @@ diff --git a/Cargo.toml b/Cargo.toml
  [dev-dependencies.aws-runtime]
 -path = "../aws-runtime"
  features = ["test-util"]
- version = "1.9.2"
+ version = "1.10.0"
 
  [dev-dependencies.aws-smithy-async]
 -path = "../aws-smithy-async"
@@ -22742,12 +22775,12 @@ diff --git a/Cargo.toml b/Cargo.toml
  [dev-dependencies.aws-smithy-eventstream]
 -path = "../aws-smithy-eventstream"
  features = ["test-util"]
- version = "0.61.2"
+ version = "0.61.4"
 
  [dev-dependencies.aws-smithy-http-client]
 -path = "../aws-smithy-http-client"
- features = ["test-util", "wire-mock"]
- version = "1.4.0"
+ features = ["test-util", "wire-mock", "legacy-test-util"]
+ version = "1.4.2"
 
  [dev-dependencies.aws-smithy-protocol-test]
 -path = "../aws-smithy-protocol-test"
@@ -22756,19 +22789,19 @@ diff --git a/Cargo.toml b/Cargo.toml
  [dev-dependencies.aws-smithy-runtime]
 -path = "../aws-smithy-runtime"
  features = ["test-util"]
- version = "1.14.0"
+ version = "1.15.0"
 
  [dev-dependencies.aws-smithy-runtime-api]
 -path = "../aws-smithy-runtime-api"
  features = ["test-util"]
- version = "1.16.0"
+ version = "1.18.0"
 
  [dev-dependencies.aws-smithy-types]
 -path = "../aws-smithy-types"
  features = ["http-body-1-x", "test-util"]
- version = "1.6.3"
+ version = "1.8.1"
 
-@@ -164,6 +142,91 @@
+@@ -163,6 +141,91 @@
  rt-tokio = ["aws-smithy-async/rt-tokio", "aws-smithy-types/http-body-1-x", "aws-smithy-types/rt-tokio"]
  gated-tests = []
  default = ["rustls", "default-https-client", "rt-tokio"]
@@ -29057,11 +29090,11 @@ diff --git a/src/operation/create_code_signing_config.rs b/src/operation/create_
 -        ::tracing::debug!(request_id = ?::aws_types::request_id::RequestId::request_id(response));
 -        let parse_result = if !success && status != 201 || force_error {
 -            crate::protocol_serde::shape_create_code_signing_config::de_create_code_signing_config_http_error(
--                status, headers, body,
+-                status, headers, body, _cfg,
 -            )
 -        } else {
 -            crate::protocol_serde::shape_create_code_signing_config::de_create_code_signing_config_http_response(
--                status, headers, body,
+-                status, headers, body, _cfg,
 -            )
 -        };
 -        crate::protocol_serde::type_erase_result(parse_result)
@@ -29987,11 +30020,11 @@ diff --git a/src/operation/create_event_source_mapping.rs b/src/operation/create
 -        ::tracing::debug!(request_id = ?::aws_types::request_id::RequestId::request_id(response));
 -        let parse_result = if !success && status != 202 || force_error {
 -            crate::protocol_serde::shape_create_event_source_mapping::de_create_event_source_mapping_http_error(
--                status, headers, body,
+-                status, headers, body, _cfg,
 -            )
 -        } else {
 -            crate::protocol_serde::shape_create_event_source_mapping::de_create_event_source_mapping_http_response(
--                status, headers, body,
+-                status, headers, body, _cfg,
 -            )
 -        };
 -        crate::protocol_serde::type_erase_result(parse_result)
@@ -33206,9 +33239,9 @@ diff --git a/src/operation/publish_version.rs b/src/operation/publish_version.rs
 -        let mut force_error = false;
 -        ::tracing::debug!(request_id = ?::aws_types::request_id::RequestId::request_id(response));
 -        let parse_result = if !success && status != 201 || force_error {
--            crate::protocol_serde::shape_publish_version::de_publish_version_http_error(status, headers, body)
+-            crate::protocol_serde::shape_publish_version::de_publish_version_http_error(status, headers, body, _cfg)
 -        } else {
--            crate::protocol_serde::shape_publish_version::de_publish_version_http_response(status, headers, body)
+-            crate::protocol_serde::shape_publish_version::de_publish_version_http_response(status, headers, body, _cfg)
 -        };
 -        crate::protocol_serde::type_erase_result(parse_result)
 -    }
@@ -37503,13 +37536,14 @@ diff --git a/src/protocol_serde.rs b/src/protocol_serde.rs
 diff --git a/src/protocol_serde/shape_create_code_signing_config.rs b/src/protocol_serde/shape_create_code_signing_config.rs
 --- a/src/protocol_serde/shape_create_code_signing_config.rs
 +++ b/src/protocol_serde/shape_create_code_signing_config.rs
-@@ -1,151 +0,0 @@
+@@ -1,153 +0,0 @@
 -// Code generated by software.amazon.smithy.rust.codegen.smithy-rs. DO NOT EDIT.
 -#[allow(clippy::unnecessary_wraps)]
 -pub fn de_create_code_signing_config_http_error(
 -    _response_status: u16,
 -    _response_headers: &::aws_smithy_runtime_api::http::Headers,
 -    _response_body: &[u8],
+-    _cfg: &::aws_smithy_types::config_bag::ConfigBag,
 -) -> std::result::Result<
 -    crate::operation::create_code_signing_config::CreateCodeSigningConfigOutput,
 -    crate::operation::create_code_signing_config::CreateCodeSigningConfigError,
@@ -37581,6 +37615,7 @@ diff --git a/src/protocol_serde/shape_create_code_signing_config.rs b/src/protoc
 -    _response_status: u16,
 -    _response_headers: &::aws_smithy_runtime_api::http::Headers,
 -    _response_body: &[u8],
+-    _cfg: &::aws_smithy_types::config_bag::ConfigBag,
 -) -> std::result::Result<
 -    crate::operation::create_code_signing_config::CreateCodeSigningConfigOutput,
 -    crate::operation::create_code_signing_config::CreateCodeSigningConfigError,
@@ -37694,13 +37729,14 @@ diff --git a/src/protocol_serde/shape_create_code_signing_config_input.rs b/src/
 diff --git a/src/protocol_serde/shape_create_event_source_mapping.rs b/src/protocol_serde/shape_create_event_source_mapping.rs
 --- a/src/protocol_serde/shape_create_event_source_mapping.rs
 +++ b/src/protocol_serde/shape_create_event_source_mapping.rs
-@@ -1,452 +0,0 @@
+@@ -1,467 +0,0 @@
 -// Code generated by software.amazon.smithy.rust.codegen.smithy-rs. DO NOT EDIT.
 -#[allow(clippy::unnecessary_wraps)]
 -pub fn de_create_event_source_mapping_http_error(
 -    _response_status: u16,
 -    _response_headers: &::aws_smithy_runtime_api::http::Headers,
 -    _response_body: &[u8],
+-    _cfg: &::aws_smithy_types::config_bag::ConfigBag,
 -) -> std::result::Result<
 -    crate::operation::create_event_source_mapping::CreateEventSourceMappingOutput,
 -    crate::operation::create_event_source_mapping::CreateEventSourceMappingError,
@@ -37808,15 +37844,28 @@ diff --git a/src/protocol_serde/shape_create_event_source_mapping.rs b/src/proto
 -                    output = crate::protocol_serde::shape_too_many_requests_exception::de_too_many_requests_exception_json_err(_response_body, output)
 -                    .map_err(crate::operation::create_event_source_mapping::CreateEventSourceMappingError::unhandled)?;
 -                    output = output.set_retry_after_seconds(
--                        crate::protocol_serde::shape_too_many_requests_exception::de_retry_after_seconds_header(
--                            _response_headers,
--                        )
--                        .map_err(|_| {
--                            crate::operation::create_event_source_mapping::CreateEventSourceMappingError::unhandled(
--                                "Failed to parse retryAfterSeconds from header `Retry-After",
--                            )
--                        })?,
--                    );
+-                    match crate::protocol_serde::shape_too_many_requests_exception::de_retry_after_seconds_header(_response_headers) {
+-                        ::std::result::Result::Ok(value) => value,
+-                        ::std::result::Result::Err(err) => {
+-                            let _ = &err;
+-                            let has_unreadable_value = _response_headers
+-                                .get_all_bytes("Retry-After")
+-                                .any(|value| std::str::from_utf8(value).is_err());
+-                            if has_unreadable_value
+-                                && _cfg.load::<::aws_smithy_runtime_api::http::NonUtf8HeaderHandling>()
+-                                    == ::std::option::Option::Some(&::aws_smithy_runtime_api::http::NonUtf8HeaderHandling::Skip)
+-                            {
+-                                ::std::option::Option::None
+-                            } else {
+-                                return ::std::result::Result::Err(
+-                                    crate::operation::create_event_source_mapping::CreateEventSourceMappingError::unhandled(
+-                                        "Failed to parse retryAfterSeconds from header `Retry-After`",
+-                                    ),
+-                                );
+-                            }
+-                        }
+-                    },
+-                );
 -                    let output = output.meta(generic);
 -                    output.build()
 -                };
@@ -37835,6 +37884,7 @@ diff --git a/src/protocol_serde/shape_create_event_source_mapping.rs b/src/proto
 -    _response_status: u16,
 -    _response_headers: &::aws_smithy_runtime_api::http::Headers,
 -    _response_body: &[u8],
+-    _cfg: &::aws_smithy_types::config_bag::ConfigBag,
 -) -> std::result::Result<
 -    crate::operation::create_event_source_mapping::CreateEventSourceMappingOutput,
 -    crate::operation::create_event_source_mapping::CreateEventSourceMappingError,
@@ -38341,13 +38391,14 @@ diff --git a/src/protocol_serde/shape_create_event_source_mapping_input.rs b/src
 diff --git a/src/protocol_serde/shape_publish_version.rs b/src/protocol_serde/shape_publish_version.rs
 --- a/src/protocol_serde/shape_publish_version.rs
 +++ b/src/protocol_serde/shape_publish_version.rs
-@@ -1,534 +0,0 @@
+@@ -1,550 +0,0 @@
 -// Code generated by software.amazon.smithy.rust.codegen.smithy-rs. DO NOT EDIT.
 -#[allow(clippy::unnecessary_wraps)]
 -pub fn de_publish_version_http_error(
 -    _response_status: u16,
 -    _response_headers: &::aws_smithy_runtime_api::http::Headers,
 -    _response_body: &[u8],
+-    _cfg: &::aws_smithy_types::config_bag::ConfigBag,
 -) -> std::result::Result<
 -    crate::operation::publish_version::PublishVersionOutput,
 -    crate::operation::publish_version::PublishVersionError,
@@ -38488,11 +38539,25 @@ diff --git a/src/protocol_serde/shape_publish_version.rs b/src/protocol_serde/sh
 -                output = crate::protocol_serde::shape_too_many_requests_exception::de_too_many_requests_exception_json_err(_response_body, output)
 -                    .map_err(crate::operation::publish_version::PublishVersionError::unhandled)?;
 -                output = output.set_retry_after_seconds(
--                    crate::protocol_serde::shape_too_many_requests_exception::de_retry_after_seconds_header(_response_headers).map_err(|_| {
--                        crate::operation::publish_version::PublishVersionError::unhandled(
--                            "Failed to parse retryAfterSeconds from header `Retry-After",
--                        )
--                    })?,
+-                    match crate::protocol_serde::shape_too_many_requests_exception::de_retry_after_seconds_header(_response_headers) {
+-                        ::std::result::Result::Ok(value) => value,
+-                        ::std::result::Result::Err(err) => {
+-                            let _ = &err;
+-                            let has_unreadable_value = _response_headers
+-                                .get_all_bytes("Retry-After")
+-                                .any(|value| std::str::from_utf8(value).is_err());
+-                            if has_unreadable_value
+-                                && _cfg.load::<::aws_smithy_runtime_api::http::NonUtf8HeaderHandling>()
+-                                    == ::std::option::Option::Some(&::aws_smithy_runtime_api::http::NonUtf8HeaderHandling::Skip)
+-                            {
+-                                ::std::option::Option::None
+-                            } else {
+-                                return ::std::result::Result::Err(crate::operation::publish_version::PublishVersionError::unhandled(
+-                                    "Failed to parse retryAfterSeconds from header `Retry-After`",
+-                                ));
+-                            }
+-                        }
+-                    },
 -                );
 -                let output = output.meta(generic);
 -                output.build()
@@ -38511,6 +38576,7 @@ diff --git a/src/protocol_serde/shape_publish_version.rs b/src/protocol_serde/sh
 -    _response_status: u16,
 -    _response_headers: &::aws_smithy_runtime_api::http::Headers,
 -    _response_body: &[u8],
+-    _cfg: &::aws_smithy_types::config_bag::ConfigBag,
 -) -> std::result::Result<
 -    crate::operation::publish_version::PublishVersionOutput,
 -    crate::operation::publish_version::PublishVersionError,

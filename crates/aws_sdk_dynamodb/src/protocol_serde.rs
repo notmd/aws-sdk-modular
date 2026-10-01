@@ -954,8 +954,10 @@ pub(crate) mod shape_attribute_definition;
     feature = "op_batch_get_item",
     feature = "op_batch_write_item",
     feature = "op_delete_item",
+    feature = "op_describe_export",
     feature = "op_execute_statement",
     feature = "op_execute_transaction",
+    feature = "op_export_table_to_point_in_time",
     feature = "op_get_item",
     feature = "op_put_item",
     feature = "op_query",
@@ -972,8 +974,10 @@ pub(crate) mod shape_attribute_map;
     feature = "op_batch_get_item",
     feature = "op_batch_write_item",
     feature = "op_delete_item",
+    feature = "op_describe_export",
     feature = "op_execute_statement",
     feature = "op_execute_transaction",
+    feature = "op_export_table_to_point_in_time",
     feature = "op_get_item",
     feature = "op_put_item",
     feature = "op_query",
@@ -1086,6 +1090,9 @@ pub(crate) mod shape_export_summaries;
 #[cfg(feature = "op_describe_contributor_insights")]
 pub(crate) mod shape_failure_exception;
 
+#[cfg(any(feature = "op_describe_export", feature = "op_export_table_to_point_in_time"))]
+pub(crate) mod shape_filter_specification;
+
 #[cfg(any(
     feature = "op_create_table",
     feature = "op_describe_import",
@@ -1146,8 +1153,10 @@ pub(crate) mod shape_item_collection_metrics_per_table;
     feature = "op_batch_get_item",
     feature = "op_batch_write_item",
     feature = "op_delete_item",
+    feature = "op_describe_export",
     feature = "op_execute_statement",
     feature = "op_execute_transaction",
+    feature = "op_export_table_to_point_in_time",
     feature = "op_get_item",
     feature = "op_put_item",
     feature = "op_query",
@@ -1167,8 +1176,10 @@ pub(crate) mod shape_item_response_list;
     feature = "op_batch_get_item",
     feature = "op_batch_write_item",
     feature = "op_delete_item",
+    feature = "op_describe_export",
     feature = "op_execute_statement",
     feature = "op_execute_transaction",
+    feature = "op_export_table_to_point_in_time",
     feature = "op_get_item",
     feature = "op_put_item",
     feature = "op_query",
@@ -1864,8 +1875,10 @@ pub(crate) mod shape_batch_statement_error;
     feature = "op_batch_get_item",
     feature = "op_batch_write_item",
     feature = "op_delete_item",
+    feature = "op_describe_export",
     feature = "op_execute_statement",
     feature = "op_execute_transaction",
+    feature = "op_export_table_to_point_in_time",
     feature = "op_get_item",
     feature = "op_put_item",
     feature = "op_query",
@@ -1877,8 +1890,15 @@ pub(crate) mod shape_batch_statement_error;
 ))]
 pub(crate) mod shape_binary_set_attribute_value;
 
-#[cfg(feature = "op_batch_get_item")]
+#[cfg(any(
+    feature = "op_batch_get_item",
+    feature = "op_describe_export",
+    feature = "op_export_table_to_point_in_time"
+))]
 pub(crate) mod shape_expression_attribute_name_map;
+
+#[cfg(any(feature = "op_describe_export", feature = "op_export_table_to_point_in_time"))]
+pub(crate) mod shape_expression_attribute_value_map;
 
 #[cfg(any(
     feature = "op_create_table",
@@ -1914,8 +1934,10 @@ pub(crate) mod shape_key_list;
     feature = "op_batch_get_item",
     feature = "op_batch_write_item",
     feature = "op_delete_item",
+    feature = "op_describe_export",
     feature = "op_execute_statement",
     feature = "op_execute_transaction",
+    feature = "op_export_table_to_point_in_time",
     feature = "op_get_item",
     feature = "op_put_item",
     feature = "op_query",
@@ -1945,8 +1967,10 @@ pub(crate) mod shape_local_secondary_indexes;
     feature = "op_batch_get_item",
     feature = "op_batch_write_item",
     feature = "op_delete_item",
+    feature = "op_describe_export",
     feature = "op_execute_statement",
     feature = "op_execute_transaction",
+    feature = "op_export_table_to_point_in_time",
     feature = "op_get_item",
     feature = "op_put_item",
     feature = "op_query",
@@ -1963,8 +1987,10 @@ pub(crate) mod shape_map_attribute_value;
     feature = "op_batch_get_item",
     feature = "op_batch_write_item",
     feature = "op_delete_item",
+    feature = "op_describe_export",
     feature = "op_execute_statement",
     feature = "op_execute_transaction",
+    feature = "op_export_table_to_point_in_time",
     feature = "op_get_item",
     feature = "op_put_item",
     feature = "op_query",
@@ -2038,8 +2064,10 @@ pub(crate) mod shape_replica_list;
     feature = "op_batch_get_item",
     feature = "op_batch_write_item",
     feature = "op_delete_item",
+    feature = "op_describe_export",
     feature = "op_execute_statement",
     feature = "op_execute_transaction",
+    feature = "op_export_table_to_point_in_time",
     feature = "op_get_item",
     feature = "op_put_item",
     feature = "op_query",

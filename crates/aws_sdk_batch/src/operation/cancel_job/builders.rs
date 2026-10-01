@@ -23,10 +23,10 @@ impl crate::operation::cancel_job::builders::CancelJobInputBuilder {
 /// Fluent builder constructing a request to `CancelJob`.
 ///
 /// <p>Cancels a job in an Batch job queue. Jobs that are in a <code>SUBMITTED</code>, <code>PENDING</code>, or <code>RUNNABLE</code> state are cancelled and the job status is updated to <code>FAILED</code>.</p><note>
-/// <p>A <code>PENDING</code> job is canceled after all dependency jobs are completed. Therefore, it may take longer than expected to cancel a job in <code>PENDING</code> status.</p>
-/// <p>When you try to cancel an array parent job in <code>PENDING</code>, Batch attempts to cancel all child jobs. The array parent job is canceled when all child jobs are completed.</p>
+/// <p>A <code>PENDING</code> job is cancelled after all dependency jobs are completed. Therefore, it might take longer than expected to cancel a job in <code>PENDING</code> status.</p>
+/// <p>When you try to cancel an array parent job in <code>PENDING</code>, Batch attempts to cancel all child jobs. The array parent job is cancelled when all child jobs are completed.</p>
 /// </note>
-/// <p>Jobs that progressed to the <code>STARTING</code> or <code>RUNNING</code> state aren't canceled. However, the API operation still succeeds, even if no job is canceled. These jobs must be terminated with the <code>TerminateJob</code> operation.</p>
+/// <p>Jobs that progressed to the <code>STARTING</code> or <code>RUNNING</code> state aren't cancelled. However, the API operation still succeeds, even if no job is cancelled. These jobs must be terminated with the <code>TerminateJob</code> or <code>TerminateJobs</code> operation.</p>
 #[derive(::std::clone::Clone, ::std::fmt::Debug)]
 pub struct CancelJobFluentBuilder {
     handle: ::std::sync::Arc<crate::client::Handle>,
@@ -132,20 +132,20 @@ impl CancelJobFluentBuilder {
     pub fn get_job_id(&self) -> &::std::option::Option<::std::string::String> {
         self.inner.get_job_id()
     }
-    /// <p>A message to attach to the job that explains the reason for canceling it. This message is returned by future <code>DescribeJobs</code> operations on the job. It is also recorded in the Batch activity logs.</p>
-    /// <p>This parameter has as limit of 1024 characters.</p>
+    /// <p>A message to attach to the job that explains the reason for cancelling it. This message is returned by future <code>DescribeJobs</code> operations on the job. It is also recorded in the Batch activity logs.</p>
+    /// <p>This parameter has a limit of 1024 characters.</p>
     pub fn reason(mut self, input: impl ::std::convert::Into<::std::string::String>) -> Self {
         self.inner = self.inner.reason(input.into());
         self
     }
-    /// <p>A message to attach to the job that explains the reason for canceling it. This message is returned by future <code>DescribeJobs</code> operations on the job. It is also recorded in the Batch activity logs.</p>
-    /// <p>This parameter has as limit of 1024 characters.</p>
+    /// <p>A message to attach to the job that explains the reason for cancelling it. This message is returned by future <code>DescribeJobs</code> operations on the job. It is also recorded in the Batch activity logs.</p>
+    /// <p>This parameter has a limit of 1024 characters.</p>
     pub fn set_reason(mut self, input: ::std::option::Option<::std::string::String>) -> Self {
         self.inner = self.inner.set_reason(input);
         self
     }
-    /// <p>A message to attach to the job that explains the reason for canceling it. This message is returned by future <code>DescribeJobs</code> operations on the job. It is also recorded in the Batch activity logs.</p>
-    /// <p>This parameter has as limit of 1024 characters.</p>
+    /// <p>A message to attach to the job that explains the reason for cancelling it. This message is returned by future <code>DescribeJobs</code> operations on the job. It is also recorded in the Batch activity logs.</p>
+    /// <p>This parameter has a limit of 1024 characters.</p>
     pub fn get_reason(&self) -> &::std::option::Option<::std::string::String> {
         self.inner.get_reason()
     }

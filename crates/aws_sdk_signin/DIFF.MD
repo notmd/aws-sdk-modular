@@ -1,7 +1,7 @@
 # AWS SDK modularizer diff
 
 - repository: `https://github.com/awslabs/aws-sdk-rust`
-- revision: `26155f26ed36d90263a2c9058a67b08543c96f85`
+- revision: `c7775434628c96f7e0fc72fb83af0f5ad5dd6c9f`
 - service: `sdk/signin`
 - model: `aws-models/signin.json`
 - package: `aws-sdk-signin`
@@ -53,7 +53,7 @@ diff --git a/Cargo.toml b/Cargo.toml
 
  [dependencies.aws-runtime]
 -path = "../aws-runtime"
- version = "1.9.2"
+ version = "1.10.0"
 
  [dependencies.aws-smithy-async]
 -path = "../aws-smithy-async"
@@ -61,11 +61,11 @@ diff --git a/Cargo.toml b/Cargo.toml
 
  [dependencies.aws-smithy-http]
 -path = "../aws-smithy-http"
- version = "0.64.0"
+ version = "0.64.1"
 
  [dependencies.aws-smithy-json]
 -path = "../aws-smithy-json"
- version = "0.63.0"
+ version = "0.63.1"
 
  [dependencies.aws-smithy-observability]
 -path = "../aws-smithy-observability"
@@ -74,28 +74,28 @@ diff --git a/Cargo.toml b/Cargo.toml
  [dependencies.aws-smithy-runtime]
 -path = "../aws-smithy-runtime"
  features = ["client"]
- version = "1.14.0"
+ version = "1.15.0"
 
  [dependencies.aws-smithy-runtime-api]
 -path = "../aws-smithy-runtime-api"
  features = ["client", "http-1x"]
- version = "1.16.0"
+ version = "1.18.0"
 
  [dependencies.aws-smithy-schema]
 -path = "../aws-smithy-schema"
- version = "0.2.0"
+ version = "0.2.1"
 
  [dependencies.aws-smithy-types]
 -path = "../aws-smithy-types"
  features = ["http-body-1-x"]
- version = "1.6.3"
+ version = "1.8.1"
 
  [dependencies.aws-types]
 -path = "../aws-types"
  version = "1.6.0"
 
  [dependencies.bytes]
-@@ -84,7 +73,6 @@
+@@ -81,7 +70,6 @@
  [dependencies.tracing]
  version = "0.1"
  [dev-dependencies.aws-credential-types]
@@ -103,8 +103,8 @@ diff --git a/Cargo.toml b/Cargo.toml
  features = ["test-util"]
  version = "1.3.0"
 
-@@ -103,3 +91,14 @@
- test-util = ["aws-credential-types/test-util", "aws-smithy-runtime/legacy-test-util", "aws-smithy-runtime/test-util"]
+@@ -102,3 +90,14 @@
+ test-util = ["aws-credential-types/test-util"]
  gated-tests = []
  default = ["rustls", "default-https-client", "rt-tokio"]
 +op_create_o_auth2_token = []
@@ -1673,7 +1673,7 @@ diff --git a/Cargo.toml b/Cargo.toml
 
  [dependencies.aws-runtime]
 -path = "../aws-runtime"
- version = "1.9.2"
+ version = "1.10.0"
 
  [dependencies.aws-smithy-async]
 -path = "../aws-smithy-async"
@@ -1681,11 +1681,11 @@ diff --git a/Cargo.toml b/Cargo.toml
 
  [dependencies.aws-smithy-http]
 -path = "../aws-smithy-http"
- version = "0.64.0"
+ version = "0.64.1"
 
  [dependencies.aws-smithy-json]
 -path = "../aws-smithy-json"
- version = "0.63.0"
+ version = "0.63.1"
 
  [dependencies.aws-smithy-observability]
 -path = "../aws-smithy-observability"
@@ -1694,28 +1694,28 @@ diff --git a/Cargo.toml b/Cargo.toml
  [dependencies.aws-smithy-runtime]
 -path = "../aws-smithy-runtime"
  features = ["client"]
- version = "1.14.0"
+ version = "1.15.0"
 
  [dependencies.aws-smithy-runtime-api]
 -path = "../aws-smithy-runtime-api"
  features = ["client", "http-1x"]
- version = "1.16.0"
+ version = "1.18.0"
 
  [dependencies.aws-smithy-schema]
 -path = "../aws-smithy-schema"
- version = "0.2.0"
+ version = "0.2.1"
 
  [dependencies.aws-smithy-types]
 -path = "../aws-smithy-types"
  features = ["http-body-1-x"]
- version = "1.6.3"
+ version = "1.8.1"
 
  [dependencies.aws-types]
 -path = "../aws-types"
  version = "1.6.0"
 
  [dependencies.bytes]
-@@ -84,7 +73,6 @@
+@@ -81,7 +70,6 @@
  [dependencies.tracing]
  version = "0.1"
  [dev-dependencies.aws-credential-types]
@@ -1723,8 +1723,8 @@ diff --git a/Cargo.toml b/Cargo.toml
  features = ["test-util"]
  version = "1.3.0"
 
-@@ -103,3 +91,14 @@
- test-util = ["aws-credential-types/test-util", "aws-smithy-runtime/legacy-test-util", "aws-smithy-runtime/test-util"]
+@@ -102,3 +90,14 @@
+ test-util = ["aws-credential-types/test-util"]
  gated-tests = []
  default = ["rustls", "default-https-client", "rt-tokio"]
 +op_create_o_auth2_token = []

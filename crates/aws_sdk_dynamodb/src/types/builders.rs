@@ -144,6 +144,9 @@ pub use crate::types::_enable_kinesis_streaming_configuration::EnableKinesisStre
 #[cfg(any(feature = "op_describe_export", feature = "op_export_table_to_point_in_time"))]
 pub use crate::types::_incremental_export_specification::IncrementalExportSpecificationBuilder;
 
+#[cfg(any(feature = "op_describe_export", feature = "op_export_table_to_point_in_time"))]
+pub use crate::types::_filter_specification::FilterSpecificationBuilder;
+
 #[cfg(any(
     feature = "op_describe_import",
     feature = "op_import_table",
