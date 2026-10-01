@@ -1,5 +1,16 @@
 # AWS SDK modularizer checkpoint log
 
+## 2026-10-01 — `bf59d49e6` — update the pinned AWS SDK upstream to the latest commit
+
+- Objective: move the pinned `awslabs/aws-sdk-rust` revision to the latest `main` commit (`c7775434628c96f7e0fc72fb83af0f5ad5dd6c9f`, "Update smithy-rs to release-2026-09-30.2") and regenerate every modularized service crate and diff artifact.
+- Generic rule: the single top-level `repository`/`revision` pair in `services-manifest.json` drives the archive download, model discovery, operation feature derivation, and both diff artifacts, so the upstream bump required no codemod change and no service- or operation-specific branch.
+- Changed files: `services-manifest.json` (revision `26155f26ed36d90263a2c9058a67b08543c96f85` -> `c7775434628c96f7e0fc72fb83af0f5ad5dd6c9f`), `Cargo.lock` (AWS SDK and `aws-smithy-*` dependency versions), `conformance/summary.md`, and all 18 generated crates, including the new `batch` operation modules, client surfaces, types, and protocol-serde files plus refreshed `DIFF.MD`/`DIFF.diff` artifacts.
+- Commands: `cargo fetch` passed; generation passed for all 18 services; `AWS_SDK_MODULARIZER_ARCHIVE=/tmp/aws-sdk-rust.tar.gz RUSTFLAGS='-Awarnings' just conformance` passed for all 18 services; `cargo check --workspace`, `cargo test --workspace`, `cargo fmt --all -- --check`, and `git diff --check` passed. The pinned archive was fetched once from the new revision and reused by checksum `5fdb4f820fbbe29252657b063decd9610074a5062a14575b861c12b52302374a`.
+- Diff result: zero generated `tests/` directories, zero `tests/` paths or hunks in any `DIFF.diff`, every `DIFF.MD` still documents the `tests/**` exclusion, and every artifact now pins the new revision.
+- Operation coverage: 1,156 -> 1,159 operations, coverage delta `+3`, with zero missing and zero ambiguous mappings; the increase is three new upstream `batch` operations (`cancel_jobs`, `terminate_jobs`, `terminate_service_jobs`) that each receive a non-default `op_*` feature and a cfg-gated module and client surface.
+- Remaining blocker: none.
+- Next action: keep the manifest revision as the single upstream knob and re-run the full verification loop after the next upstream bump.
+
 ## 2026-08-31 — `90034a503` — derive redundant SDK crate names from service keys
 
 - Objective: remove redundant `package_name` and `library_name` properties from all service manifest entries while preserving generated Cargo names and eliminating redundant `[lib]` diff hunks.
